@@ -59,6 +59,7 @@ The repository contains documentation maintenance scripts under `scripts/`:
 - `archive_docs.py`
 - `generate_std_social_cards.py`
 - `build_subpath.py`
+- `deploy-website.*`
 
 These scripts rebuild the documentation after changing the editable state.
 
@@ -86,6 +87,19 @@ $ python scripts/build_subpath.py --base-path /website --output /tmp/thrust-webs
 ```
 
 The script copies the website to the output directory and rewrites internal root-relative links for `/assets/`, `/documentation/`, `/en/`, and `/es/`. The source checkout is not changed.
+
+## Website Deployment
+
+Automatic deployment is handled by `.github/workflows/deploy-pages.yml`. The workflow builds the website with `/website` as the base path and publishes the generated `_site` directory through GitHub Pages Actions.
+
+Manual deployment is available through the platform-specific scripts:
+
+- `scripts/deploy-website.sh`
+- `scripts/deploy-website.fish`
+- `scripts/deploy-website.ps1`
+- `scripts/deploy-website.bat`
+
+By default they deploy to `https://thrustlang.github.io/website/`. Set `BASE_PATH` if a different GitHub Pages path is needed.
 
 ## Related Guides
 

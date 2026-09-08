@@ -22,6 +22,7 @@ It explains what each script does, when to use it, what each flag means, which v
 - `scripts/archive_docs.py`: mark an older documentation version as archived
 - `scripts/generate_std_social_cards.py`: generate PNG Open Graph cards for standard library pages
 - `scripts/build_subpath.py`: build a deployable site copy for a subpath such as `/website`
+- `scripts/deploy-website.*`: deploy the website to GitHub Pages manually
 
 ## When To Use Each Script
 
@@ -30,6 +31,7 @@ It explains what each script does, when to use it, what each flag means, which v
 - Use `scripts/release_docs.py` when a new public version must be published.
 - Use `scripts/archive_docs.py` when an older published version should stay accessible but no longer be current.
 - Use `scripts/build_subpath.py` when this website must be copied under a non-root URL path.
+- Use `scripts/deploy-website.*` when you want to deploy the website manually instead of using the GitHub Actions workflow.
 
 ## Quick Situations Table
 
@@ -46,6 +48,7 @@ It explains what each script does, when to use it, what each flag means, which v
 | Archive an old docs version | `scripts/archive_docs.py` | `--version` |
 | Regenerate std social cards | `scripts/generate_std_social_cards.py` | optional `--version`, optional `--slug` |
 | Build website for `/website` deployment | `scripts/build_subpath.py` | `--base-path /website --output <dir>` |
+| Deploy website manually | `scripts/deploy-website.*` | no required flags |
 
 ## `scripts/create_docs.py`
 
@@ -235,6 +238,49 @@ External URLs such as `https://github.com/...` are not rewritten.
 - the directory passed through `--output`
 
 The source checkout is not modified.
+
+## `scripts/deploy-website.*`
+
+### What It Does
+
+Builds the website for `https://thrustlang.github.io/website/` and deploys it to the repository `gh-pages` branch.
+
+The Bash, fish, PowerShell, and batch scripts perform the same deployment flow for different shells.
+
+### Command Shape
+
+```console
+$ bash scripts/deploy-website.sh
+```
+
+```console
+$ fish scripts/deploy-website.fish
+```
+
+```powershell
+PS> powershell -ExecutionPolicy Bypass -File scripts/deploy-website.ps1
+```
+
+```console
+> scripts\deploy-website.bat
+```
+
+### What It Does Internally
+
+1. Checks whether `origin/gh-pages` exists and creates it if needed.
+2. Runs `scripts/build_subpath.py --base-path /website` into a temporary directory.
+3. Uses a temporary worktree for `gh-pages`.
+4. Replaces the branch contents with the built website.
+5. Commits and pushes only when files changed.
+
+### Environment Overrides
+
+- `BASE_PATH`: override the deploy base path. Defaults to `/website`.
+- `PYTHON_BIN`: select the Python executable. Defaults to `python3` on Unix shells and `python` on Windows scripts.
+
+### Automatic Deployment
+
+`.github/workflows/deploy-pages.yml` runs the same subpath build on pushes to `main` or `master`, and can also be started with `workflow_dispatch`.
 
 ## `scripts/update_docs.py`
 

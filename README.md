@@ -14,6 +14,7 @@ It contains the public landing pages, versioned language documentation, standard
 - The generated versioned documentation under `documentation/`
 - The editable documentation content under `documentation/content/`
 - The documentation maintenance scripts under `scripts/`
+- The GitHub Pages deployment workflow under `.github/workflows/deploy-pages.yml`
 
 ## Documentation Guides
 
@@ -21,3 +22,9 @@ It contains the public landing pages, versioned language documentation, standard
 - `guide/UPDATE_DOCS.md`
 - `guide/RELEASE_DOCS.md`
 - `guide/ARCHIVE_DOCS.md`
+
+## Deployment
+
+The repository can be deployed to GitHub Pages at `https://thrustlang.github.io/website/`.
+
+Automatic deployment is handled by `.github/workflows/deploy-pages.yml`. Manual deployment is available through `scripts/deploy-website.sh`, `scripts/deploy-website.fish`, `scripts/deploy-website.ps1`, and `scripts/deploy-website.bat`.
