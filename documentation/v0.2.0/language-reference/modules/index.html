@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modules v0.2.0 | Thrust</title>
+  <meta name="description" content="Imports, aliases, and selective import scopes.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/documentation/v0.2.0/language-reference/modules/">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/en/">
+        <img class="brand-logo" src="/assets/brand/thrustlang-logo-128.png" srcset="/assets/brand/thrustlang-logo-128.png 128w, /assets/brand/thrustlang-logo-256.png 256w, /assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/en/">Home</a>
+        <a href="/en/features/">Features</a>
+        <a href="/en/downloads/">Downloads</a>
+        <a class="current" href="/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>Modules (v0.2.0)</h1>
+      <p>Imports, aliases, and selective import scopes.</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.0">Version</label>
+        <select id="docs-version-v0.2.0" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Archived</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>Modules are brought into a file with import. A file can import a full module, give it an alias, or import only selected names.</p>
+      <p>Use selective imports when a file only needs a few symbols. This keeps the dependency list easier to scan.</p>
+      <p>Aliases are useful when a module path is long or repeated often.</p>
+      <p class="muted">Primary source: <code>syntax/modules/import.md</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Syntax Signatures</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::io;
+import std::collections::vector;
+import &quot;other.thrust&quot; as dep;
+import &quot;other.thrust&quot; only { stack, counter };</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>Imports should show what the file actually depends on. Avoid importing large modules when one or two names are enough.</p>
+      <p>Use a consistent import style across nearby files so readers do not have to adjust to a new pattern each time.</p>
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Use `only` imports when a file needs just a few names.</li>
+        <li>Use aliases when module paths become repetitive.</li>
+        <li>Avoid circular imports by moving shared definitions into smaller files.</li>
+      </ul>
+    </section>
+
+
+
+    <section class="container section panel docs-content">
+      <h2>Example</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::io;
+
+fn main() s32 @public {
+    io::print(&quot;module import works\n&quot;);
+    return 0;
+}</code></pre>
+      <p><a class="btn" href="/documentation/v0.2.0/language-reference/index.html">Back to language reference</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/assets/js/thrust-highlight.js"></script>
+  <script src="/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/documentation/assets/docs-search.js"></script>
+</body>
+</html>

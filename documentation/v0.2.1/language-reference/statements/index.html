@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Statements v0.2.1 | Thrust</title>
+  <meta name="description" content="Conditional and control statements for runtime execution.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/documentation/v0.2.1/language-reference/statements/">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/en/">
+        <img class="brand-logo" src="/assets/brand/thrustlang-logo-128.png" srcset="/assets/brand/thrustlang-logo-128.png 128w, /assets/brand/thrustlang-logo-256.png 256w, /assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/en/">Home</a>
+        <a href="/en/features/">Features</a>
+        <a href="/en/downloads/">Downloads</a>
+        <a class="current" href="/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>Statements (v0.2.1)</h1>
+      <p>Conditional and control statements for runtime execution.</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.1">Version</label>
+        <select id="docs-version-v0.2.1" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Latest</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>Statements control what a function does step by step. Thrust uses explicit blocks for branches, loops, returns, and control statements.</p>
+      <p>Clear blocks make error handling easier to follow. They also make it easier to see where a function exits or changes state.</p>
+      <p>Prefer readable control flow over clever shortcuts, especially in code that handles pointers, files, or memory.</p>
+      <p class="muted">Primary source: <code>syntax/statements/</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Syntax Signatures</h2>
+      <pre class="code-thrust"><code class="language-thrust">if ready {
+    return 0;
+} else {
+    return 1;
+}
+
+break;
+continue;</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>Use early returns for invalid input or error cases when that makes the main path clearer.</p>
+      <p>Avoid deeply nested conditionals when a small helper function would make the branch easier to understand.</p>
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Return early when input is invalid.</li>
+        <li>Keep branch bodies short and focused.</li>
+        <li>Use break and continue when they make the loop clearer.</li>
+      </ul>
+    </section>
+
+
+
+    <section class="container section panel docs-content">
+      <h2>Example</h2>
+      <pre class="code-thrust"><code class="language-thrust">fn classify(n: s32) s32 @public {
+    if n &lt; 0 {
+        return -1;
+    }
+    if n == 0 {
+        return 0;
+    }
+    return 1;
+}</code></pre>
+      <p><a class="btn" href="/documentation/v0.2.1/language-reference/index.html">Back to language reference</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/assets/js/thrust-highlight.js"></script>
+  <script src="/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/documentation/assets/docs-search.js"></script>
+</body>
+</html>

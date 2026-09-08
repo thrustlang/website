@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Types v0.2.1 | Thrust</title>
+  <meta name="description" content="Primitive and built-in type forms used by Thrust.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/documentation/v0.2.1/language-reference/types/">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/en/">
+        <img class="brand-logo" src="/assets/brand/thrustlang-logo-128.png" srcset="/assets/brand/thrustlang-logo-128.png 128w, /assets/brand/thrustlang-logo-256.png 256w, /assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/en/">Home</a>
+        <a href="/en/features/">Features</a>
+        <a href="/en/downloads/">Downloads</a>
+        <a class="current" href="/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>Types (v0.2.1)</h1>
+      <p>Primitive and built-in type forms used by Thrust.</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.1">Version</label>
+        <select id="docs-version-v0.2.1" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Latest</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>Thrust types are written explicitly. Integers, floats, pointers, arrays, function references, and void all appear directly in source code.</p>
+      <p>This makes declarations easy to read. When a function takes u32, ptr[s32], or array[char; 64], the size and shape of the value are visible at the call boundary.</p>
+      <p>Use concrete types in public APIs unless there is a clear reason to introduce a type alias or a generic parameter.</p>
+      <p class="muted">Primary source: <code>syntax/types/</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Syntax Signatures</h2>
+      <pre class="code-thrust"><code class="language-thrust">var signed: s32 = -1;
+var unsigned: u64 = 1;
+var decimal: f64 = 3.14;
+var address: ptr[u8] = nullptr;
+var dynamic: array[s32] = [1, 2, 3];
+var fixedValues: array[u16; 4] = fixed[0, 1, 2, 3];</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>Fixed-width integers are best for public APIs and binary formats because their size is part of the name.</p>
+      <p>Pointers and arrays mean different things. A pointer refers to memory elsewhere, while an array type describes a sequence of elements.</p>
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Prefer explicit widths like `u32` or `s64` when size matters.</li>
+        <li>Represent fixed-size protocol data with arrays, not dynamic buffers.</li>
+        <li>Use aliases when a plain type needs a clearer name.</li>
+      </ul>
+    </section>
+
+
+
+    <section class="container section panel docs-content">
+      <h2>Example</h2>
+      <pre class="code-thrust"><code class="language-thrust">fn main() s32 @public {
+    var values: array[s32; 3] = fixed[2, 4, 6];
+
+    var sum: s32 =
+        (deref values[0]) +
+        (deref values[1]) +
+        (deref values[2]);
+
+    return sum;
+}</code></pre>
+      <p><a class="btn" href="/documentation/v0.2.1/language-reference/index.html">Back to language reference</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/assets/js/thrust-highlight.js"></script>
+  <script src="/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/documentation/assets/docs-search.js"></script>
+</body>
+</html>
