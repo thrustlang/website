@@ -1,10 +1,10 @@
 <img src= "https://github.com/thrustlang/.github/blob/main/assets/logos/new%20logo/thrustlang-logo-banner-text-italic.png" alt= "logo" style= "width: 80%; height: 80%;"></img>
 
-# The Thrust Website
+# Website
 
 <img src= "https://github.com/thrustlang/.github/blob/main/assets/standard-text-separator.png" alt= "standard-separator" style= "width: 1hv;"> </img>
 
-The **Thrust Website** is the official website and official documentation hub for the **Thrust Programming Language**.
+This is the official website and official documentation hub for the **Thrust Programming Language**.
 
 It contains the public landing pages, versioned language documentation, standard library documentation, downloads pages, and the small Python tooling used to maintain documentation updates and releases.
 
