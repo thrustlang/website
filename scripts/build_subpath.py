@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import re
 import shutil
+import tempfile
 from pathlib import Path
 
 
@@ -92,13 +93,24 @@ def build_subpath(source: Path, output: Path, base_path: str) -> None:
     if source == output:
         raise SystemExit("output must be different from source")
 
-    if source in output.parents:
-        raise SystemExit("output must not be inside the source tree")
-
     normalized_base = normalize_base_path(base_path)
+
+    if source in output.parents:
+        if output.exists():
+            shutil.rmtree(output)
+
+        with tempfile.TemporaryDirectory(prefix="thrust-website-build-") as temp_dir:
+            temp_output = Path(temp_dir) / "site"
+            copy_site(source, temp_output)
+            rewrite_paths(temp_output, normalized_base)
+            (temp_output / ".nojekyll").write_text("")
+            output.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(temp_output), str(output))
+
+        return
+
     copy_site(source, output)
     rewrite_paths(output, normalized_base)
-    (output / ".nojekyll").touch()
     (output / ".nojekyll").write_text("")
 
 

@@ -11,16 +11,29 @@ PAGES_WORKTREE="/tmp/thrust-website-gh-pages"
 
 cd "$PROJECT_DIR"
 
-echo "Using project directory: $PROJECT_DIR"
+if [ -n "${REMOTE_NAME:-}" ]; then
+    REMOTE="$REMOTE_NAME"
+elif git remote get-url origin >/dev/null 2>&1; then
+    REMOTE="origin"
+else
+    REMOTE="$(git remote | sed -n '1p')"
+fi
 
-if ! git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then
-    echo "Branch 'gh-pages' not found on remote. Creating orphan branch..."
-    CURRENT_BRANCH=$(git branch --show-current)
-    git checkout --orphan gh-pages
-    git rm -rf . >/dev/null
-    git commit --allow-empty -m "Initial gh-pages commit"
-    git push origin gh-pages
-    git checkout "$CURRENT_BRANCH"
+if [ -z "$REMOTE" ]; then
+    echo "No git remote configured. Add one or set REMOTE_NAME." >&2
+    exit 1
+fi
+
+echo "Using project directory: $PROJECT_DIR"
+echo "Using remote: $REMOTE"
+
+if ! git ls-remote --exit-code --heads "$REMOTE" gh-pages >/dev/null 2>&1; then
+    echo "Branch 'gh-pages' not found on remote '$REMOTE'. Creating it from a temporary repository..."
+    TEMP_EMPTY="$(mktemp -d /tmp/thrust-website-empty-gh-pages.XXXXXX)"
+    git -C "$TEMP_EMPTY" init
+    git -C "$TEMP_EMPTY" commit --allow-empty -m "Initial gh-pages commit"
+    git -C "$TEMP_EMPTY" push "$(git remote get-url "$REMOTE")" HEAD:gh-pages
+    rm -rf "$TEMP_EMPTY"
 fi
 
 echo "Building website for $BASE_PATH..."
@@ -29,19 +42,20 @@ rm -rf "$TEMP_SITE"
 
 echo "Deploying website to GitHub Pages..."
 rm -rf "$PAGES_WORKTREE"
-git fetch origin gh-pages >/dev/null 2>&1
-git worktree add "$PAGES_WORKTREE" gh-pages
+git fetch "$REMOTE" gh-pages >/dev/null 2>&1
+git worktree add --detach "$PAGES_WORKTREE" FETCH_HEAD
 
 pushd "$PAGES_WORKTREE" > /dev/null
     find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
     cp -r "$TEMP_SITE"/* ./
+    cp "$TEMP_SITE/.nojekyll" ./.nojekyll
 
     git add -A
     if git diff-index --quiet HEAD --; then
         echo "No changes to website."
     else
         git commit -m "Update website $(date '+%Y-%m-%d %H:%M')"
-        git push origin gh-pages
+        git push "$REMOTE" HEAD:gh-pages
     fi
 popd > /dev/null
 
