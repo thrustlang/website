@@ -23,12 +23,15 @@ The main inputs are:
 - `documentation/content/<version>/compiler-command-line-reference.json`
 - `documentation/versions.json`
 - `thrustc/std/<version>/...`
+- `thrustc/thrustc_cli/src/help.rs`
 
 `pages.json` stores the editable text, examples, summaries, and structured page content.
 
 `versions.json` stores the version list, the current latest version, and the public status shown in the documentation hub.
 
 The `thrustc/std/<version>/...` tree is used to extract public signatures for standard library pages.
+
+The compiler command line reference must be synchronized with `thrustc/thrustc_cli/src/help.rs`. Flags that exist only in parser internals are not public documentation until they are listed in the help output.
 
 ## Generated Output
 
@@ -40,19 +43,32 @@ That output includes:
 - `documentation/<version>/std/...`
 - `documentation/<version>/language-reference/...`
 - `documentation/<version>/search-index.json`
+- `documentation/<version>/social/std/*.png`
 
 The documentation hub itself is regenerated at `documentation/index.html`.
 
+Standard library pages also receive PNG Open Graph cards under `documentation/<version>/social/std/`. These images are used when `std::*` documentation URLs are shared.
+
 ## Maintenance Scripts
 
-The repository contains four maintenance scripts under `scripts/`:
+The repository contains documentation maintenance scripts under `scripts/`:
 
 - `create_docs.py`
 - `update_docs.py`
 - `release_docs.py`
 - `archive_docs.py`
+- `generate_std_social_cards.py`
+- `build_subpath.py`
 
 These scripts rebuild the documentation after changing the editable state.
+
+Install Python dependencies before rebuilding generated documentation:
+
+```console
+$ python -m pip install -r requirements.txt
+```
+
+The documentation build fails if `Pillow` is missing, because standard library pages reference generated PNG social cards.
 
 ## Recommended Workflow
 
@@ -60,6 +76,16 @@ These scripts rebuild the documentation after changing the editable state.
 2. Update existing content with `scripts/update_docs.py`.
 3. Publish a new documentation version with `scripts/release_docs.py`.
 4. Mark older versions as archived with `scripts/archive_docs.py`.
+
+## Subpath Deployment Build
+
+Use `scripts/build_subpath.py` when the website is deployed below a path instead of the domain root. For example, the compiler repository can publish this site at `https://thrustlang.github.io/website/` while keeping Rust code documentation at the root.
+
+```console
+$ python scripts/build_subpath.py --base-path /website --output /tmp/thrust-website-build
+```
+
+The script copies the website to the output directory and rewrites internal root-relative links for `/assets/`, `/documentation/`, `/en/`, and `/es/`. The source checkout is not changed.
 
 ## Related Guides
 

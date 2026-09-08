@@ -8,6 +8,16 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.0/std/collections/vector/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="std::collections::vector | Thrust">
+  <meta property="og:description" content="Generic contiguous dynamic array with capacity growth and index-based operations.">
+  <meta property="og:image" content="/documentation/v0.2.0/social/std/collections-vector.png">
+  <meta property="og:url" content="/documentation/v0.2.0/std/collections/vector/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="std::collections::vector | Thrust">
+  <meta name="twitter:description" content="Generic contiguous dynamic array with capacity growth and index-based operations.">
+  <meta name="twitter:image" content="/documentation/v0.2.0/social/std/collections-vector.png">
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -41,7 +51,7 @@
 
     <section class="container section panel docs-content">
       <h2>Overview</h2>
-      <p>std::collections::vector is a generic dynamic array backed by contiguous memory. It stores a data pointer, a length, and a capacity.</p>
+      <p>std::collections::vector is a generic dynamic array stored in contiguous memory. It stores a data pointer, a length, and a capacity.</p>
       <p>The module exposes the usual operations: create a vector, push values, remove values, access elements, reserve capacity, shrink storage, and destroy the allocation when finished.</p>
       <p>The API stays close to memory operations. This makes it useful for compiler data structures, parser buffers, and small tools where allocation behavior should stay visible.</p>
       <p class="muted">Source: <code>thrustc/std/v0.2.0/collections/vector.thrust</code></p>

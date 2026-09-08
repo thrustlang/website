@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.0/compiler-command-line-reference/general/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -53,7 +54,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>optional help topic</code></p>
       <p><strong>Allowed values:</strong> <code>opt, emit, print, code-model, reloc-model, sanitizer, symbol-linkage-strategy, denormal-floating-point-behavior, denormal-floating-point-32-bits-behavior</code></p>
-
       <h3>Details</h3>
       <p>Without an extra topic, this prints the full top-level command line help.</p>
       <p>With a supported topic, it prints the focused help for that flag family instead of the generic overview.</p>
@@ -73,7 +73,6 @@
       <p><strong>Accepts value:</strong> <code>no</code></p>
 
 
-
       <h3>Details</h3>
       <p>This does not start a compilation pipeline. It only prints the current compiler version string.</p>
       <h3>Examples</h3>
@@ -88,7 +87,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>diagnostic code</code></p>
       <p><strong>Allowed values:</strong> <code>E0001, W0001</code></p>
-
       <h3>Details</h3>
       <p>Use this when you already have a diagnostic code and want the longer explanation text.</p>
       <p>The accepted value is a compiler issue code such as an error or warning identifier.</p>

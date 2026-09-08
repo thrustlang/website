@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.0/language-reference/structs/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -72,7 +73,25 @@ var p: Pair = new Pair {
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>Fields and Construction</h2>
+      <p>A struct value is built by naming each field and assigning a value.</p>
+      <ul>
+        <li>Each field has its own explicit type in the struct declaration.</li>
+        <li>new StructName { ... } creates a value with the listed field values.</li>
+        <li>Use helper constructors when a struct has required defaults or related fields that must agree.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Layout and Interop</h2>
+      <p>Structs used across FFI boundaries need stable field expectations.</p>
+      <ul>
+        <li>Field order matters when matching an external layout.</li>
+        <li>@packed changes padding behavior. Use it only when the external format requires it.</li>
+        <li>When a struct is shared with C code, verify field sizes and alignment with compile-time builtins.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>

@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.0/language-reference/casts/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -66,7 +67,25 @@ var raw: ptr = y as ptr;</code></pre>
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>Numeric Casts</h2>
+      <p>Numeric casts are explicit because they can change representation.</p>
+      <ul>
+        <li>Casting from a wider integer to a narrower integer can discard high bits.</li>
+        <li>Casting between signed and unsigned types changes how the same bits are interpreted.</li>
+        <li>Casting between integer and floating-point types can lose precision. Check ranges before relying on the result.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Pointer Casts</h2>
+      <p>Pointer casts should stay near code that knows the memory layout.</p>
+      <ul>
+        <li>A raw ptr can be converted to a typed pointer when the pointed storage is known to hold that type.</li>
+        <li>A typed pointer can be converted to raw ptr for FFI and allocation APIs.</li>
+        <li>Do not use casts to bypass type errors in ordinary code. Prefer the correct type at the boundary.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>

@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.1/language-reference/enums/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -42,7 +43,7 @@
     <section class="container section panel docs-content">
       <h2>Overview</h2>
       <p>Enums group related named values under one name. In current Thrust, each member writes its type and value explicitly.</p>
-      <p>Members are accessed with the arrow operator, for example Mode-&gt;Safe. The expression evaluates to the member value.</p>
+      <p>Members are accessed with the enum access operator, for example Mode=&gt;Safe. The expression evaluates to the member value.</p>
       <p>An enum name is not used as a variable type in the current compiler. Store the underlying value type, such as u32 or s32.</p>
       <p class="muted">Primary source: <code>syntax/enum/</code></p>
     </section>
@@ -68,7 +69,25 @@
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>Members and Values</h2>
+      <p>Current enums are named groups of explicit constant values.</p>
+      <ul>
+        <li>Each member writes its value type and concrete value.</li>
+        <li>Members are read with EnumName=&gt;MemberName.</li>
+        <li>Store enum results in the underlying value type, such as u32 or s32.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Closed Domains</h2>
+      <p>Enums document the expected values for a small domain.</p>
+      <ul>
+        <li>Use enums for modes, status codes, tags, and external numeric constants.</li>
+        <li>Keep values stable when they are part of a file format, ABI, or public API.</li>
+        <li>When behavior depends on every enum member, review all matches or condition chains after adding a member.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>
@@ -79,15 +98,15 @@
 }
 
 fn codeOf(value: s32) s32 @public {
-    if value == ExitCode-&gt;Ok {
+    if value == ExitCode=&gt;Ok {
         return 0;
     }
 
-    if value == ExitCode-&gt;InvalidInput {
+    if value == ExitCode=&gt;InvalidInput {
         return 1;
     }
 
-    return ExitCode-&gt;IOError;
+    return ExitCode=&gt;IOError;
 }</code></pre>
       <p><a class="btn" href="/documentation/v0.2.1/language-reference/index.html">Back to language reference</a></p>
     </section>

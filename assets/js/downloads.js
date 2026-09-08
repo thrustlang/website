@@ -1,6 +1,6 @@
 (function () {
   var config = {
-    version: "0.2.0",
+    version: "0.2.1",
     base: "https://github.com/thrustlang/thrustc/releases/download/",
     platforms: {
       windows: {

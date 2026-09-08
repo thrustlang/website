@@ -1095,8 +1095,7 @@
           "examples": [
             "thrustc main.thrust --disable-default-optimizations"
           ],
-          "notes": [],
-          "version_note": "The older singular spelling appears in v0.2.0 snapshots, but the local v0.2.1 CLI uses the plural form."
+          "notes": []
         },
         {
           "name": "--disable-all-sanitizers",

@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.1/compiler-command-line-reference/linkage/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -53,7 +54,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>path/to/clang</code></p>
 
-
       <h3>Details</h3>
       <p>This forces the linker driver to use a specific Clang executable instead of automatic detection.</p>
       <p>It is useful when more than one LLVM or Clang toolchain is installed on the machine.</p>
@@ -71,7 +71,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>path/to/gcc</code></p>
 
-
       <h3>Details</h3>
       <p>This selects GCC as the external linking compiler.</p>
       <p>Use it when you want GCC-specific linking behavior or when GCC is the available host linker toolchain.</p>
@@ -88,7 +87,6 @@
 
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>&quot;-lm;-lz&quot;</code></p>
-
 
       <h3>Details</h3>
       <p>This is the escape hatch for linker or C compiler options that do not have a first-class Thrust flag.</p>

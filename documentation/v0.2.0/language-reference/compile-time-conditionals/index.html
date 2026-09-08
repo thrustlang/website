@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.0/language-reference/compile-time-conditionals/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -66,7 +67,25 @@
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>Selection Time</h2>
+      <p>Compile-time conditionals are evaluated before code generation.</p>
+      <ul>
+        <li>The selected branch remains in the program for that compilation target.</li>
+        <li>Inactive branches are not emitted, which allows target-specific declarations and imports.</li>
+        <li>Each branch should still be valid for the target where its predicate can become true.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Predicates</h2>
+      <p>Predicates usually come from target and compiler builtins.</p>
+      <ul>
+        <li>Use target checks such as isLinux, isWindows, isWasm, and pointerWidth for platform-dependent declarations.</li>
+        <li>Keep predicates small. Complex target rules are easier to maintain when moved into named constants or helper modules.</li>
+        <li>When a branch imports a platform file, test that branch on the matching target so it does not silently become stale.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>

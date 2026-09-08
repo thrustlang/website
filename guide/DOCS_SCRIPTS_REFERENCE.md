@@ -11,12 +11,17 @@ It explains what each script does, when to use it, what each flag means, which v
 > [!IMPORTANT]
 > The editable documentation source lives under `documentation/content/`. The HTML files under `documentation/<version>/` are generated output.
 
+> [!IMPORTANT]
+> Standard library pages are checked against `thrustc/std/<version>/`. Compiler command line pages are checked against `thrustc/thrustc_cli/src/help.rs`; flags that only exist in parser internals are not public website documentation.
+
 ## Script Index
 
 - `scripts/create_docs.py`: create a new page scaffold in `std` or `language-reference`
 - `scripts/update_docs.py`: update existing content fields in an existing page or CLI reference entry
 - `scripts/release_docs.py`: publish a new documentation version from an existing one
 - `scripts/archive_docs.py`: mark an older documentation version as archived
+- `scripts/generate_std_social_cards.py`: generate PNG Open Graph cards for standard library pages
+- `scripts/build_subpath.py`: build a deployable site copy for a subpath such as `/website`
 
 ## When To Use Each Script
 
@@ -24,6 +29,7 @@ It explains what each script does, when to use it, what each flag means, which v
 - Use `scripts/update_docs.py` when the page or CLI entry already exists and only its content should change.
 - Use `scripts/release_docs.py` when a new public version must be published.
 - Use `scripts/archive_docs.py` when an older published version should stay accessible but no longer be current.
+- Use `scripts/build_subpath.py` when this website must be copied under a non-root URL path.
 
 ## Quick Situations Table
 
@@ -38,6 +44,8 @@ It explains what each script does, when to use it, what each flag means, which v
 | Create a new published docs version | `scripts/release_docs.py` | `--new-version` |
 | Create a new published docs version from a specific base | `scripts/release_docs.py` | `--new-version --from` |
 | Archive an old docs version | `scripts/archive_docs.py` | `--version` |
+| Regenerate std social cards | `scripts/generate_std_social_cards.py` | optional `--version`, optional `--slug` |
+| Build website for `/website` deployment | `scripts/build_subpath.py` | `--base-path /website --output <dir>` |
 
 ## `scripts/create_docs.py`
 
@@ -123,6 +131,110 @@ Pass these values because:
 - `documentation/index.html`
 - `documentation/<version>/...`
 - `documentation/<version>/search-index.json`
+
+## `scripts/generate_std_social_cards.py`
+
+### What It Does
+
+Generates PNG Open Graph cards for standard library documentation pages. The generated images are used by `std::*` pages through their `og:image` and `twitter:image` metadata.
+
+The script reads `documentation/content/<version>/pages.json` and uses each `std` page title as the large card text.
+
+### Dependency
+
+Install the Python dependencies before running documentation builds:
+
+```console
+$ python -m pip install -r requirements.txt
+```
+
+The build fails if `Pillow` is not installed.
+
+### Command Shape
+
+```console
+$ python scripts/generate_std_social_cards.py [--version <version>] [--slug <std-slug>]
+```
+
+### Flags Index
+
+| Flag | Required | What It Means | Valid Values | Notes |
+| --- | --- | --- | --- | --- |
+| `--version` | no | Documentation version to generate | existing version id like `v0.2.1` | If omitted, all versions are generated. |
+| `--slug` | no | One std page slug to generate | existing std slug like `mem` or `collections/vector` | Requires `--version`. |
+
+### Examples
+
+Generate every standard library card for every version:
+
+```console
+$ python scripts/generate_std_social_cards.py
+```
+
+Generate one version:
+
+```console
+$ python scripts/generate_std_social_cards.py --version v0.2.1
+```
+
+Generate one module:
+
+```console
+$ python scripts/generate_std_social_cards.py --version v0.2.1 --slug mem
+```
+
+### Files It Changes
+
+- `documentation/<version>/social/std/*.png`
+
+### Notes
+
+- Cards are generated only for `std::*` documentation pages.
+- Language reference pages and compiler command line pages do not receive std social cards.
+- `documentation/assets/build_docs.py` also generates these cards as part of the normal documentation build.
+
+## `scripts/build_subpath.py`
+
+### What It Does
+
+Builds a copy of the website that can be served from a non-root path, such as `https://thrustlang.github.io/website/`.
+
+The source website keeps root-relative paths such as `/assets/`, `/documentation/`, `/en/`, and `/es/`. This script copies the site to an output directory and rewrites those internal paths with the requested base path.
+
+### When To Use It
+
+- when another repository deploys this website under a subdirectory
+- when testing the website from a GitHub Pages path like `/website`
+- when the source website should remain usable at the domain root later
+
+### Command Shape
+
+```console
+$ python scripts/build_subpath.py --base-path /website --output /tmp/thrust-website-build
+```
+
+### Flags Index
+
+| Flag | Required | What It Means | Valid Values | Notes |
+| --- | --- | --- | --- | --- |
+| `--base-path` | yes | URL prefix where the copied site will be served | path like `/website` | Leading slash is optional. Trailing slash is removed. |
+| `--output` | yes | Destination directory for the copied and rewritten site | path outside the repo | Existing output is replaced. |
+| `--source` | no | Source website directory | path to a website checkout | Defaults to the current repository root. |
+
+### Rewritten Paths
+
+- `/assets/...`
+- `/documentation/...`
+- `/en/...`
+- `/es/...`
+
+External URLs such as `https://github.com/...` are not rewritten.
+
+### Files It Changes
+
+- the directory passed through `--output`
+
+The source checkout is not modified.
 
 ## `scripts/update_docs.py`
 
@@ -235,7 +347,6 @@ $ python scripts/update_docs.py --version <version> --section <section> [--slug 
   - `details`
   - `examples`
   - `notes`
-  - optional `version_note`
 
 ### Situational Examples
 

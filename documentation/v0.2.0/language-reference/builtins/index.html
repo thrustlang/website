@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Builtins v0.2.0 | Thrust</title>
-  <meta name="description" content="Compiler-provided functions, token operations, and builtin types for type, target, host, and compile-time work.">
+  <meta name="description" content="Compiler-provided functions, low-level memory and ABI operations, and builtin types for type, target, host, and compile-time work.">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.0/language-reference/builtins/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -31,7 +32,7 @@
   <main class="site-main">
     <section class="container hero">
       <h1>Builtins (v0.2.0)</h1>
-      <p>Compiler-provided functions, token operations, and builtin types for type, target, host, and compile-time work.</p>
+      <p>Compiler-provided functions, low-level memory and ABI operations, and builtin types for type, target, host, and compile-time work.</p>
       <div class="docs-version-row">
         <label for="docs-version-v0.2.0">Version</label>
         <select id="docs-version-v0.2.0" class="docs-version-select" data-docs-version-select></select>
@@ -59,13 +60,13 @@ fn verifyTypes() void {
 
     <section class="container section panel docs-content">
       <h2>Behavior and Use</h2>
-      <p>Compile-time builtins are evaluated while the compiler processes the program, and token builtins lower directly to low-level operations or compiler-managed constructs.</p>
+      <p>Compile-time builtins are evaluated while the compiler processes the program, and memory and ABI builtins lower directly to low-level memory operations, ABI queries, or compiler-managed variadic argument access.</p>
       <p>When staticAssert or compileError fails, compilation stops immediately. Warnings produced by compileWarning continue compilation but still affect diagnostics output.</p>
       <h3>Best Practices</h3>
       <ul>
         <li>Use staticAssert for layout and target assumptions.</li>
         <li>Store builtin results in named constants when they are reused.</li>
-        <li>Prefer the highest-level builtin that states your intent clearly, then drop to token builtins only when you really need raw memory behavior.</li>
+        <li>Prefer the highest-level builtin that states your intent clearly, then drop to memory and ABI builtins only when you really need raw memory behavior or ABI-level access.</li>
         <li>Write staticAssert messages that clearly say what failed.</li>
       </ul>
     </section>
@@ -207,8 +208,8 @@ fn verifyTypes() void {
     </section>
 
     <section class="container section panel docs-content">
-      <h2>Token Builtins</h2>
-      <p>These builtins lower directly to low-level compiler operations or ABI queries.</p>
+      <h2>Memory and ABI Builtins</h2>
+      <p>These builtins lower directly to low-level memory operations, ABI queries, or variadic argument access.</p>
       <ul>
         <li><code>halloc(Type)</code> - allocates heap memory for one value of the given type and returns ptr[Type].</li>
         <li><code>memcpy(dst, src, size)</code> - copies a block of memory and returns ptr.</li>
@@ -227,6 +228,16 @@ fn verifyTypes() void {
       <p>The language also exposes one builtin alias that appears in many APIs.</p>
       <ul>
         <li><code>CString</code> - builtin alias for array[char], used for null-terminated string values.</li>
+      </ul>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Using Builtins in Declarations</h2>
+      <p>Builtins are most useful when they keep declarations tied to target facts.</p>
+      <ul>
+        <li>Use sizeOf and alignOf to define capacities or layout checks that follow the referenced type.</li>
+        <li>Use target builtins to select platform-specific constants and imports through compile-time conditionals.</li>
+        <li>Use compileError and compileWarning for explicit diagnostics when a configuration is unsupported or unusual.</li>
       </ul>
     </section>
 

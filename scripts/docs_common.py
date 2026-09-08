@@ -6,6 +6,8 @@ import re
 import shutil
 from pathlib import Path
 
+from generate_std_social_cards import generate_std_social_cards, slug_filename
+
 
 ROOT: Path = Path(__file__).resolve().parent
 REPO_ROOT: Path = ROOT.parent
@@ -165,10 +167,36 @@ def std_signatures_for_source(source_file: str, version: str):
     return extract_signatures(STD_ROOT / version / source_file)
 
 
-def render_head(title: str, desc: str, canonical: str):
+def render_head(
+    title: str,
+    desc: str,
+    canonical: str,
+    *,
+    og_title: str | None = None,
+    og_description: str | None = None,
+    og_image: str | None = None,
+    og_url: str | None = None,
+):
     safe_title = html.escape(title)
     safe_desc = html.escape(desc)
     safe_canonical = html.escape(canonical)
+    social = ""
+
+    if og_image is not None:
+        safe_og_title = html.escape(og_title or title)
+        safe_og_description = html.escape(og_description or desc)
+        safe_og_image = html.escape(og_image)
+        safe_og_url = html.escape(og_url or canonical)
+        social = f"""
+  <meta property=\"og:type\" content=\"website\">
+  <meta property=\"og:title\" content=\"{safe_og_title}\">
+  <meta property=\"og:description\" content=\"{safe_og_description}\">
+  <meta property=\"og:image\" content=\"{safe_og_image}\">
+  <meta property=\"og:url\" content=\"{safe_og_url}\">
+  <meta name=\"twitter:card\" content=\"summary_large_image\">
+  <meta name=\"twitter:title\" content=\"{safe_og_title}\">
+  <meta name=\"twitter:description\" content=\"{safe_og_description}\">
+  <meta name=\"twitter:image\" content=\"{safe_og_image}\">"""
 
     return f"""<!doctype html>
 <html lang=\"en\">
@@ -180,6 +208,7 @@ def render_head(title: str, desc: str, canonical: str):
   <link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/assets/brand/favicon-32.png\">
   <link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/assets/brand/favicon-16.png\">
   <link rel=\"canonical\" href=\"{safe_canonical}\">
+{social}
   <link rel=\"stylesheet\" href=\"/assets/css/site.css\">
   <link rel=\"stylesheet\" href=\"/assets/css/gruvbox-code.css\">
 </head>
@@ -298,8 +327,10 @@ def render_std_page(version: str, badge: str, slug: str, data: dict):
     signatures = std_signatures_for_source(data["source"], version)
     signature_block = "\n".join(signatures[:220])
     source_view = f"thrustc/std/{version}/{data['source']}"
+    canonical = f"/documentation/{version}/std/{slug}/"
+    social_image = f"/documentation/{version}/social/std/{slug_filename(slug)}"
 
-    return f"""{render_head(data['title'] + ' ' + version, data['summary'], f'/documentation/{version}/std/{slug}/')}
+    return f"""{render_head(data['title'] + ' ' + version, data['summary'], canonical, og_title=f"{data['title']} | Thrust", og_description=data['summary'], og_image=social_image, og_url=canonical)}
   <main class=\"site-main\">\n{docs_hero(data['title'], data['summary'], version, badge)}\n    <section class=\"container section panel docs-content\">\n      <h2>Overview</h2>\n{render_paragraphs(data['overview'])}\n      <p class=\"muted\">Source: <code>{html.escape(source_view)}</code></p>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Public Signatures</h2>\n      <p class=\"muted\">Exported declarations for this module snapshot.</p>\n      <pre class=\"code-thrust\"><code class=\"language-thrust\">{html.escape(signature_block)}</code></pre>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Behavior and Use</h2>\n{render_paragraphs(data['details'])}\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Examples</h2>\n{render_code_blocks(data['examples'])}\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Notes</h2>\n      <ul>\n{render_items(data['notes'])}\n      </ul>\n      <p><a class=\"btn\" href=\"{doc_href(f'/documentation/{version}/std/')}\">Back to std index</a></p>\n    </section>\n  </main>\n{FOOTER}"""
 
 
@@ -354,7 +385,7 @@ def render_cli_flag_section(flag: dict):
         else "      <p class=\"muted\">No examples for this flag yet.</p>"
     )
 
-    return f"""    <section class=\"container section panel docs-content\">\n      <h2><code>{html.escape(flag['name'])}</code></h2>\n      <p>{html.escape(polish_prose(flag['description']))}</p>\n{render_cli_meta('Aliases', flag.get('aliases'))}\n{render_cli_meta('Accepts value', flag.get('takes_value'))}\n{render_cli_meta('Value syntax', flag.get('value_syntax'))}\n{render_cli_meta('Allowed values', flag.get('allowed_values'))}\n{render_cli_meta('Version note', flag.get('version_note'))}\n      <h3>Details</h3>\n{details_block}\n      <h3>Examples</h3>\n{examples_block}\n      <h3>Notes</h3>\n{notes_block}\n    </section>"""
+    return f"""    <section class=\"container section panel docs-content\">\n      <h2><code>{html.escape(flag['name'])}</code></h2>\n      <p>{html.escape(polish_prose(flag['description']))}</p>\n{render_cli_meta('Aliases', flag.get('aliases'))}\n{render_cli_meta('Accepts value', flag.get('takes_value'))}\n{render_cli_meta('Value syntax', flag.get('value_syntax'))}\n{render_cli_meta('Allowed values', flag.get('allowed_values'))}\n      <h3>Details</h3>\n{details_block}\n      <h3>Examples</h3>\n{examples_block}\n      <h3>Notes</h3>\n{notes_block}\n    </section>"""
 
 
 def render_cli_category_page(version: str, badge: str, cli_reference: dict, category: dict):
@@ -462,9 +493,6 @@ def cli_category_search_text(cli_reference: dict, category: dict):
         parts.extend(flag.get("details", []))
         parts.extend(flag.get("examples", []))
         parts.extend(flag.get("notes", []))
-
-        if flag.get("version_note"):
-            parts.append(flag["version_note"])
 
     return "\n".join(part for part in parts if part)
 
@@ -575,7 +603,7 @@ def render_docs_hub(versions_data):
     </div>
   </header>
 
-  <main class=\"site-main\">\n    <section class=\"container hero\">\n      <h1>Documentation</h1>\n      <p>Versioned documentation for Thrust, with current and archived references.</p>\n      <div class=\"docs-version-row\">\n        <label for=\"docs-version-root\">Version</label>\n        <select id=\"docs-version-root\" class=\"docs-version-select\" data-docs-version-select></select>\n      </div>\n    </section>\n\n    <section class=\"container section panel docs-search\" data-docs-search>\n      <h2>Search Documentation</h2>\n      <p class=\"muted\">Search the latest standard library, language reference, and compiler command line reference.</p>\n      <label class=\"docs-search-label\" for=\"docs-search-input\">Query</label>\n      <input id=\"docs-search-input\" class=\"docs-search-input\" type=\"search\" placeholder=\"Try vector, deref, @extern, sizeOf, -emit...\" data-docs-search-input>\n      <div class=\"docs-search-meta muted\" data-docs-search-meta>Type at least two characters.</div>\n      <div class=\"docs-search-results\" data-docs-search-results></div>\n    </section>\n\n    <section class=\"container section docs-grid docs-grid-large\">\n      <article class=\"panel doc-card\">\n        <h2>Standard Library</h2>\n        <p class=\"muted\">Core modules and APIs provided by the standard library.</p>\n        <p><a class=\"btn\" href=\"/documentation/{html.escape(latest)}/std/index.html\">View std index</a></p>\n      </article>\n      <article class=\"panel doc-card\">\n        <h2>Language Reference</h2>\n        <p class=\"muted\">Stable syntax, semantics, and language constructs.</p>\n        <p><a class=\"btn\" href=\"/documentation/{html.escape(latest)}/language-reference/index.html\">View language reference</a></p>\n      </article>\n      <article class=\"panel doc-card\">\n        <h2>Compiler Command Line Reference</h2>\n        <p class=\"muted\">Detailed reference for compiler flags, categories, values, and usage.</p>\n        <p><a class=\"btn\" href=\"/documentation/{html.escape(latest)}/compiler-command-line-reference/index.html\">View CLI reference</a></p>\n      </article>\n    </section>\n\n    <section class=\"container section panel\">\n      <h2>Archived Versions</h2>\n      <p class=\"muted\">Archived snapshots remain available at fixed versioned URLs.</p>\n{archived_html}\n    </section>\n  </main>\n  <footer class=\"site-footer\">\n    <div class=\"container footer-row\">\n      <span class=\"muted\">Thrust Programming Language</span>\n      <div class=\"social\">\n        <a class=\"btn\" href=\"https://github.com/thrustlang\" target=\"_blank\" rel=\"noopener noreferrer\">\n          <svg class=\"icon icon-sm\" aria-hidden=\"true\"><use href=\"/assets/icons/brands.svg#icon-github\"></use></svg>\n          GitHub\n        </a>\n        <a class=\"btn\" href=\"https://discord.gg/MhVpCSxnhV\" target=\"_blank\" rel=\"noopener noreferrer\">\n          <svg class=\"icon icon-sm\" aria-hidden=\"true\"><use href=\"/assets/icons/brands.svg#icon-discord\"></use></svg>\n          Discord\n        </a>\n      </div>\n    </div>\n  </footer>\n  <script src=\"/assets/js/thrust-highlight.js\"></script>\n  <script src=\"/documentation/assets/docs-version-switcher.js\"></script>\n  <script src=\"/documentation/assets/docs-search.js\"></script>\n</body>\n</html>\n"""
+  <main class=\"site-main\">\n    <section class=\"container hero\">\n      <h1>Documentation</h1>\n      <p>Versioned documentation for Thrust, with current and archived references.</p>\n      <div class=\"docs-version-row\">\n        <label for=\"docs-version-root\">Version</label>\n        <select id=\"docs-version-root\" class=\"docs-version-select\" data-docs-version-select></select>\n      </div>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Early Stage Notice</h2>\n      <p>Thrust and its standard library are still very young for a systems programming language. Expect future changes in the standard library, along with smaller adjustments in the language reference, including areas such as builtins.</p>\n    </section>\n\n    <section class=\"container section panel docs-search\" data-docs-search>\n      <h2>Search Documentation</h2>\n      <p class=\"muted\">Search the latest standard library, language reference, and compiler command line reference.</p>\n      <label class=\"docs-search-label\" for=\"docs-search-input\">Query</label>\n      <input id=\"docs-search-input\" class=\"docs-search-input\" type=\"search\" placeholder=\"Try vector, deref, @extern, sizeOf, -emit...\" data-docs-search-input>\n      <div class=\"docs-search-meta muted\" data-docs-search-meta>Type at least two characters.</div>\n      <div class=\"docs-search-results\" data-docs-search-results></div>\n    </section>\n\n    <section class=\"container section docs-grid docs-grid-large\">\n      <article class=\"panel doc-card\">\n        <h2>Standard Library</h2>\n        <p class=\"muted\">Core modules and APIs provided by the standard library.</p>\n        <p><a class=\"btn\" href=\"/documentation/{html.escape(latest)}/std/index.html\">View std index</a></p>\n      </article>\n      <article class=\"panel doc-card\">\n        <h2>Language Reference</h2>\n        <p class=\"muted\">Stable syntax, semantics, and language constructs.</p>\n        <p><a class=\"btn\" href=\"/documentation/{html.escape(latest)}/language-reference/index.html\">View language reference</a></p>\n      </article>\n      <article class=\"panel doc-card\">\n        <h2>Compiler Command Line Reference</h2>\n        <p class=\"muted\">Detailed reference for compiler flags, categories, values, and usage.</p>\n        <p><a class=\"btn\" href=\"/documentation/{html.escape(latest)}/compiler-command-line-reference/index.html\">View CLI reference</a></p>\n      </article>\n    </section>\n\n    <section class=\"container section panel\">\n      <h2>Archived Versions</h2>\n      <p class=\"muted\">Archived snapshots remain available at fixed versioned URLs.</p>\n{archived_html}\n    </section>\n  </main>\n  <footer class=\"site-footer\">\n    <div class=\"container footer-row\">\n      <span class=\"muted\">Thrust Programming Language</span>\n      <div class=\"social\">\n        <a class=\"btn\" href=\"https://github.com/thrustlang\" target=\"_blank\" rel=\"noopener noreferrer\">\n          <svg class=\"icon icon-sm\" aria-hidden=\"true\"><use href=\"/assets/icons/brands.svg#icon-github\"></use></svg>\n          GitHub\n        </a>\n        <a class=\"btn\" href=\"https://discord.gg/MhVpCSxnhV\" target=\"_blank\" rel=\"noopener noreferrer\">\n          <svg class=\"icon icon-sm\" aria-hidden=\"true\"><use href=\"/assets/icons/brands.svg#icon-discord\"></use></svg>\n          Discord\n        </a>\n      </div>\n    </div>\n  </footer>\n  <script src=\"/assets/js/thrust-highlight.js\"></script>\n  <script src=\"/documentation/assets/docs-version-switcher.js\"></script>\n  <script src=\"/documentation/assets/docs-search.js\"></script>\n</body>\n</html>\n"""
 
 
 def build_version(version: str, versions_data=None) -> None:
@@ -605,6 +633,8 @@ def build_version(version: str, versions_data=None) -> None:
         page = base / "std" / slug / "index.html"
         page.parent.mkdir(parents=True, exist_ok=True)
         page.write_text(render_std_page(version, badge, slug, data))
+
+    generate_std_social_cards(version, pages.get("std", {}))
 
     for slug, data in pages.get("language-reference", {}).items():
         page = base / "language-reference" / slug / "index.html"

@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.1/language-reference/ffi/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -73,7 +74,25 @@ fn atoi(text: const array[char]) s32
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>External Symbols</h2>
+      <p>FFI declarations describe symbols that are defined outside Thrust code.</p>
+      <ul>
+        <li>@extern(&quot;name&quot;) gives the exact linked symbol name.</li>
+        <li>@convention(&quot;C&quot;) selects the C calling convention for calls across the boundary.</li>
+        <li>@arbitraryArgs marks variadic functions such as printf-style declarations.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Safety Boundary</h2>
+      <p>The compiler cannot verify that a C declaration matches the real C function.</p>
+      <ul>
+        <li>Match integer widths, pointer types, return type, and variadic arguments exactly.</li>
+        <li>Keep raw declarations in one module and expose wrapper functions with clearer Thrust types.</li>
+        <li>Retest bindings when the target platform, C library, or header declaration changes.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>

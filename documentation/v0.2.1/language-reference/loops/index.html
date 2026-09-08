@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.1/language-reference/loops/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -76,7 +77,25 @@ loop {
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>Loop Forms</h2>
+      <p>Use the loop form that matches where the exit condition lives.</p>
+      <ul>
+        <li>while is best when the condition is checked before every iteration.</li>
+        <li>for keeps initializer, condition, step, and body together.</li>
+        <li>loop repeats until a break or return exits from inside the body.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>State and Bounds</h2>
+      <p>Loop state should be visible and updated in one predictable place.</p>
+      <ul>
+        <li>Keep counters and limits close to the loop header.</li>
+        <li>When indexing arrays or pointers, compare against the known length before the access.</li>
+        <li>Move invariant calculations before the loop to make the body easier to inspect.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>

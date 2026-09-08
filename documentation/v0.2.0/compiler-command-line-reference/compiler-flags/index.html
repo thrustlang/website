@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.0/compiler-command-line-reference/compiler-flags/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -53,7 +54,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>path/to/build</code></p>
 
-
       <h3>Details</h3>
       <p>Use this when you want emitted files, intermediates, and temporary build outputs to live outside the default location.</p>
       <h3>Examples</h3>
@@ -69,7 +69,6 @@
 
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>path/to/tools</code></p>
-
 
       <h3>Details</h3>
       <p>This points the compiler at a tools root that expands what it can discover automatically during the pipeline.</p>
@@ -87,7 +86,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>architecture name</code></p>
       <p><strong>Allowed values:</strong> <code>x86_64</code></p>
-
       <h3>Details</h3>
       <p>Use this when the desired architecture is enough and you do not need to spell a full target triple.</p>
       <h3>Examples</h3>
@@ -104,7 +102,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>target triple</code></p>
       <p><strong>Allowed values:</strong> <code>x86_64-pc-linux-gnu, x86_64-pc-windows-msvc</code></p>
-
       <h3>Details</h3>
       <p>The target triple controls operating system, architecture, vendor, and ABI assumptions in one place.</p>
       <p>Prefer this over `-target` when cross-compiling or when the platform details matter.</p>
@@ -122,7 +119,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>cpu name</code></p>
       <p><strong>Allowed values:</strong> <code>haswell, alderlake, ivybridge, pentium, pantherlake</code></p>
-
       <h3>Details</h3>
       <p>This helps the backend emit code for a specific processor family rather than a generic architecture.</p>
       <h3>Examples</h3>
@@ -139,7 +135,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>feature;feature</code></p>
       <p><strong>Allowed values:</strong> <code>sse2, cx16, sahf, tbm</code></p>
-
       <h3>Details</h3>
       <p>Use this when you want to turn on a small set of backend features without replacing the whole feature list.</p>
       <h3>Examples</h3>
@@ -156,7 +151,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>feature;feature</code></p>
       <p><strong>Allowed values:</strong> <code>sse2, cx16, sahf, tbm</code></p>
-
       <h3>Details</h3>
       <p>This is useful when the selected CPU baseline is too aggressive for the actual deployment environment.</p>
       <h3>Examples</h3>
@@ -173,7 +167,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>+feature,-feature</code></p>
       <p><strong>Allowed values:</strong> <code>+sse2, +cx16, +sahf, -tbm</code></p>
-
       <h3>Details</h3>
       <p>This gives direct low-level control over the backend feature string.</p>
       <p>Use it when you want an explicit allow and deny list rather than incremental enable or disable flags.</p>
@@ -191,7 +184,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>artifact kind</code></p>
       <p><strong>Allowed values:</strong> <code>llvm-bc, llvm-ir, asm, unopt-llvm-ir, unopt-llvm-bc, unopt-asm, obj, unchecked-pretty-ast, unchecked-ast, pretty-ast, ast, pretty-tokens, tokens</code></p>
-
       <h3>Details</h3>
       <p>Use emission when you want a file output such as LLVM IR, assembler, object code, tokens, or AST snapshots.</p>
       <h3>Examples</h3>
@@ -208,7 +200,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>printable unit</code></p>
       <p><strong>Allowed values:</strong> <code>llvm-ir, unopt-llvm-ir, asm, unopt-asm, unchecked-pretty-ast, unchecked-ast, pretty-ast, ast, pretty-tokens, tokens</code></p>
-
       <h3>Details</h3>
       <p>This is the text-output twin of `-emit`.</p>
       <p>Use it for inspection, debugging, or piping compiler output into another tool.</p>
@@ -226,7 +217,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>optimization level</code></p>
       <p><strong>Allowed values:</strong> <code>O0, O1, O2, O3, Os, Oz</code></p>
-
       <h3>Details</h3>
       <p>Higher levels generally trade compilation time for more aggressive optimization.</p>
       <p>Use size-oriented levels when output size matters more than raw performance.</p>
@@ -244,7 +234,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>pipeline stage</code></p>
       <p><strong>Allowed values:</strong> <code>lexing, parsing, scope-analysis, ast-verification, type-checking, general-analysis, attribute-checking, linter, compiler-intrinsic-checking, compiler-callconventions-checking, codegen</code></p>
-
       <h3>Details</h3>
       <p>This is useful for debugging the compiler pipeline and inspecting partial outputs.</p>
       <h3>Examples</h3>
@@ -261,7 +250,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>relocation model</code></p>
       <p><strong>Allowed values:</strong> <code>static, pic, dynamic</code></p>
-
       <h3>Details</h3>
       <p>This affects generated machine code and the way addresses are represented.</p>
       <p>Use PIC-related modes when the output must be position independent.</p>
@@ -279,7 +267,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>code model</code></p>
       <p><strong>Allowed values:</strong> <code>small, medium, large, kernel</code></p>
-
       <h3>Details</h3>
       <p>The code model influences assumptions about code and data placement in the address space.</p>
       <h3>Examples</h3>
@@ -296,7 +283,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>version</code></p>
       <p><strong>Allowed values:</strong> <code>15.0.0</code></p>
-
       <h3>Details</h3>
       <p>Use this when you need the generated output to match a specific macOS deployment baseline.</p>
       <h3>Examples</h3>
@@ -313,7 +299,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>version</code></p>
       <p><strong>Allowed values:</strong> <code>17.4.0</code></p>
-
       <h3>Details</h3>
       <p>This matters when targeting Apple mobile environments and their deployment constraints.</p>
       <h3>Examples</h3>
@@ -330,7 +315,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>version</code></p>
       <p><strong>Allowed values:</strong> <code>2.0</code></p>
-
       <h3>Details</h3>
       <p>This lets the compiler adapt CUDA-related ABI or backend expectations for a particular CUDA release.</p>
       <h3>Examples</h3>
@@ -345,7 +329,6 @@
       <p>Enable the JIT execution mode.</p>
 
       <p><strong>Accepts value:</strong> <code>no</code></p>
-
 
 
       <h3>Details</h3>
@@ -364,7 +347,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>path/to/libc.so</code></p>
 
-
       <h3>Details</h3>
       <p>Use this when the JIT runtime must link against a specific C runtime library.</p>
       <h3>Examples</h3>
@@ -380,7 +362,6 @@
 
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>path/to/library.so</code></p>
-
 
       <h3>Details</h3>
       <p>This lets the JIT loader resolve external symbols from additional libraries.</p>
@@ -398,7 +379,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>symbol name</code></p>
 
-
       <h3>Details</h3>
       <p>Use this when the executed function is not the default `main`.</p>
       <h3>Examples</h3>
@@ -414,7 +394,6 @@
 
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>&quot;--foo;bar&quot;</code></p>
-
 
       <h3>Details</h3>
       <p>Arguments are passed through the JIT configuration rather than through the host shell after compilation.</p>
@@ -432,7 +411,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>ABI name</code></p>
       <p><strong>Allowed values:</strong> <code>system-v, nvidia-cuda</code></p>
-
       <h3>Details</h3>
       <p>The ABI affects calling conventions, data passing rules, and interoperability with external code.</p>
       <h3>Examples</h3>
@@ -449,7 +427,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>feature mode</code></p>
       <p><strong>Allowed values:</strong> <code>stable, unstable</code></p>
-
       <h3>Details</h3>
       <p>Stable mode limits the language surface to stable features.</p>
       <p>Unstable mode enables experimental or incomplete features.</p>
@@ -467,7 +444,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>path/to/std</code></p>
 
-
       <h3>Details</h3>
       <p>Use this when the compiler should resolve the standard library from a non-default location.</p>
       <h3>Examples</h3>
@@ -483,7 +459,6 @@
 
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>x.x.x</code></p>
-
 
       <h3>Details</h3>
       <p>This helps the compiler resolve the expected versioned standard library snapshot.</p>
@@ -501,7 +476,6 @@
       <p><strong>Accepts value:</strong> <code>no</code></p>
 
 
-
       <h3>Details</h3>
       <p>This turns on backend debug info emission such as DWARF data where supported.</p>
       <h3>Examples</h3>
@@ -514,7 +488,6 @@
       <p>Emit debug information optimized for inlined functions.</p>
 
       <p><strong>Accepts value:</strong> <code>no</code></p>
-
 
 
       <h3>Details</h3>
@@ -531,7 +504,6 @@
       <p><strong>Accepts value:</strong> <code>no</code></p>
 
 
-
       <h3>Details</h3>
       <p>This helps profilers map optimized machine code back to the original source more accurately.</p>
       <h3>Examples</h3>
@@ -546,7 +518,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>DWARF version</code></p>
       <p><strong>Allowed values:</strong> <code>v4, v5</code></p>
-
       <h3>Details</h3>
       <p>Use this when your debugger or platform requires a specific DWARF generation.</p>
       <h3>Examples</h3>
@@ -563,7 +534,6 @@
       <p><strong>Accepts value:</strong> <code>no</code></p>
 
 
-
       <h3>Details</h3>
       <p>This can be useful for debugging or for niche targets where automatic ABI handling gets in the way.</p>
       <h3>Examples</h3>
@@ -578,7 +548,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>mode list</code></p>
       <p><strong>Allowed values:</strong> <code>IEEE, preserve-sign-signature, transform-to-positive-zero, dynamic</code></p>
-
       <h3>Details</h3>
       <p>This affects how the backend treats denormal values and therefore can change numerical edge-case behavior.</p>
       <h3>Examples</h3>
@@ -595,7 +564,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>mode list</code></p>
       <p><strong>Allowed values:</strong> <code>IEEE, preserve-sign-signature, transform-to-positive-zero, dynamic</code></p>
-
       <h3>Details</h3>
       <p>This is the 32-bit specific counterpart of the general denormal floating-point behavior flag.</p>
       <h3>Examples</h3>
@@ -612,7 +580,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>strategy</code></p>
       <p><strong>Allowed values:</strong> <code>any, exact, large, samesize, noduplicates</code></p>
-
       <h3>Details</h3>
       <p>This matters when the backend has to reason about multiple declarations of the same symbol.</p>
       <h3>Examples</h3>
@@ -629,7 +596,6 @@
       <p><strong>Accepts value:</strong> <code>no</code></p>
 
 
-
       <h3>Details</h3>
       <p>This inserts stack state protection intended to make some classes of memory corruption harder to exploit.</p>
       <h3>Examples</h3>
@@ -644,7 +610,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>sanitizer</code></p>
       <p><strong>Allowed values:</strong> <code>address, hwaddress, memory, thread, memtag</code></p>
-
       <h3>Details</h3>
       <p>Sanitizers add runtime checks and diagnostics for memory issues, threading bugs, or related classes of problems.</p>
       <h3>Examples</h3>
@@ -661,7 +626,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>setting;setting</code></p>
       <p><strong>Allowed values:</strong> <code>bounds, coverage</code></p>
-
       <h3>Details</h3>
       <p>Use this to narrow or tune the effect of an active sanitizer configuration.</p>
       <h3>Examples</h3>
@@ -677,7 +641,6 @@
 
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>-p{passname,passname}</code></p>
-
 
       <h3>Details</h3>
       <p>Use this when the default optimization pipeline is not enough and you want to control LLVM pass selection directly.</p>
@@ -695,7 +658,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>pass;pass</code></p>
       <p><strong>Allowed values:</strong> <code>loopvectorization, loopunroll, loopinterleaving, loopsimplifyvectorization, mergefunctions, callgraphprofile</code></p>
-
       <h3>Details</h3>
       <p>This lets you tune the pass set used by the compiler-specific modificator stage.</p>
       <h3>Examples</h3>
@@ -712,7 +674,6 @@
       <p><strong>Accepts value:</strong> <code>yes</code></p>
       <p><strong>Value syntax:</strong> <code>variant triple</code></p>
       <p><strong>Allowed values:</strong> <code>arm64-apple-ios15.0-macabi</code></p>
-
       <h3>Details</h3>
       <p>Use this when a Darwin target needs its variant triple spelled out separately from the main target triple.</p>
       <h3>Examples</h3>
@@ -727,7 +688,6 @@
       <p>Enable ANSI color formatting in diagnostics output.</p>
 
       <p><strong>Accepts value:</strong> <code>no</code></p>
-
 
 
       <h3>Details</h3>

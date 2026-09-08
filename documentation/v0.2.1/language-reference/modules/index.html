@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.1/language-reference/modules/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -67,7 +68,26 @@ import &quot;other.thrust&quot; only { stack, counter };</code></pre>
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>Import Forms</h2>
+      <p>Imports control which external names are available in the current file.</p>
+      <ul>
+        <li>import std::io brings a module into scope through its module path.</li>
+        <li>import &quot;file.thrust&quot; imports a source file by path.</li>
+        <li>as gives an imported module or file a shorter local name.</li>
+        <li>only limits the import to selected symbols. Use it when a file depends on a small part of another module.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Name Resolution</h2>
+      <p>Qualified names make module boundaries explicit.</p>
+      <ul>
+        <li>Use module::symbol when a name comes from an imported module.</li>
+        <li>Aliases reduce repeated long paths but should still describe the imported code.</li>
+        <li>If two imports expose the same unqualified name, keep the access qualified instead of relying on reader memory.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>

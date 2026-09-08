@@ -158,6 +158,7 @@ a {
 
 .layout-left {
   min-width: 0;
+  overflow: hidden;
 }
 
 .layout-right {
@@ -250,7 +251,10 @@ a {
 }
 
 .layout-left .section-downloads {
-  max-width: calc(100% - clamp(120px, 8vw, 200px));
+  width: calc(100% - 6.59rem);
+  max-width: calc(100% - 6.59rem);
+  margin-right: 0;
+  overflow: hidden;
 }
 
 .stack-panels {
@@ -603,7 +607,9 @@ code {
   }
 
   .layout-left .section-downloads {
+    width: 100%;
     max-width: none;
+    margin-right: 0;
   }
 
   .header-row {

@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.0/language-reference/deref/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -66,7 +67,25 @@ var value: s32 = (deref pointer);</code></pre>
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>References and Dereference</h2>
+      <p>ref and deref make address-taking and memory reads explicit.</p>
+      <ul>
+        <li>ref value creates a pointer to storage that already exists.</li>
+        <li>deref pointer reads the value at the pointer location.</li>
+        <li>Writing through a pointer changes the storage reached by that pointer, not a copy.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Pointer Indexing</h2>
+      <p>Indexing a pointer or array relies on a valid base and a valid element offset.</p>
+      <ul>
+        <li>Check for nullptr before dereferencing pointers from external code or allocation routines.</li>
+        <li>Keep the length or capacity used for bounds checks near the indexing code.</li>
+        <li>Use typed pointers when possible so the element type is visible at the access site.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>

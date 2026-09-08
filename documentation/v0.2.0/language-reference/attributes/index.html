@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.0/language-reference/attributes/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -116,7 +117,35 @@
       <p>Static and const declarations accept a narrower set: @public, @extern, @linkage, and @align.</p>
       <p>Struct declarations accept @public and @packed. Enum declarations accept @public. Local declarations accept @heap and @align.</p>
     </section>
+    <section class="container section panel docs-content">
+      <h2>Linkage and Visibility</h2>
+      <p>Visibility attributes decide whether a symbol remains internal or is visible outside the module.</p>
+      <ul>
+        <li>@public exports a declaration through the generated object file.</li>
+        <li>@extern binds a declaration to a symbol name that exists outside the normal Thrust name mangling path.</li>
+        <li>@linkage selects the LLVM linkage mode. Use non-standard linkage only when object-file or platform behavior requires it.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Calling and Code Generation</h2>
+      <p>Some attributes affect how a function is called or emitted by the backend.</p>
+      <ul>
+        <li>@convention selects the calling convention. It must match the caller and callee across FFI boundaries.</li>
+        <li>Inlining and size attributes are backend hints or requirements. They should describe a specific need, not be applied everywhere.</li>
+        <li>@constructor and @destructor create load and unload hooks. Keep their bodies small and avoid hidden dependencies between them.</li>
+      </ul>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Layout and Storage</h2>
+      <p>Layout attributes should be tied to the data format or ABI that requires them.</p>
+      <ul>
+        <li>@align(N) sets an explicit byte alignment where the declaration kind accepts it.</li>
+        <li>@packed changes struct padding. It can make field access less natural for the target, so use it for external layouts rather than normal data.</li>
+        <li>@heap requests heap storage for local declarations that need it. Keep ownership and destruction rules visible near the allocation.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>

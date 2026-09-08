@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.1/language-reference/functions/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -70,7 +71,26 @@ fn main() s32 @public {
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>Signature Parts</h2>
+      <p>A function signature states the name, parameters, return type, and optional attributes.</p>
+      <ul>
+        <li>Parameters are written as name: Type and are checked at call sites.</li>
+        <li>The return type follows the parameter list. If omitted, the function returns void.</li>
+        <li>@public exports the function. @extern and @convention describe how the function connects to external symbols.</li>
+        <li>Named arguments can make call sites clearer when several parameters have the same type.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Return and Ownership Conventions</h2>
+      <p>The signature should make error and ownership behavior predictable.</p>
+      <ul>
+        <li>Use status-code returns when a function can fail but does not produce a value.</li>
+        <li>Use nullptr or another documented sentinel when returning a pointer that may be absent.</li>
+        <li>If a function returns owned memory, document which function releases it and keep that convention consistent.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>

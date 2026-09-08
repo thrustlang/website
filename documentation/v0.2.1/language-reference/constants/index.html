@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.1/language-reference/constants/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -66,7 +67,25 @@ const READY: bool = true;</code></pre>
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>Compile-Time Values</h2>
+      <p>Constants are resolved while the program is compiled.</p>
+      <ul>
+        <li>const name: Type = value declares a value that cannot be reassigned.</li>
+        <li>A constant expression can include literals and compile-time builtins such as sizeOf, alignOf, and pointerWidth.</li>
+        <li>Use constants for protocol values, flags, array sizes, ABI checks, and limits that are part of the program definition.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Constants Versus Variables</h2>
+      <p>Use constants when the value is a rule, not state.</p>
+      <ul>
+        <li>A variable stores runtime state and can change as the function executes.</li>
+        <li>A constant documents a fixed decision and lets the compiler reuse that value directly.</li>
+        <li>If a value depends on input, file contents, allocation, or an external call, it belongs in runtime code instead of a const declaration.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>

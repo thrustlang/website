@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
   <link rel="canonical" href="/documentation/v0.2.1/language-reference/types/">
+
   <link rel="stylesheet" href="/assets/css/site.css">
   <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
 </head>
@@ -52,7 +53,7 @@
       <pre class="code-thrust"><code class="language-thrust">var signed: s32 = -1;
 var unsigned: u64 = 1;
 var decimal: f64 = 3.14;
-var address: ptr[u8] = nullptr;
+var bufferPtr: ptr[u8] = nullptr;
 var dynamic: array[s32] = [1, 2, 3];
 var fixedValues: array[u16; 4] = fixed[0, 1, 2, 3];</code></pre>
     </section>
@@ -69,7 +70,39 @@ var fixedValues: array[u16; 4] = fixed[0, 1, 2, 3];</code></pre>
       </ul>
     </section>
 
+    <section class="container section panel docs-content">
+      <h2>Scalar Types</h2>
+      <p>Scalar values are stored directly and are usually passed by value.</p>
+      <ul>
+        <li>Signed integers use the s prefix, such as s8, s16, s32, and s64. Use them when negative values are part of the domain.</li>
+        <li>Unsigned integers use the u prefix, such as u8, u16, u32, and u64. Use them for sizes, bit masks, and values that cannot be negative.</li>
+        <li>Floating-point values use f32 or f64 in normal code. Wider or target-specific float forms should be kept near code that needs that representation.</li>
+        <li>bool represents true or false values. Keep boolean names descriptive because the type alone does not explain the condition.</li>
+        <li>char stores a byte-sized character value. Strings and UTF-8 data should still be treated as byte sequences unless a helper decodes code points.</li>
+      </ul>
+    </section>
 
+    <section class="container section panel docs-content">
+      <h2>Pointer and Array Types</h2>
+      <p>Pointer and array syntax makes memory shape visible at the use site.</p>
+      <ul>
+        <li>ptr[T] points to a value of type T. The pointer may still be null or invalid, so code must check the value before dereferencing when the source is not trusted.</li>
+        <li>ptr without a subtype is a raw pointer. Use it at FFI or allocator boundaries and cast back to a concrete pointer before reading typed values.</li>
+        <li>array[T] describes a dynamic array form. Its length is not part of the type.</li>
+        <li>array[T; N] describes a fixed-size array. The element count is part of the type and can be used by compile-time layout checks.</li>
+        <li>CString is the builtin alias used for null-terminated character arrays passed to C-style APIs.</li>
+      </ul>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Aliases and Layout</h2>
+      <p>Aliases and layout builtins help keep public declarations readable without hiding representation.</p>
+      <ul>
+        <li>type aliases give a name to an existing type. They do not create a separate runtime representation.</li>
+        <li>sizeOf, alignOf, and typeWidth report layout information known to the compiler. Use them for constants and static checks instead of repeating numeric assumptions.</li>
+        <li>ABI-oriented builtins such as abiSizeOf and abiAlignOf describe the representation required by the target ABI. Use them when interfacing with external code.</li>
+      </ul>
+    </section>
 
     <section class="container section panel docs-content">
       <h2>Example</h2>
