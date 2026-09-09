@@ -33,4 +33,4 @@ It contains the public landing pages, versioned language documentation, standard
 
 The repository can be deployed to GitHub Pages at `https://thrustlang.github.io/website/`.
 
-Automatic deployment is handled by `.github/workflows/deploy-pages.yml`. Manual deployment is available through `scripts/deploy-website.sh`, `scripts/deploy-website.fish`, `scripts/deploy-website.ps1`, and `scripts/deploy-website.bat`.
+Deployment through `.github/workflows/deploy-pages.yml` runs when a pushed change includes `documentation/versions.json` and the commit message starts with `Release docs `. That commit is created by `scripts/release_docs.py`. Manual deployment is available through `scripts/deploy-website.sh`, `scripts/deploy-website.fish`, `scripts/deploy-website.ps1`, and `scripts/deploy-website.bat`.

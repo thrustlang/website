@@ -91,7 +91,9 @@ The script copies the website to the output directory and rewrites internal root
 
 ## Website Deployment
 
-Automatic deployment is handled by `.github/workflows/deploy-pages.yml`. The workflow builds the website with `/website` as the base path and publishes the generated `_site` directory through GitHub Pages Actions.
+GitHub Pages deployment is handled by `.github/workflows/deploy-pages.yml`. The workflow builds the website with `/website` as the base path and publishes the generated `_site` directory through GitHub Pages Actions.
+
+The workflow does not deploy every push. It deploys when a pushed change includes `documentation/versions.json` and the commit message starts with `Release docs `. That commit is created by `scripts/release_docs.py`. The workflow can also be started manually with `workflow_dispatch`.
 
 Manual deployment is available through the platform-specific scripts:
 

@@ -4,7 +4,7 @@
 
 <img src= "https://github.com/thrustlang/.github/blob/main/assets/standard-text-separator.png" alt= "standard-separator" style= "width: 1hv;"> </img>
 
-`scripts/release_docs.py` creates a new documentation version from an existing content version, promotes it to the latest public version, and regenerates the published output.
+`scripts/release_docs.py` creates a new documentation version from an existing content version, promotes it to the latest public version, regenerates the published output, and creates the release commit.
 
 > [!IMPORTANT]
 > The new version must already exist in `thrustc/std/<new-version>/` before this script is run.
@@ -20,6 +20,7 @@ The script:
 5. Builds the new generated documentation.
 6. Updates `documentation/versions.json`.
 7. Rebuilds the full documentation hub and output.
+8. Creates a git commit named `Release docs <new-version>` unless `--no-commit` is passed.
 
 ## Command Syntax
 
@@ -31,6 +32,7 @@ $ python scripts/release_docs.py --new-version v0.2.2
 
 - `--new-version`: new documentation version to publish
 - `--from`: optional source version used as the base content
+- `--no-commit`: generate files without creating the release commit
 
 ## Examples
 
@@ -54,6 +56,15 @@ The script may update:
 - `documentation/versions.json`
 - `documentation/<new-version>/...`
 - `documentation/index.html`
+
+## Deployment Trigger
+
+`.github/workflows/deploy-pages.yml` deploys after the release commit is pushed. The workflow requires both conditions:
+
+- `documentation/versions.json` changed in the pushed commit
+- the commit message starts with `Release docs `
+
+Use `--no-commit` only when you plan to commit manually with the same message shape or deploy manually.
 
 ## Failure Behavior
 

@@ -341,7 +341,7 @@ PS> powershell -ExecutionPolicy Bypass -File scripts/deploy-website.ps1
 
 ### Automatic Deployment
 
-`.github/workflows/deploy-pages.yml` runs the same subpath build on pushes to `main` or `master`, and can also be started with `workflow_dispatch`.
+`.github/workflows/deploy-pages.yml` runs the same subpath build when a pushed change includes `documentation/versions.json` and the commit message starts with `Release docs `. That commit is created by `scripts/release_docs.py`. It can also be started manually with `workflow_dispatch`.
 
 ## `scripts/update_docs.py`
 
@@ -527,6 +527,8 @@ Use `--category` and `--flag` together because the target is one specific flag.
 
 Creates a new documentation version from an existing content version, marks it as the latest version, updates `documentation/versions.json`, and rebuilds the published output.
 
+By default, it also creates a git commit named `Release docs <version>`. The GitHub Pages workflow deploys only release commits with that message shape after they are pushed.
+
 ### When To Use It
 
 - when a new documentation release should become public
@@ -536,7 +538,7 @@ Creates a new documentation version from an existing content version, marks it a
 ### Command Shape
 
 ```console
-$ python scripts/release_docs.py --new-version <new-version> [--from <source-version>]
+$ python scripts/release_docs.py --new-version <new-version> [--from <source-version>] [--no-commit]
 ```
 
 ### Flags Index
@@ -545,6 +547,7 @@ $ python scripts/release_docs.py --new-version <new-version> [--from <source-ver
 | --- | --- | --- | --- | --- |
 | `--new-version` | yes | New documentation version to publish | new version id like `v0.2.2` | Must not already exist. |
 | `--from` | no | Existing version to copy as the starting point | existing version id like `v0.2.1` | If omitted, the current latest version is used. |
+| `--no-commit` | no | Generate release files without creating a git commit | flag only | Use this when you want to inspect or commit manually. |
 
 ### Valid Value Guidance
 
