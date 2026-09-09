@@ -14,12 +14,12 @@ It contains the public landing pages, versioned language documentation, standard
 - The generated versioned documentation under `documentation/`
 - The editable documentation content under `documentation/content/`
 - The documentation maintenance scripts under `scripts/`
-- The GitHub Pages deployment workflow under `.github/workflows/deploy-pages.yml`
 
 ## Documentation Guides
 
 - `guide/DOCUMENTATION_WORKFLOW.md`
 - `guide/DOCS_SCRIPTS_REFERENCE.md`
+- `guide/JSON_FORMAT.md`
 - `guide/CREATE_DOCS.md`
 - `guide/UPDATE_DOCS.md`
 - `guide/UPDATE_DOWNLOADS.md`
@@ -33,4 +33,4 @@ It contains the public landing pages, versioned language documentation, standard
 
 The repository can be deployed to GitHub Pages at `https://thrustlang.github.io/website/`.
 
-Deployment through `.github/workflows/deploy-pages.yml` runs when a pushed change includes `documentation/versions.json` and the commit message starts with `Release docs `. That commit is created by `scripts/release_docs.py`. Manual deployment is available through `scripts/deploy-website.sh`, `scripts/deploy-website.fish`, `scripts/deploy-website.ps1`, and `scripts/deploy-website.bat`.
+Deployment through `.github/workflows/deploy-pages.yml` runs when a pushed change includes `documentation/versions.json` and the commit message starts with `Release docs `. That commit is created by `scripts/release_docs.py`. A later normal commit does not deploy just because release files already exist. Manual deployment is available through `scripts/deploy-website.sh`, `scripts/deploy-website.fish`, `scripts/deploy-website.ps1`, and `scripts/deploy-website.bat`.

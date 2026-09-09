@@ -66,6 +66,8 @@ The script may update:
 
 Use `--no-commit` only when you plan to commit manually with the same message shape or deploy manually.
 
+This trigger is not based on a file that must be deleted later. A later normal commit does not deploy just because release files already exist. Accidental deployment requires both a change to `documentation/versions.json` and a commit message that starts with `Release docs `.
+
 ## Failure Behavior
 
 > [!NOTE]

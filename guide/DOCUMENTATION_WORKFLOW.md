@@ -33,6 +33,8 @@ The `thrustc/std/<version>/...` tree is used to extract public signatures for st
 
 The compiler command line reference must be synchronized with `thrustc/thrustc_cli/src/help.rs`. Flags that exist only in parser internals are not public documentation until they are listed in the help output.
 
+See [JSON Format](./JSON_FORMAT.md) for the full schema-style explanation of each source JSON section and generated JSON output.
+
 ## Generated Output
 
 The generated output lives under `documentation/<version>/`.
@@ -95,6 +97,8 @@ GitHub Pages deployment is handled by `.github/workflows/deploy-pages.yml`. The 
 
 The workflow does not deploy every push. It deploys when a pushed change includes `documentation/versions.json` and the commit message starts with `Release docs `. That commit is created by `scripts/release_docs.py`. The workflow can also be started manually with `workflow_dispatch`.
 
+This is not based on a persistent marker file. A later normal commit does not deploy just because release files remain in the repository. To trigger deployment accidentally, a commit would need to both change `documentation/versions.json` and use a message that starts with `Release docs `.
+
 Manual deployment is available through the platform-specific scripts:
 
 - `scripts/deploy-website.sh`
@@ -117,6 +121,7 @@ Use `--test` first to print the planned file changes without writing them.
 ## Related Guides
 
 - [Scripts Reference](./DOCS_SCRIPTS_REFERENCE.md)
+- [JSON Format](./JSON_FORMAT.md)
 - [Update Docs](./UPDATE_DOCS.md)
 - [Create Docs](./CREATE_DOCS.md)
 - [Update Downloads](./UPDATE_DOWNLOADS.md)

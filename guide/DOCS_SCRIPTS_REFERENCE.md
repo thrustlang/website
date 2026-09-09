@@ -14,6 +14,8 @@ It explains what each script does, when to use it, what each flag means, which v
 > [!IMPORTANT]
 > Standard library pages are checked against `thrustc/std/<version>/`. Compiler command line pages are checked against `thrustc/thrustc_cli/src/help.rs`; flags that only exist in parser internals are not public website documentation.
 
+See [JSON Format](./JSON_FORMAT.md) for the detailed structure of `versions.json`, `pages.json`, `compiler-command-line-reference.json`, and generated JSON output.
+
 ## Script Index
 
 - `scripts/create_docs.py`: create a new page scaffold in `std` or `language-reference`
@@ -342,6 +344,8 @@ PS> powershell -ExecutionPolicy Bypass -File scripts/deploy-website.ps1
 ### Automatic Deployment
 
 `.github/workflows/deploy-pages.yml` runs the same subpath build when a pushed change includes `documentation/versions.json` and the commit message starts with `Release docs `. That commit is created by `scripts/release_docs.py`. It can also be started manually with `workflow_dispatch`.
+
+The trigger is not a persistent marker file. A later normal commit does not deploy just because release files already exist. Accidental deployment requires both a change to `documentation/versions.json` and a commit message that starts with `Release docs `.
 
 ## `scripts/update_docs.py`
 
