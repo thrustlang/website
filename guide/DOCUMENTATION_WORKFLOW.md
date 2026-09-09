@@ -58,10 +58,11 @@ The repository contains documentation maintenance scripts under `scripts/`:
 - `release_docs.py`
 - `archive_docs.py`
 - `generate_std_social_cards.py`
-- `build_subpath.py`
+- `normalize_website_path_for_gh_pages.py`
+- `update_downloads.py`
 - `deploy-website.*`
 
-These scripts rebuild the documentation after changing the editable state.
+The documentation content scripts rebuild generated documentation after changing editable state. The website utility scripts handle deployment builds, download links, or generated assets.
 
 Install Python dependencies before rebuilding generated documentation:
 
@@ -80,10 +81,10 @@ The documentation build fails if `Pillow` is missing, because standard library p
 
 ## Subpath Deployment Build
 
-Use `scripts/build_subpath.py` when the website is deployed below a path instead of the domain root. For example, the compiler repository can publish this site at `https://thrustlang.github.io/website/` while keeping Rust code documentation at the root.
+Use `scripts/normalize_website_path_for_gh_pages.py` when the website is deployed below a path instead of the domain root. For example, the compiler repository can publish this site at `https://thrustlang.github.io/website/` while keeping Rust code documentation at the root.
 
 ```console
-$ python scripts/build_subpath.py --base-path /website --output /tmp/thrust-website-build
+$ python scripts/normalize_website_path_for_gh_pages.py --base-path /website --output /tmp/thrust-website-build
 ```
 
 The script copies the website to the output directory and rewrites internal root-relative links for `/assets/`, `/documentation/`, `/en/`, and `/es/`. The source checkout is not changed.
@@ -101,13 +102,27 @@ Manual deployment is available through the platform-specific scripts:
 
 By default they deploy to `https://thrustlang.github.io/website/`. Set `BASE_PATH` if a different GitHub Pages path is needed.
 
+## Downloads Updates
+
+Use `scripts/update_downloads.py` when the public download cards should point from one compiler release version to another.
+
+```console
+$ python scripts/update_downloads.py --from-version 0.2.1 --to-version 0.2.2
+```
+
+Use `--test` first to print the planned file changes without writing them.
+
 ## Related Guides
 
 - [Scripts Reference](./DOCS_SCRIPTS_REFERENCE.md)
 - [Update Docs](./UPDATE_DOCS.md)
 - [Create Docs](./CREATE_DOCS.md)
+- [Update Downloads](./UPDATE_DOWNLOADS.md)
 - [Release Docs](./RELEASE_DOCS.md)
 - [Archive Docs](./ARCHIVE_DOCS.md)
+- [Generate Std Social Cards](./GENERATE_STD_SOCIAL_CARDS.md)
+- [Normalize Website Path For GH Pages](./NORMALIZE_WEBSITE_PATH_FOR_GH_PAGES.md)
+- [Deploy Website](./DEPLOY_WEBSITE.md)
 
 ## Notes And Limitations
 

@@ -19,9 +19,15 @@ It contains the public landing pages, versioned language documentation, standard
 ## Documentation Guides
 
 - `guide/DOCUMENTATION_WORKFLOW.md`
+- `guide/DOCS_SCRIPTS_REFERENCE.md`
+- `guide/CREATE_DOCS.md`
 - `guide/UPDATE_DOCS.md`
+- `guide/UPDATE_DOWNLOADS.md`
 - `guide/RELEASE_DOCS.md`
 - `guide/ARCHIVE_DOCS.md`
+- `guide/GENERATE_STD_SOCIAL_CARDS.md`
+- `guide/NORMALIZE_WEBSITE_PATH_FOR_GH_PAGES.md`
+- `guide/DEPLOY_WEBSITE.md`
 
 ## Deployment
 

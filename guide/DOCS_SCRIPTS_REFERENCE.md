@@ -21,7 +21,8 @@ It explains what each script does, when to use it, what each flag means, which v
 - `scripts/release_docs.py`: publish a new documentation version from an existing one
 - `scripts/archive_docs.py`: mark an older documentation version as archived
 - `scripts/generate_std_social_cards.py`: generate PNG Open Graph cards for standard library pages
-- `scripts/build_subpath.py`: build a deployable site copy for a subpath such as `/website`
+- `scripts/normalize_website_path_for_gh_pages.py`: normalize website paths for GitHub Pages subpath deployment
+- `scripts/update_downloads.py`: update public download links from one compiler version to another
 - `scripts/deploy-website.*`: deploy the website to GitHub Pages manually
 
 ## When To Use Each Script
@@ -30,7 +31,8 @@ It explains what each script does, when to use it, what each flag means, which v
 - Use `scripts/update_docs.py` when the page or CLI entry already exists and only its content should change.
 - Use `scripts/release_docs.py` when a new public version must be published.
 - Use `scripts/archive_docs.py` when an older published version should stay accessible but no longer be current.
-- Use `scripts/build_subpath.py` when this website must be copied under a non-root URL path.
+- Use `scripts/normalize_website_path_for_gh_pages.py` when this website must be copied under a non-root URL path.
+- Use `scripts/update_downloads.py` when the website download cards should point to a new compiler release version.
 - Use `scripts/deploy-website.*` when you want to deploy the website manually instead of using the GitHub Actions workflow.
 
 ## Quick Situations Table
@@ -47,7 +49,8 @@ It explains what each script does, when to use it, what each flag means, which v
 | Create a new published docs version from a specific base | `scripts/release_docs.py` | `--new-version --from` |
 | Archive an old docs version | `scripts/archive_docs.py` | `--version` |
 | Regenerate std social cards | `scripts/generate_std_social_cards.py` | optional `--version`, optional `--slug` |
-| Build website for `/website` deployment | `scripts/build_subpath.py` | `--base-path /website --output <dir>` |
+| Normalize website paths for `/website` deployment | `scripts/normalize_website_path_for_gh_pages.py` | `--base-path /website --output <dir>` |
+| Update compiler download links | `scripts/update_downloads.py` | `--from-version --to-version`, optional `--test` |
 | Deploy website manually | `scripts/deploy-website.*` | no required flags |
 
 ## `scripts/create_docs.py`
@@ -196,7 +199,7 @@ $ python scripts/generate_std_social_cards.py --version v0.2.1 --slug mem
 - Language reference pages and compiler command line pages do not receive std social cards.
 - `documentation/assets/build_docs.py` also generates these cards as part of the normal documentation build.
 
-## `scripts/build_subpath.py`
+## `scripts/normalize_website_path_for_gh_pages.py`
 
 ### What It Does
 
@@ -213,7 +216,7 @@ The source website keeps root-relative paths such as `/assets/`, `/documentation
 ### Command Shape
 
 ```console
-$ python scripts/build_subpath.py --base-path /website --output /tmp/thrust-website-build
+$ python scripts/normalize_website_path_for_gh_pages.py --base-path /website --output /tmp/thrust-website-build
 ```
 
 ### Flags Index
@@ -238,6 +241,64 @@ External URLs such as `https://github.com/...` are not rewritten.
 - the directory passed through `--output`
 
 The source checkout is not modified.
+
+## `scripts/update_downloads.py`
+
+### What It Does
+
+Updates the compiler downloads version used by the website.
+
+The script changes `assets/js/downloads.js`, which builds the GitHub Releases download URLs, and updates fallback version labels in the English and Spanish pages.
+
+### When To Use It
+
+- when a new compiler release should be shown in download cards
+- when `assets/js/downloads.js` and visible fallback labels must stay synchronized
+- when you want to test the planned replacements before writing files
+
+### Command Shape
+
+```console
+$ python scripts/update_downloads.py --from-version <current-version> --to-version <new-version> [--test]
+```
+
+### Flags Index
+
+| Flag | Required | What It Means | Valid Values | Notes |
+| --- | --- | --- | --- | --- |
+| `--from-version` | yes | Current downloads version expected in the site | `0.2.1` or `v0.2.1` | Must match the version in `assets/js/downloads.js`. |
+| `--to-version` | yes | New downloads version to write | `0.2.2` or `v0.2.2` | Stored without `v` in JavaScript and with `v` in visible labels. |
+| `--test` | no | Print planned changes without writing files | flag only | Useful before the real update. |
+
+### Examples
+
+#### Test A Downloads Update
+
+```console
+$ python scripts/update_downloads.py --from-version 0.2.1 --to-version 0.2.2 --test
+```
+
+This prints the current version, target version, files that would change, and occurrence counts. No files are modified.
+
+#### Apply A Downloads Update
+
+```console
+$ python scripts/update_downloads.py --from-version 0.2.1 --to-version 0.2.2
+```
+
+### Files It Changes
+
+- `assets/js/downloads.js`
+- `en/index.html`
+- `es/index.html`
+- `en/downloads/index.html`
+- `es/downloads/index.html`
+
+### Common Mistakes
+
+- passing a `--from-version` that does not match the current downloads version
+- expecting `--test` to modify files
+- updating the website before the matching GitHub Release assets exist
 
 ## `scripts/deploy-website.*`
 
@@ -268,7 +329,7 @@ PS> powershell -ExecutionPolicy Bypass -File scripts/deploy-website.ps1
 ### What It Does Internally
 
 1. Checks whether `origin/gh-pages` exists and creates it if needed.
-2. Runs `scripts/build_subpath.py --base-path /website` into a temporary directory.
+2. Runs `scripts/normalize_website_path_for_gh_pages.py --base-path /website` into a temporary directory.
 3. Uses a temporary worktree for `gh-pages`.
 4. Replaces the branch contents with the built website.
 5. Commits and pushes only when files changed.

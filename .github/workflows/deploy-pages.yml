@@ -32,7 +32,7 @@ jobs:
           python-version: "3.x"
 
       - name: Build website for GitHub Pages
-        run: python scripts/build_subpath.py --base-path /website --output _site
+        run: python scripts/normalize_website_path_for_gh_pages.py --base-path /website --output _site
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

@@ -50,7 +50,7 @@ end
 
 echo "Building website for $BASE_PATH..."
 run rm -rf $TEMP_SITE
-run $PYTHON_BIN scripts/build_subpath.py --base-path $BASE_PATH --output $TEMP_SITE
+run $PYTHON_BIN scripts/normalize_website_path_for_gh_pages.py --base-path $BASE_PATH --output $TEMP_SITE
 
 echo "Deploying website to GitHub Pages..."
 run rm -rf $PAGES_WORKTREE

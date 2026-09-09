@@ -45,7 +45,7 @@ if %errorlevel% neq 0 (
 
 echo Building website for %BASE_PATH%...
 if exist "%TEMP_SITE%" rd /s /q "%TEMP_SITE%"
-"%PYTHON_BIN%" scripts\build_subpath.py --base-path "%BASE_PATH%" --output "%TEMP_SITE%"
+"%PYTHON_BIN%" scripts\normalize_website_path_for_gh_pages.py --base-path "%BASE_PATH%" --output "%TEMP_SITE%"
 if errorlevel 1 exit /b 1
 
 echo Deploying website to GitHub Pages...
