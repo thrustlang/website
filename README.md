@@ -28,3 +28,8 @@ It contains the public landing pages, versioned language documentation, standard
 - [`guide/GENERATE_STD_SOCIAL_CARDS.md`](https://github.com/thrustlang/website/blob/master/guide/GENERATE_STD_SOCIAL_CARDS.md)
 - [`guide/NORMALIZE_WEBSITE_PATH_FOR_GH_PAGES.md`](https://github.com/thrustlang/website/blob/master/guide/NORMALIZE_WEBSITE_PATH_FOR_GH_PAGES.md)
 - [`guide/DEPLOY_WEBSITE.md`](https://github.com/thrustlang/website/blob/master/guide/DEPLOY_WEBSITE.md)
+
+### Online 
+
+The page is already available as a prototype in [Thrust Programming Language - Experimental Website](https://thrustlang.github.io/website/), it isn't the one
+that will be used in the official domain.
