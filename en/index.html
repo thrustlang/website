@@ -187,11 +187,11 @@ fn main() s32 @public {
           <div class="features-grid">
             <article class="feature-card">
               <h3>C-Style Clarity</h3>
-              <p>A familiar C-style mental model with explicit locals, loops, and direct control over values and branches.</p>
+              <p>A familiar C-style mental model with explicit control.</p>
             </article>
             <article class="feature-card">
               <h3>Generics at Compile Time</h3>
-              <p>Generic functions and structures with explicit instantiation and no runtime generic overhead.</p>
+              <p>Generic functions and structures, specialized at compile time.</p>
             </article>
             <article class="feature-card">
               <h3>C Interoperability</h3>
@@ -203,11 +203,27 @@ fn main() s32 @public {
             </article>
             <article class="feature-card">
               <h3>Useful Imports</h3>
-              <p>Mix <code>std::</code> modules, aliases, and selective imports to keep dependencies explicit without making the file noisy.</p>
+              <p>Mix <code>std::</code> modules, aliases, and selective imports.</p>
             </article>
             <article class="feature-card">
               <h3>Built-in Compile Helpers</h3>
               <p>Type/layout builtins like <code>sizeOf</code>, <code>alignOf</code>, and <code>isSameType</code> for safer code.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Scope-Based Ownership</h3>
+              <p>Automatic deallocation at scope exit, with no runtime ownership tracking. Memory is released exactly when the scope ends.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Ahead-of-Time and JIT</h3>
+              <p>Native binaries ahead-of-time, or run through the JIT.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Zero-Cost Abstractions</h3>
+              <p>Generics are specialized and dead branches removed at compile time.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Explicit Memory and Target Control</h3>
+              <p>Direct control of layout, alignment, calling conventions, and targets.</p>
             </article>
           </div>
         </section>
