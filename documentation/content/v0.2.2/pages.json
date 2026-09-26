@@ -1096,7 +1096,9 @@
             "hostOsName() - returns the host operating system name as a constant string.",
             "hostArch() - returns the host architecture name as a constant string.",
             "hostEndian() - returns the host endianness as a constant string.",
-            "currentTimestamp() - returns the current host timestamp as usize."
+            "currentTimestamp() - returns the current host timestamp as usize.",
+            "processorCount() - returns the number of logical processors available to the host as usize.",
+            "hostName() - returns the host machine name as a constant string (CString)."
           ]
         },
         {
