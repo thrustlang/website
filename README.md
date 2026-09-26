@@ -32,4 +32,4 @@ It contains the public landing pages, versioned language documentation, standard
 ### Online 
 
 The page is already available as a prototype in [Thrust Programming Language - Experimental Website](https://thrustlang.github.io/website/), it isn't the one
-that will be used in the official domain.
+yet that will be used in the official domain.
