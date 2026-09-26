@@ -133,6 +133,12 @@ a {
   transform: translate(1px, 1px);
 }
 
+.lang-link {
+  margin-left: 0.7rem;
+  padding-left: 0.7rem;
+  border-left: 1px solid var(--line);
+}
+
 .nav-links a.current {
   background: var(--accent);
   color: #ffffff;
@@ -145,8 +151,8 @@ a {
 
 .layout-board {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(430px, 480px);
-  gap: 2.2rem;
+  grid-template-columns: minmax(0, 1fr) minmax(440px, 660px);
+  gap: 0;
   align-items: start;
 }
 
@@ -163,7 +169,6 @@ a {
 
 .layout-right {
   min-width: 0;
-  justify-self: end;
   margin-top: 0;
 }
 
@@ -251,8 +256,8 @@ a {
 }
 
 .layout-left .section-downloads {
-  width: calc(100% - 6.59rem);
-  max-width: calc(100% - 6.59rem);
+  width: 100%;
+  max-width: 100%;
   margin-right: 0;
   overflow: hidden;
 }
@@ -306,6 +311,26 @@ code {
   display: grid;
   gap: 0.8rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.downloads-group + .downloads-group {
+  margin-top: 1.6rem;
+}
+
+.downloads-group-title {
+  margin: 0 0 0.6rem;
+  font-size: 1.15rem;
+}
+
+.releases-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.downloads-page .downloads-group-title {
+  text-align: left;
 }
 
 .download-card {
@@ -446,6 +471,12 @@ code {
   align-items: center;
   gap: 0.65rem;
   flex-wrap: wrap;
+}
+
+.archived-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .docs-version-select {

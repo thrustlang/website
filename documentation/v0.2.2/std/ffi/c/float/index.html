@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>std::ffi::c::float v0.2.2 | Thrust</title>
+  <meta name="description" content="Raw C bindings for floating-point text conversion.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/documentation/v0.2.2/std/ffi/c/float/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="std::ffi::c::float | Thrust">
+  <meta property="og:description" content="Raw C bindings for floating-point text conversion.">
+  <meta property="og:image" content="/documentation/v0.2.2/social/std/ffi-c-float.png">
+  <meta property="og:url" content="/documentation/v0.2.2/std/ffi/c/float/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="std::ffi::c::float | Thrust">
+  <meta name="twitter:description" content="Raw C bindings for floating-point text conversion.">
+  <meta name="twitter:image" content="/documentation/v0.2.2/social/std/ffi-c-float.png">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/en/">
+        <img class="brand-logo" src="/assets/brand/thrustlang-logo-128.png" srcset="/assets/brand/thrustlang-logo-128.png 128w, /assets/brand/thrustlang-logo-256.png 256w, /assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/en/">Home</a>
+        <a href="/en/features/">Features</a>
+        <a href="/en/downloads/">Downloads</a>
+        <a class="current" href="/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>std::ffi::c::float (v0.2.2)</h1>
+      <p>Raw C bindings for floating-point text conversion.</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.2">Version</label>
+        <select id="docs-version-v0.2.2" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Latest</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>std::ffi::c::float exposes C conversion functions such as atof, strtof, strtod, and strtold.</p>
+      <p>These return raw C results; check the end pointer or errno when conversion can fail.</p>
+      <p class="muted">Source: <code>thrustc/std/v0.2.2/ffi/c/float.thrust</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Public Signatures</h2>
+      <p class="muted">Exported declarations for this module snapshot.</p>
+      <pre class="code-thrust"><code class="language-thrust">fn atof(text: CString)                             f64 @public @extern(&quot;atof&quot;)    @convention(&quot;C&quot;);
+fn strtof(text: CString, end: ptr[ptr])            f32 @public @extern(&quot;strtof&quot;)  @convention(&quot;C&quot;);
+fn strtod(text: CString, end: ptr[ptr])            f64 @public @extern(&quot;strtod&quot;)  @convention(&quot;C&quot;);
+fn strtold(text: CString, end: ptr[ptr])           f80 @public @extern(&quot;strtold&quot;) @convention(&quot;C&quot;);</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>The conversion functions return raw C results and may set errno on failure.</p>
+      <p>Check the end pointer or errno when a conversion can fail.</p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Examples</h2>
+
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Notes</h2>
+      <ul>
+        <li>Prefer std::float for safer parsing with result structs.</li>
+        <li>Follow the C semantics for overflow and invalid input.</li>
+      </ul>
+      <p><a class="btn" href="/documentation/v0.2.2/std/index.html">Back to std index</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/assets/js/thrust-highlight.js"></script>
+  <script src="/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/documentation/assets/docs-search.js"></script>
+</body>
+</html>

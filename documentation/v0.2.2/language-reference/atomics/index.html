@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atomic Operations v0.2.2 | Thrust</title>
+  <meta name="description" content="Atomic read-modify-write and compare-and-swap builtins (unstable).">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/documentation/v0.2.2/language-reference/atomics/">
+
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/en/">
+        <img class="brand-logo" src="/assets/brand/thrustlang-logo-128.png" srcset="/assets/brand/thrustlang-logo-128.png 128w, /assets/brand/thrustlang-logo-256.png 256w, /assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/en/">Home</a>
+        <a href="/en/features/">Features</a>
+        <a href="/en/downloads/">Downloads</a>
+        <a class="current" href="/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>Atomic Operations (v0.2.2)</h1>
+      <p>Atomic read-modify-write and compare-and-swap builtins (unstable).</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.2">Version</label>
+        <select id="docs-version-v0.2.2" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Latest</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>The atomic builtins perform read-modify-write and compare-and-swap operations on a memory location. They map to the LLVM atomicrmw and cmpxchg instructions.</p>
+      <p>This feature is unstable. It only works when the compiler runs in unstable mode, and it can change or disappear.</p>
+      <p class="muted">Primary source: <code>syntax/atomics/atomics.md</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Syntax Signatures</h2>
+      <pre class="code-thrust"><code class="language-thrust">fn example() void @public {
+    var atomicRelax counter: u32 = 10;
+    var old: u32 = atomicAdd(counter, 5);
+}</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>The destination of an atomic operation must be a variable declared with an atomic ordering modificator, such as atomicRelax or atomicSync.</p>
+      <p>The operation inherits the ordering from the destination declaration. atomicNone and atomicFree do not describe an atomic operation and are rejected.</p>
+      <p>Compare-and-swap follows the C11 model: expected is passed by address and is updated with the current value on failure. The builtin returns true when the swap happened.</p>
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Keep the destination&#x27;s ordering modificator consistent with the operation.</li>
+        <li>Use the success and failure orderings so they remain valid for LLVM lowering.</li>
+        <li>Run with -mode unstable to use these builtins.</li>
+      </ul>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Read-Modify-Write Builtins</h2>
+      <p>Each builtin writes a value atomically and returns the previous value. The destination and value must be integers.</p>
+      <ul>
+        <li><code>atomicStore(counter, value)</code> - stores a new value, returns the previous one.</li>
+        <li><code>atomicAdd(counter, value)</code> - addition.</li>
+        <li><code>atomicSubtract(counter, value)</code> - subtraction.</li>
+        <li><code>atomicAnd(counter, value)</code> - bitwise and.</li>
+        <li><code>atomicNand(counter, value)</code> - bitwise nand.</li>
+        <li><code>atomicOr(counter, value)</code> - bitwise or.</li>
+        <li><code>atomicXor(counter, value)</code> - bitwise xor.</li>
+        <li><code>atomicSignedMaximum(counter, value)</code> - signed maximum.</li>
+        <li><code>atomicSignedMinimum(counter, value)</code> - signed minimum.</li>
+        <li><code>atomicUnsignedMaximum(counter, value)</code> - unsigned maximum.</li>
+        <li><code>atomicUnsignedMinimum(counter, value)</code> - unsigned minimum.</li>
+      </ul>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Compare-And-Swap</h2>
+      <p>atomicCompareAndSwap compares the destination against an expected value and swaps in a new value when they match.</p>
+      <ul>
+        <li>atomicCompareAndSwap(counter, expected, new, success, failure)</li>
+        <li>expected is an lvalue holding the expected value; it is updated on failure.</li>
+        <li>success and failure are atomic ordering arguments using the atomic keyword literals.</li>
+      </ul>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Example</h2>
+      <pre class="code-thrust"><code class="language-thrust">fn main() s32 @public {
+    var atomicRelax counter: u32 = 20;
+    var expected: u32 = 20;
+    var swapped: bool = atomicCompareAndSwap(counter, expected, 30, atomicSync, atomicRelax);
+
+    if swapped &amp;&amp; counter == 30 {
+        return 0;
+    }
+
+    return 1;
+}</code></pre>
+      <p><a class="btn" href="/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/assets/js/thrust-highlight.js"></script>
+  <script src="/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/documentation/assets/docs-search.js"></script>
+</body>
+</html>

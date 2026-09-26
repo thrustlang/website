@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Caracteristicas | Thrust</title>
-  <meta name="description" content="Caracteristicas estables del lenguaje Thrust.">
+  <title>Características | Thrust</title>
+  <meta name="description" content="Características estables del lenguaje Thrust.">
   <link rel="icon" type="image/png" sizes="32x32" href="../../assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="../../assets/brand/favicon-16.png">
   <link rel="canonical" href="/es/features/">
@@ -22,7 +22,7 @@
       </a>
       <nav class="nav-links" aria-label="Navegacion principal">
         <a href="/es/">Inicio</a>
-        <a class="current" href="/es/features/">Caracteristicas</a>
+        <a class="current" href="/es/features/">Características</a>
         <a href="/es/downloads/">Descargas</a>
         <a href="/documentation/index.html">Documentation</a>
         <a class="lang-link" href="/en/features/">EN</a>
@@ -32,8 +32,8 @@
 
   <main class="site-main">
     <section class="container hero">
-      <h1>Caracteristicas</h1>
-      <p>Features estables del lenguaje enfocados en claridad, interoperabilidad y desarrollo de sistemas predecible.</p>
+      <h1>Características</h1>
+      <p>Características estables del lenguaje enfocadas en claridad, interoperabilidad y desarrollo de sistemas predecible.</p>
     </section>
 
     <section class="container section" id="features">
@@ -168,11 +168,11 @@ fn main() s32 @public {
     var values := vector::newVector[s32]();
     var angle: f64 = math::PI_4;
 
-    vector::pushBack[s32](ref values, 10);
-    vector::pushBack[s32](ref values, 20);
+    vector::push[s32](ref values, 10);
+    vector::push[s32](ref values, 20);
 
     io::print("last=%d cos=%f\n", vector::back[s32](ref values), math::cosine(angle));
-    vector::destroyVector[s32](ref values);
+    vector::dropVector[s32](ref values);
     return 0;
 }</code></pre>
           <pre class="code-thrust"><code class="language-thrust">import "other.thrust" as dep;

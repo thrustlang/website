@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>std::collections::vector v0.2.2 | Thrust</title>
+  <meta name="description" content="Generic contiguous dynamic array with capacity growth and index-based operations.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/documentation/v0.2.2/std/collections/vector/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="std::collections::vector | Thrust">
+  <meta property="og:description" content="Generic contiguous dynamic array with capacity growth and index-based operations.">
+  <meta property="og:image" content="/documentation/v0.2.2/social/std/collections-vector.png">
+  <meta property="og:url" content="/documentation/v0.2.2/std/collections/vector/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="std::collections::vector | Thrust">
+  <meta name="twitter:description" content="Generic contiguous dynamic array with capacity growth and index-based operations.">
+  <meta name="twitter:image" content="/documentation/v0.2.2/social/std/collections-vector.png">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/en/">
+        <img class="brand-logo" src="/assets/brand/thrustlang-logo-128.png" srcset="/assets/brand/thrustlang-logo-128.png 128w, /assets/brand/thrustlang-logo-256.png 256w, /assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/en/">Home</a>
+        <a href="/en/features/">Features</a>
+        <a href="/en/downloads/">Downloads</a>
+        <a class="current" href="/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>std::collections::vector (v0.2.2)</h1>
+      <p>Generic contiguous dynamic array with capacity growth and index-based operations.</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.2">Version</label>
+        <select id="docs-version-v0.2.2" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Latest</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>std::collections::vector is a generic dynamic array stored in contiguous memory. It stores a data pointer, a length, and a capacity.</p>
+      <p>The module exposes the usual operations: create a vector, push and pop values, remove values, access elements, iterate, reserve capacity, shrink storage, and drop the allocation when finished.</p>
+      <p>The API stays close to memory operations. This makes it useful for compiler data structures, parser buffers, and small tools where allocation behavior should stay visible.</p>
+      <p class="muted">Source: <code>thrustc/std/v0.2.2/collections/vector.thrust</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Public Signatures</h2>
+      <p class="muted">Exported declarations for this module snapshot.</p>
+      <pre class="code-thrust"><code class="language-thrust">const INITIAL_CAPACITY: usize @public = 4;
+struct Vector [T] @public {
+struct VectorIterator [T] @public {
+fn newVector [T] () Vector[T] @public;
+fn withCapacity [T] (capacity: usize) Vector[T] @public;
+fn dropVector [T] (vector: ptr[Vector[T]]) void @public @deallocator;
+fn getLength [T] (vector: ptr[Vector[T]]) usize @public;
+fn getCapacity [T] (vector: ptr[Vector[T]]) usize @public;
+fn isEmpty [T] (vector: ptr[Vector[T]]) bool @public;
+fn getDataPointer [T] (vector: ptr[Vector[T]]) ptr[T] @public;
+fn at [T] (vector: ptr[Vector[T]], index: usize) T @public;
+fn front [T] (vector: ptr[Vector[T]]) T @public;
+fn back [T] (vector: ptr[Vector[T]]) T @public;
+fn ensureCapacity [T] (vector: ptr[Vector[T]], minimum: usize) void @public;
+fn push [T] (vector: ptr[Vector[T]], value: T) void @public;
+fn pop [T] (vector: ptr[Vector[T]]) T @public;
+fn insertAt [T] (vector: ptr[Vector[T]], index: usize, value: T) void @public;
+fn removeAt [T] (vector: ptr[Vector[T]], index: usize) T @public;
+fn clear [T] (vector: ptr[Vector[T]]) void @public;
+fn reserveCapacity [T] (vector: ptr[Vector[T]], newCapacity: usize) void @public;
+fn shrinkToFit [T] (vector: ptr[Vector[T]]) void @public;
+fn swapElements [T] (vector: ptr[Vector[T]], first: usize, second: usize) void @public;
+fn iter [T] (vector: ptr[Vector[T]]) VectorIterator[T] @public;
+fn next [T] (iterator: ptr[VectorIterator[T]]) optional::Optional[T] @public;
+fn forEach [T] (vector: ptr[Vector[T]], action: Fn[ptr[T], ptr, usize] -&gt; void) void @public @arbitraryArgs;
+fn filter [T] (vector: ptr[Vector[T]], predicate: Fn[T] -&gt; bool) Vector[T] @public;
+fn map [T, U] (vector: ptr[Vector[T]], mapper: Fn[T] -&gt; U) Vector[U] @public;</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>Use newVector when you do not know the final size. Use withCapacity when you can reserve space up front.</p>
+      <p>Call dropVector when the vector is no longer needed. The vector owns heap memory once it grows or is created with capacity.</p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Examples</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::collections::vector;
+import std::io;
+
+// Collect a few scores and report the last one entered.
+fn main() s32 @public {
+    var scores := vector::newVector[s32]();
+
+    vector::push[s32](ref scores, 10);
+    vector::push[s32](ref scores, 20);
+    vector::push[s32](ref scores, 30);
+
+    io::print(&quot;latest score: %d\n&quot;, vector::back[s32](ref scores));
+
+    vector::dropVector[s32](ref scores);
+
+    return 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::collections::vector;
+import std::io;
+
+// Insert at the front and then drop the first element.
+fn main() s32 @public {
+    var scores := vector::withCapacity[s32](4);
+
+    vector::insertAt[s32](ref scores, 0, 5);
+    vector::insertAt[s32](ref scores, 1, 8);
+    vector::removeAt[s32](ref scores, 0);
+
+    io::print(&quot;first score: %d\n&quot;, vector::front[s32](ref scores));
+
+    vector::dropVector[s32](ref scores);
+
+    return 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::collections::vector;
+import std::io;
+
+directive &quot;--disable-warnings=W0020&quot;;
+
+// Apply a calibration curve (value * gain + bias) to every reading, using the
+// extra arguments forwarded through forEach.
+static mut calibrated: s32 = 0;
+
+fn calibrate(value: ptr[s32], args: ptr, count: usize) void {
+    var gain: s32 = arbitraryArgFrom(args, s32);
+    var bias: s32 = arbitraryArgFrom(args, s32);
+
+    calibrated = calibrated + value-&gt;[0] * gain + bias;
+}
+
+fn main() s32 @public {
+    var readings := vector::newVector[s32]();
+
+    vector::push[s32](ref readings, 21);
+    vector::push[s32](ref readings, 19);
+    vector::push[s32](ref readings, 23);
+
+    vector::forEach(ref readings, calibrate, 2 as s32, 5 as s32);
+
+    vector::dropVector[s32](ref readings);
+
+    io::print(&quot;calibrated total: %d\n&quot;, calibrated);
+
+    return 0;
+}</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Notes</h2>
+      <ul>
+        <li>Index-based helpers do not check bounds for you.</li>
+        <li>Pushing many values can grow the allocation. Reserve capacity first if you already know the size.</li>
+        <li>Write the element type at the call site when the compiler cannot infer it clearly.</li>
+      </ul>
+      <p><a class="btn" href="/documentation/v0.2.2/std/index.html">Back to std index</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/assets/js/thrust-highlight.js"></script>
+  <script src="/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/documentation/assets/docs-search.js"></script>
+</body>
+</html>

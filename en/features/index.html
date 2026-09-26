@@ -168,11 +168,11 @@ fn main() s32 @public {
     var values := vector::newVector[s32]();
     var angle: f64 = math::PI_4;
 
-    vector::pushBack[s32](ref values, 10);
-    vector::pushBack[s32](ref values, 20);
+    vector::push[s32](ref values, 10);
+    vector::push[s32](ref values, 20);
 
     io::print("last=%d cos=%f\n", vector::back[s32](ref values), math::cosine(angle));
-    vector::destroyVector[s32](ref values);
+    vector::dropVector[s32](ref values);
     return 0;
 }</code></pre>
           <pre class="code-thrust"><code class="language-thrust">import "other.thrust" as dep;

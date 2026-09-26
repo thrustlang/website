@@ -1,0 +1,1516 @@
+{
+  "std": {
+    "io": {
+      "title": "std::io",
+      "summary": "Input and output APIs, stream handles, formatted printing, scanning, and file operations.",
+      "source": "io.thrust",
+      "overview": [
+        "The std::io module provides the usual input and output tools through a Thrust interface. It keeps streams, files, printing, scanning, and small file helpers in one module, so basic I/O code stays easy to read.",
+        "Most functions call into std::ffi::c::io. That means the behavior is close to C stdio: return values should be checked, file handles must be closed, and formatting follows C-style format strings.",
+        "Use this module for terminal output, simple file access, buffered reads and writes, and cases where you need direct control over a stream. The API is low-level, but the names are clearer than calling the raw C bindings directly."
+      ],
+      "details": [
+        "Formatted output uses variadic functions. Use print for stdout, printTo for a specific stream, and printToBuffer when the destination is a fixed-size buffer.",
+        "Reading and writing functions return the amount of data processed or a status code. Check those values instead of assuming the whole operation succeeded."
+      ],
+      "examples": [
+        "import std::io;\n\nfn main() s32 @public {\n    io::print(\"value=%d\\n\", 42);\n    return 0;\n}",
+        "import std::io;\n\nfn main() s32 @public {\n    var file := io::openFile(\"data.txt\", \"r\");\n\n    if file == nullptr {\n        io::printError(\"openFile\");\n        return 1;\n    }\n\n    var c: s32 = io::readCharFrom(file);\n\n    if c != io::EOF {\n        io::print(\"first byte=%d\\n\", c);\n    }\n\n    if io::closeFile(file) != 0 {\n        return 1;\n    }\n\n    return 0;\n}",
+        "import std::io;\n\nfn main() s32 @public {\n    var text: array[char; 64];\n\n    if io::printToBuffer(ref text, 64, \"id=%d name=%s\", 7, \"tool\") < 0 {\n        return 1;\n    }\n\n    io::print(\"%s\\n\", ref text);\n    return 0;\n}"
+      ],
+      "notes": [
+        "Formatting helpers use C-style format strings, so the arguments must match the format.",
+        "closeFile must be called on successfully opened handles to release resources.",
+        "lockStream, tryLockStream, and unlockStream are available when a stream needs manual locking."
+      ]
+    },
+    "math": {
+      "title": "std::math",
+      "summary": "Mathematical constants and wrappers around scalar math functions for f64 and f32.",
+      "source": "math.thrust",
+      "overview": [
+        "The std::math module gives Thrust names to common scalar math functions. It includes constants, trigonometry, logarithms, exponentials, rounding helpers, comparisons, and several special functions.",
+        "These functions are wrappers over the platform math library. You can write math::squareRoot or math::power in Thrust code without importing the raw C names everywhere.",
+        "For edge cases such as NaN, infinities, and domain errors, expect the same behavior as the C runtime on the target platform."
+      ],
+      "details": [
+        "Use the exported constants, such as PI and TAU, instead of repeating numeric literals in formulas.",
+        "If a calculation calls expensive functions many times, store intermediate results yourself. The module does not hide that cost."
+      ],
+      "examples": [
+        "import std::math;\n\nfn main() s32 @public {\n    var angle: f64 = math::PI_4;\n    var s: f64 = math::sine(angle);\n    var c: f64 = math::cosine(angle);\n\n    if s > 0.70 && c > 0.70 {\n        return 0;\n    }\n\n    return 1;\n}",
+        "import std::math;\n\nfn main() s32 @public {\n    var hyp: f64 = math::hypotenuse(3.0, 4.0);\n    var root: f64 = math::squareRoot(144.0);\n\n    if hyp == 5.0 && root == 12.0 {\n        return 0;\n    }\n\n    return 1;\n}"
+      ],
+      "notes": [
+        "Public constants are exported as f64 and intended for direct reuse.",
+        "Check inputs yourself when a function only accepts certain values.",
+        "Use std::math first. Drop to std::ffi::c::math only when you need the raw C function directly."
+      ]
+    },
+    "mem": {
+      "title": "std::mem",
+      "summary": "Allocation, reallocation, memory copy/move/set helpers, and memory mapping constants.",
+      "source": "mem.thrust",
+      "overview": [
+        "The std::mem module contains raw memory operations. It covers allocation, reallocation, freeing, byte copying, byte moving, byte filling, comparison, and memory mapping constants.",
+        "The functions are direct by design. Sizes are byte counts, pointers are raw pointers, and ownership is managed by the caller.",
+        "Higher-level code, including vector, builds on this module. Use it when you need precise control over storage and are prepared to manage lifetimes explicitly."
+      ],
+      "details": [
+        "Allocation functions can return nullptr. Always check the result before writing through the pointer.",
+        "Use moveMemory when the source and destination can overlap. Use copyMemory only when they are separate ranges."
+      ],
+      "examples": [
+        "import std::mem;\n\nfn main() s32 @public {\n    var block: ptr = mem::allocateMemory(128);\n    if block == nullptr {\n        return 1;\n    }\n\n    mem::setMemory(block, 0, 128);\n    mem::freeMemory(block);\n    return 0;\n}",
+        "import std::mem;\n\nfn main() s32 @public {\n    var src: array[u8; 6] = fixed[10, 20, 30, 40, 50, 60];\n    var dst: array[u8; 6] = fixed[0, 0, 0, 0, 0, 0];\n\n    mem::copyMemory(\n        (ref dst) as ptr,\n        (ref src) as ptr,\n        sizeOf(array[u8; 6])\n    );\n\n    if (deref dst[2]) == 30 {\n        return 0;\n    }\n\n    return 1;\n}"
+      ],
+      "notes": [
+        "Lifetime ownership is manual. There is no automatic memory release.",
+        "All transfer helpers receive sizes in bytes.",
+        "Mapping constants are exposed to keep flag composition readable."
+      ]
+    },
+    "collections/vector": {
+      "title": "std::collections::vector",
+      "summary": "Generic contiguous dynamic array with capacity growth and index-based operations.",
+      "source": "collections/vector.thrust",
+      "overview": [
+        "std::collections::vector is a generic dynamic array stored in contiguous memory. It stores a data pointer, a length, and a capacity.",
+        "The module exposes the usual operations: create a vector, push and pop values, remove values, access elements, iterate, reserve capacity, shrink storage, and drop the allocation when finished.",
+        "The API stays close to memory operations. This makes it useful for compiler data structures, parser buffers, and small tools where allocation behavior should stay visible."
+      ],
+      "details": [
+        "Use newVector when you do not know the final size. Use withCapacity when you can reserve space up front.",
+        "Call dropVector when the vector is no longer needed. The vector owns heap memory once it grows or is created with capacity."
+      ],
+      "examples": [
+        "import std::collections::vector;\nimport std::io;\n\n// Collect a few scores and report the last one entered.\nfn main() s32 @public {\n    var scores := vector::newVector[s32]();\n\n    vector::push[s32](ref scores, 10);\n    vector::push[s32](ref scores, 20);\n    vector::push[s32](ref scores, 30);\n\n    io::print(\"latest score: %d\\n\", vector::back[s32](ref scores));\n\n    vector::dropVector[s32](ref scores);\n\n    return 0;\n}",
+        "import std::collections::vector;\nimport std::io;\n\n// Insert at the front and then drop the first element.\nfn main() s32 @public {\n    var scores := vector::withCapacity[s32](4);\n\n    vector::insertAt[s32](ref scores, 0, 5);\n    vector::insertAt[s32](ref scores, 1, 8);\n    vector::removeAt[s32](ref scores, 0);\n\n    io::print(\"first score: %d\\n\", vector::front[s32](ref scores));\n\n    vector::dropVector[s32](ref scores);\n\n    return 0;\n}",
+        "import std::collections::vector;\nimport std::io;\n\ndirective \"--disable-warnings=W0020\";\n\n// Apply a calibration curve (value * gain + bias) to every reading, using the\n// extra arguments forwarded through forEach.\nstatic mut calibrated: s32 = 0;\n\nfn calibrate(value: ptr[s32], args: ptr, count: usize) void {\n    var gain: s32 = arbitraryArgFrom(args, s32);\n    var bias: s32 = arbitraryArgFrom(args, s32);\n\n    calibrated = calibrated + value->[0] * gain + bias;\n}\n\nfn main() s32 @public {\n    var readings := vector::newVector[s32]();\n\n    vector::push[s32](ref readings, 21);\n    vector::push[s32](ref readings, 19);\n    vector::push[s32](ref readings, 23);\n\n    vector::forEach(ref readings, calibrate, 2 as s32, 5 as s32);\n\n    vector::dropVector[s32](ref readings);\n\n    io::print(\"calibrated total: %d\\n\", calibrated);\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "Index-based helpers do not check bounds for you.",
+        "Pushing many values can grow the allocation. Reserve capacity first if you already know the size.",
+        "Write the element type at the call site when the compiler cannot infer it clearly."
+      ]
+    },
+    "tstring": {
+      "title": "std::tstring",
+      "summary": "Owned null-terminated strings with byte operations, UTF-8 validation, and Unicode code point helpers.",
+      "source": "tstring.thrust",
+      "overview": [
+        "The std::tstring module provides TString, an owned string type implemented with std::collections::vector. It stores bytes as char values and keeps a trailing null terminator so the buffer can be exposed as a CString when needed.",
+        "Use TString when code needs a mutable string-like buffer with explicit lifetime management. The module covers construction from C strings, copying, concatenation, trimming, prefix and suffix checks, ASCII case conversion, and UTF-8 validation.",
+        "The API is still low-level. TString owns its vector allocation, so callers must destroy values they create when the string is no longer needed. Operations that return a new TString also return ownership to the caller."
+      ],
+      "details": [
+        "len returns the byte length without the trailing null terminator, while capacity reports usable byte capacity without counting that terminator.",
+        "toCString returns a pointer to the internal null-terminated buffer. Treat that pointer as borrowed from the TString and avoid using it after the TString is destroyed or mutated.",
+        "get, hasIndex, and indexOf use byte indexes. get returns '\\0' when the index is outside the string, and indexOf returns len(text) when the value is not found.",
+        "UTF-8 helpers also operate on byte indexes. isCharBoundary can be used before slicing-style logic, and decodeNext advances from one code point boundary to the next.",
+        "ASCII case conversion only changes bytes in the A-Z or a-z ranges. It does not perform locale-aware or full Unicode casing."
+      ],
+      "examples": [
+        "import std::tstring;\nimport std::io;\n\nfn main() s32 @public {\n    var text := tstring::fromCString(\"thrust\");\n\n    tstring::appendCString(ref text, \" language\");\n    io::print(\"%s\\n\", tstring::toCString(ref text));\n\n    tstring::dropTString(ref text);\n    return 0;\n}",
+        "import std::tstring;\n\nfn main() s32 @public {\n    var left := tstring::fromCString(\"hello\");\n    var right := tstring::fromCString(\" world\");\n    var joined := tstring::concat(ref left, ref right);\n\n    var ok: bool = tstring::startsWith(ref joined, \"hello\") &&\n        tstring::endsWith(ref joined, \"world\");\n\n    tstring::dropTString(ref joined);\n    tstring::dropTString(ref right);\n    tstring::dropTString(ref left);\n\n    if ok {\n        return 0;\n    }\n\n    return 1;\n}",
+        "import std::tstring;\n\nfn main() s32 @public {\n    var text := tstring::fromCString(\"  data  \");\n    var trimmed := tstring::trim(ref text);\n    var upper := tstring::toUpperCaseASCII(ref trimmed);\n    var expected := tstring::fromCString(\"DATA\");\n\n    var ok: bool = tstring::isValidUTF8(tstring::toCString(ref upper)) &&\n        tstring::equals(ref upper, ref expected);\n\n    tstring::dropTString(ref expected);\n    tstring::dropTString(ref upper);\n    tstring::dropTString(ref trimmed);\n    tstring::dropTString(ref text);\n\n    if ok {\n        return 0;\n    }\n\n    return 1;\n}",
+        "import std::tstring;\n\nfn main() s32 @public {\n    var text := tstring::newTString();\n    var ok: bool = tstring::pushUnicodeCodePoint(ref text, 0x41);\n\n    tstring::dropTString(ref text);\n\n    if ok {\n        return 0;\n    }\n\n    return 1;\n}",
+        "import std::tstring;\n\nfn main() s32 @public {\n    var text := tstring::fromCString(\"hello\");\n\n    if !tstring::hasIndex(ref text, 4) {\n        return 1;\n    }\n\n    if tstring::get(ref text, 1) != 'e' {\n        return 2;\n    }\n\n    if tstring::indexOf(ref text, \"lo\") != 3 {\n        return 3;\n    }\n\n    tstring::dropTString(ref text);\n    return 0;\n}"
+      ],
+      "notes": [
+        "TString values own heap storage through their internal vector. Call dropTString for every live TString when ownership ends.",
+        "Pointers returned by toCString are invalidated by destruction and may be affected by later mutations or reallocations.",
+        "Lengths and indexes are byte-based, not Unicode scalar counts. Use unicodeCodePointCount when you need the decoded code point count.",
+        "Use hasIndex before get when '\\0' is also a valid value in the data you are inspecting.",
+        "Invalid UTF-8 decoding stops at the invalid byte and returns the current index from decodeNextData through the public decodeNext wrapper.",
+        "Version 0.2.2 adds string splitting, joining, searching, case conversion, and more Unicode decoding helpers."
+      ]
+    },
+    "ffi/c": {
+      "title": "std::ffi::c",
+      "summary": "Type aliases, constants, and C ABI signatures used by standard wrappers.",
+      "source": "ffi/c/*.thrust",
+      "overview": [
+        "std::ffi::c contains the raw C bindings used by the standard library. The declarations are grouped by area, such as I/O, memory, math, and primitive C types.",
+        "Most application code should prefer std::io, std::mem, or std::math. Those modules use clearer Thrust names while still relying on the same C symbols underneath.",
+        "Use the raw FFI layer when you need a C symbol directly or when writing a wrapper for a library that is not yet covered by std."
+      ],
+      "details": [
+        "Each declaration must match the external C symbol. Pay special attention to pointer types, return types, and variadic functions.",
+        "Keep raw extern calls in small wrappers when possible. That makes mistakes easier to find and keeps the rest of the program cleaner."
+      ],
+      "examples": [
+        "import std::ffi::c::io as c;\n\nfn printLine(msg: CString) void @public {\n    c::puts(msg);\n}",
+        "import std::ffi::c::math as c;\n\nfn absValue(v: f64) f64 @public {\n    return c::fabs(v);\n}"
+      ],
+      "notes": [
+        "Raw bindings follow the behavior of the C library on the target platform.",
+        "Prefer wrapper modules for normal application code.",
+        "When a C library changes, recheck the matching Thrust declarations."
+      ]
+    },
+    "optional": {
+      "title": "std::optional",
+      "summary": "Optional value container with presence checks and safe access.",
+      "source": "optional.thrust",
+      "overview": [
+        "std::optional provides Optional[T], a container that may or may not hold a value. It represents an optional result without using null pointers.",
+        "Use some to wrap a value and none for absence. hasValue, isSome, and isNone report state, while unwrap returns the contained value and unwrapOr or valueOr give fallbacks."
+      ],
+      "details": [
+        "Operations that return a new Optional transfer ownership to the caller, so the previous container no longer owns the value."
+      ],
+      "examples": [
+        "import std::optional;\n\n// Wrap a value so callers can tell \"present\" from \"absent\" without using null.\nfn main() s32 @public {\n    var theme := optional::some[s32](1);\n\n    if optional::hasValue(ref theme) {\n        return optional::unwrap(ref theme);\n    }\n\n    return 0;\n}",
+        "import std::optional;\n\n// When a value is missing, fall back to a safe default instead of failing.\nfn main() s32 @public {\n    var setting := optional::none[s32]();\n\n    if optional::isNone(ref setting) {\n        return optional::unwrapOr(ref setting, -1);\n    }\n\n    return optional::unwrap(ref setting);\n}",
+        "import std::optional;\n\n// Try a primary source and fall back to a secondary one when it is empty.\nfn main() s32 @public {\n    var primary := optional::none[s32]();\n    var secondary := optional::some[s32](20);\n\n    var result := optional::orElse(ref primary, secondary);\n\n    return optional::unwrap(ref result);\n}",
+        "import std::optional;\n\n// Lift a raw pointer into an optional: empty when null, holding it otherwise.\nfn main() s32 @public {\n    var value: s32 = 7;\n    var wrapped := optional::fromPtr[s32](ref value);\n\n    var pointer := optional::ptrOrNull(ref wrapped);\n\n    if pointer != nullptr {\n        return (deref pointer);\n    }\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "Use isNone before unwrap when the value can be absent.",
+        "optional::Optional is also used by other containers such as vector::next."
+      ]
+    },
+    "env": {
+      "title": "std::env",
+      "summary": "Process arguments, environment variables, and common system paths.",
+      "source": "env.thrust",
+      "overview": [
+        "std::env gives access to command-line arguments, environment variables, and platform directories such as the home and temporary directories.",
+        "hasArgument and argument read positional arguments; getVariable reads environment variables. Typed accessors such as argumentAsS32 and getVariableAsTString return ready-to-use views."
+      ],
+      "details": [
+        "Use hasArgument and argument to inspect the command line, and getVariable or getVariableAsTString to read process environment variables by name.",
+        "Typed accessors such as argumentAsS32 and getVariableAsTString return converted values, so callers avoid re-parsing raw strings."
+      ],
+      "examples": [
+        "import std::env;\nimport std::io;\n\n// Check whether a required environment variable is set.\nfn main() s32 @public {\n    if env::hasVariable(\"PATH\") {\n        io::print(\"PATH is configured\\n\");\n    }\n\n    return 0;\n}",
+        "import std::env;\nimport std::io;\n\n// Store a session variable and confirm it is visible.\nfn main() s32 @public {\n    env::setVariable(\"THRUST_DOC_TEST\", \"hello\", true);\n\n    if env::hasVariable(\"THRUST_DOC_TEST\") {\n        io::print(\"variable stored\\n\");\n    }\n\n    env::unsetVariable(\"THRUST_DOC_TEST\");\n\n    return 0;\n}",
+        "import std::env;\nimport std::io;\n\n// Resolve the user's home directory.\nfn main() s32 @public {\n    var home := env::homeDirectory();\n\n    if home != nullptr {\n        io::print(\"home is set\\n\");\n    }\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "Environment variable access can fail; check the result before using it.",
+        "Argument accessors are indexed starting from zero."
+      ]
+    },
+    "int": {
+      "title": "std::int",
+      "summary": "Parsing of signed and unsigned integers from text.",
+      "source": "int.thrust",
+      "overview": [
+        "std::int parses integer values from C strings, TString values, and with explicit numeric bases.",
+        "parse[T] returns a result struct with the parsed value and a success flag. Variants such as parseWithBase and parseCString cover different inputs and bases."
+      ],
+      "details": [
+        "parse[T] returns a result struct with a success flag, so callers can detect failures without exceptions.",
+        "Use parseWithBase for explicit numeric bases, and parseCString or parseTString when the source is a C string or TString."
+      ],
+      "examples": [
+        "import std::int;\nimport std::io;\n\n// Parse a number typed by the user into a real integer.\nfn main() s32 @public {\n    var value: s32 = int::parse[s32](\"1024\");\n\n    io::print(\"parsed: %d\\n\", value);\n\n    return 0;\n}",
+        "import std::int;\nimport std::io;\n\n// Read a hexadecimal value such as a color code.\nfn main() s32 @public {\n    var color: s32 = int::parseWithBase[s32](\"ff\", 16);\n\n    io::print(\"color: %d\\n\", color);\n\n    return 0;\n}",
+        "import std::int;\nimport std::io;\n\n// Parse input that may be invalid, checking the result before using it.\nfn main() s32 @public {\n    var result := int::parseSigned(\"123\");\n\n    if !(result->ok) {\n        io::print(\"invalid number\\n\");\n        return 0;\n    }\n\n    io::print(\"value: %d\\n\", (result->value as s32));\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "Check the success flag before reading the value.",
+        "Base variants accept bases from 2 to 36."
+      ]
+    },
+    "float": {
+      "title": "std::float",
+      "summary": "Parsing of floating-point values from text.",
+      "source": "float.thrust",
+      "overview": [
+        "std::float parses floating-point values from C strings and TString values into f32, f80, or f64.",
+        "parse[T] returns a result struct with the parsed value and a success flag, mirroring the integer parsing helpers."
+      ],
+      "details": [
+        "parse[T] returns a result struct with a success flag and supports f32, f80, and f64 targets.",
+        "Parsing follows C library rules for format and range; check the success flag before using the value."
+      ],
+      "examples": [
+        "import std::float;\nimport std::io;\n\n// Turn a Celsius text reading into Fahrenheit and print the whole part.\nfn main() s32 @public {\n    var celsius: f64 = float::parse[f64](\"25.0\");\n    var fahrenheit: f64 = celsius * 9.0 / 5.0 + 32.0;\n\n    io::print(\"fahrenheit: %d\\n\", (fahrenheit as s32));\n\n    return 0;\n}",
+        "import std::float;\nimport std::io;\n\n// Parse a single-precision reading and show its whole part.\nfn main() s32 @public {\n    var value: f32 = float::parse[f32](\"3.5\");\n    var whole: s32 = value as s32;\n\n    io::print(\"whole part: %d\\n\", whole);\n\n    return 0;\n}",
+        "import std::float;\nimport std::io;\n\n// Parse a reading that may be malformed, checking the result first.\nfn main() s32 @public {\n    var result := float::parseF64(\"2.5\");\n\n    if !(result->ok) {\n        io::print(\"could not parse\\n\");\n        return 0;\n    }\n\n    io::print(\"value: %d\\n\", (result->value as s32));\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "Check the success flag before reading the value.",
+        "Parsing follows the platform floating-point rules for the target."
+      ]
+    },
+    "random": {
+      "title": "std::random",
+      "summary": "Random numbers and buffer filling.",
+      "source": "random.thrust",
+      "overview": [
+        "std::random produces pseudo-random unsigned integers and fills buffers with random bytes.",
+        "randomU64 and randomUsize return a random value, fillRandomBytes fills a buffer, and seedRandom seeds the generator."
+      ],
+      "details": [
+        "randomU64 and randomUsize return unsigned pseudo-random values; fillRandomBytes fills a buffer in place.",
+        "Call seedRandom before generating values if reproducible output is required."
+      ],
+      "examples": [
+        "import std::random;\nimport std::io;\n\n// Roll a six-sided die using the low bits of a random number.\nfn main() s32 @public {\n    var roll: u64 = random::randomU64();\n\n    io::print(\"die face: %d\\n\", ((roll % 6) as s32) + 1);\n\n    return 0;\n}",
+        "import std::random;\nimport std::io;\n\n// Fill a buffer with random bytes, for example to build a token.\nfn main() s32 @public {\n    var token: array[u8; 4];\n\n    random::seedRandom(123456);\n    random::fillRandomBytes((ref token) as ptr, 4);\n\n    io::print(\"token ready\\n\");\n\n    return 0;\n}",
+        "import std::random;\nimport std::io;\n\n// Reuse a seed to reproduce the same random sequence.\nfn main() s32 @public {\n    random::seedRandom(999);\n    var first: u64 = random::randomU64();\n\n    random::seedRandom(999);\n    var second: u64 = random::randomU64();\n\n    if first == second {\n        io::print(\"sequence reproduced\\n\");\n    }\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "This is not a cryptographic source of randomness.",
+        "Seed the generator when reproducible output is required."
+      ]
+    },
+    "collections/stack": {
+      "title": "std::collections::stack",
+      "summary": "Last-in first-out container.",
+      "source": "collections/stack.thrust",
+      "overview": [
+        "std::collections::stack is a generic LIFO container backed by contiguous storage.",
+        "push adds to the top, pop removes from the top, and peek reads the top without removing it. dropStack releases the storage."
+      ],
+      "details": [
+        "push adds an element to the top; pop removes and returns the top element; peek reads it without removal.",
+        "Call dropStack when the stack is no longer needed to release the backing storage."
+      ],
+      "examples": [
+        "import std::collections::stack;\nimport std::io;\n\n// Peek at the most recent action in an undo stack.\nfn main() s32 @public {\n    var undo := stack::newStack[s32]();\n\n    stack::push[s32](ref undo, 5);\n    stack::push[s32](ref undo, 6);\n\n    var top: s32 = stack::peek[s32](ref undo);\n\n    io::print(\"last action: %d\\n\", top);\n\n    stack::dropStack[s32](ref undo);\n\n    return 0;\n}",
+        "import std::collections::stack;\nimport std::io;\n\n// Undo the last action and report what was removed.\nfn main() s32 @public {\n    var undo := stack::newStack[s32]();\n\n    stack::push[s32](ref undo, 5);\n    stack::push[s32](ref undo, 6);\n\n    var removed: s32 = stack::pop[s32](ref undo);\n\n    io::print(\"removed: %d\\n\", removed);\n\n    stack::dropStack[s32](ref undo);\n\n    return 0;\n}",
+        "import std::collections::stack;\nimport std::io;\n\n// Report how many actions are pending before clearing the stack.\nfn main() s32 @public {\n    var undo := stack::newStack[s32]();\n\n    stack::push[s32](ref undo, 1);\n\n    io::print(\"pending: %d\\n\", stack::getLength[s32](ref undo));\n\n    stack::dropStack[s32](ref undo);\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "peek and pop require a non-empty stack.",
+        "Reserve capacity when the maximum size is known."
+      ]
+    },
+    "collections/queue": {
+      "title": "std::collections::queue",
+      "summary": "First-in first-out container.",
+      "source": "collections/queue.thrust",
+      "overview": [
+        "std::collections::queue is a generic FIFO container. enqueue adds at the back, dequeue removes from the front, and front or back read the ends without removing.",
+        "dropQueue releases the storage when the container is no longer needed."
+      ],
+      "details": [
+        "enqueue adds at the back; dequeue removes from the front; front and back read the ends without removal.",
+        "Call dropQueue when the container is no longer needed to release the backing storage."
+      ],
+      "examples": [
+        "import std::collections::queue;\nimport std::io;\n\n// Process print jobs in the order they arrived.\nfn main() s32 @public {\n    var jobs := queue::newQueue[s32]();\n\n    queue::enqueue[s32](ref jobs, 10);\n    queue::enqueue[s32](ref jobs, 20);\n\n    var job: s32 = queue::dequeue[s32](ref jobs);\n\n    io::print(\"processing job: %d\\n\", job);\n\n    queue::dropQueue[s32](ref jobs);\n\n    return 0;\n}",
+        "import std::collections::queue;\nimport std::io;\n\n// Inspect the next job and the last one queued.\nfn main() s32 @public {\n    var jobs := queue::newQueue[s32]();\n\n    queue::enqueue[s32](ref jobs, 10);\n    queue::enqueue[s32](ref jobs, 20);\n\n    io::print(\"next: %d, last: %d\\n\", queue::front[s32](ref jobs), queue::back[s32](ref jobs));\n\n    queue::dropQueue[s32](ref jobs);\n\n    return 0;\n}",
+        "import std::collections::queue;\nimport std::io;\n\n// Drain the queue, handling each job in turn.\nfn main() s32 @public {\n    var jobs := queue::newQueue[s32]();\n\n    queue::enqueue[s32](ref jobs, 1);\n    queue::enqueue[s32](ref jobs, 2);\n\n    while !queue::isEmpty[s32](ref jobs) {\n        var job: s32 = queue::dequeue[s32](ref jobs);\n        io::print(\"processing: %d\\n\", job);\n    }\n\n    queue::dropQueue[s32](ref jobs);\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "dequeue requires a non-empty queue.",
+        "front and back read without removing the element."
+      ]
+    },
+    "collections/vecdeque": {
+      "title": "std::collections::vecdeque",
+      "summary": "Double-ended queue with push and pop on both ends.",
+      "source": "collections/vecdeque.thrust",
+      "overview": [
+        "std::collections::vecdeque is a generic double-ended queue. It supports push and pop on both the front and the back.",
+        "pushFront, pushBack, popFront, and popBack operate on the ends; dropVecDeque releases the storage."
+      ],
+      "details": [
+        "Operations are available on both ends: pushFront, pushBack, popFront, and popBack.",
+        "Call dropVecDeque when the container is no longer needed to release the backing storage."
+      ],
+      "examples": [
+        "import std::collections::vecdeque;\nimport std::io;\n\n// Keep a sliding window of recent events.\nfn main() s32 @public {\n    var recent := vecdeque::newVecDeque[s32]();\n\n    vecdeque::pushBack[s32](ref recent, 1);\n    vecdeque::pushBack[s32](ref recent, 2);\n    vecdeque::pushFront[s32](ref recent, 3);\n\n    var oldest: s32 = vecdeque::popFront[s32](ref recent);\n\n    io::print(\"oldest event: %d\\n\", oldest);\n\n    vecdeque::dropVecDeque[s32](ref recent);\n\n    return 0;\n}",
+        "import std::collections::vecdeque;\nimport std::io;\n\n// Read an event by its position in the window.\nfn main() s32 @public {\n    var recent := vecdeque::newVecDeque[s32]();\n\n    vecdeque::pushBack[s32](ref recent, 1);\n    vecdeque::pushBack[s32](ref recent, 2);\n    vecdeque::pushFront[s32](ref recent, 3);\n\n    io::print(\"middle event: %d\\n\", vecdeque::at[s32](ref recent, 1));\n\n    vecdeque::dropVecDeque[s32](ref recent);\n\n    return 0;\n}",
+        "import std::collections::vecdeque;\nimport std::io;\n\n// Inspect both ends of the window.\nfn main() s32 @public {\n    var recent := vecdeque::newVecDeque[s32]();\n\n    vecdeque::pushBack[s32](ref recent, 7);\n    vecdeque::pushBack[s32](ref recent, 8);\n\n    io::print(\"front: %d, back: %d\\n\", vecdeque::front[s32](ref recent), vecdeque::popBack[s32](ref recent));\n\n    vecdeque::dropVecDeque[s32](ref recent);\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "popFront and popBack require a non-empty deque.",
+        "Use this when you need efficient insertion and removal at both ends."
+      ]
+    },
+    "collections/hashmap": {
+      "title": "std::collections::hashmap",
+      "summary": "Hash map from keys to values.",
+      "source": "collections/hashmap.thrust",
+      "overview": [
+        "std::collections::hashmap maps keys to values with insert, get, and remove.",
+        "get returns a pointer to the value or nullptr when the key is absent. insert returns true when the key was new. dropHashMap releases the storage."
+      ],
+      "details": [
+        "get returns a pointer to the value or nullptr when the key is absent, so callers can test before dereferencing.",
+        "insert returns true when the key was new; dropHashMap releases the storage when the map is no longer needed."
+      ],
+      "examples": [
+        "import std::collections::hashmap;\nimport std::io;\n\n// A small scoreboard keyed by player id.\nfn main() s32 @public {\n    var scores := hashmap::newHashMap[s32, s32]();\n\n    var player1: s32 = 1;\n    var player2: s32 = 2;\n\n    hashmap::insert[s32, s32](ref scores, ref player1, 100);\n    hashmap::insert[s32, s32](ref scores, ref player2, 200);\n\n    var found: ptr[s32] = hashmap::get[s32, s32](ref scores, ref player1);\n\n    if found != nullptr {\n        io::print(\"player 1 score: %d\\n\", (deref found));\n    }\n\n    hashmap::dropHashMap[s32, s32](ref scores);\n\n    return 0;\n}",
+        "import std::collections::hashmap;\nimport std::io;\n\n// Track how many times each page id was visited, then tidy up.\nfn main() s32 @public {\n    var visits := hashmap::newHashMap[s32, s32]();\n\n    var home: s32 = 1;\n    var about: s32 = 2;\n\n    hashmap::insert[s32, s32](ref visits, ref home, 10);\n    hashmap::insert[s32, s32](ref visits, ref about, 20);\n\n    if hashmap::containsKey[s32, s32](ref visits, ref home) {\n        io::print(\"home was visited\\n\");\n    }\n\n    hashmap::remove[s32, s32](ref visits, ref home);\n    hashmap::clear[s32, s32](ref visits);\n\n    hashmap::dropHashMap[s32, s32](ref visits);\n\n    return 0;\n}",
+        "import std::collections::hashmap;\nimport std::io;\n\n// A registry of commands indexed by their name.\nfn main() s32 @public {\n    var commands := hashmap::newHashMap[CString, s32]();\n\n    var run := \"run\";\n    var build := \"build\";\n\n    hashmap::insert[CString, s32](ref commands, run as ptr, 42);\n    hashmap::insert[CString, s32](ref commands, build as ptr, 42);\n\n    var found: ptr[s32] = hashmap::get[CString, s32](ref commands, run as ptr);\n\n    if found != nullptr {\n        io::print(\"command found\\n\");\n    }\n\n    hashmap::dropHashMap[CString, s32](ref commands);\n\n    return 0;\n}",
+        "import std::tstring;\nimport std::collections::hashmap;\nimport std::io;\n\n// A translation table keyed by message id, using owned strings as keys.\nfn main() s32 @public {\n    var translations := hashmap::newHashMap[tstring::TString, s32]();\n\n    var hello := tstring::fromCString(\"hello\");\n    var lookup := tstring::fromCString(\"hello\");\n\n    hashmap::insert[tstring::TString, s32](ref translations, (ref hello) as ptr, 11);\n    hashmap::insert[tstring::TString, s32](ref translations, (ref lookup) as ptr, 33);\n\n    var found: ptr[s32] = hashmap::get[tstring::TString, s32](ref translations, (ref lookup) as ptr);\n\n    if found != nullptr {\n        io::print(\"translation present\\n\");\n    }\n\n    hashmap::dropHashMap[tstring::TString, s32](ref translations);\n    tstring::dropTString(ref hello);\n    tstring::dropTString(ref lookup);\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "get returns a borrowed pointer; do not use it after the map is destroyed or rehashed.",
+        "Check the returned pointer for nullptr before dereferencing."
+      ]
+    },
+    "collections/hashset": {
+      "title": "std::collections::hashset",
+      "summary": "Hash set of keys.",
+      "source": "collections/hashset.thrust",
+      "overview": [
+        "std::collections::hashset stores a set of unique keys with insert, contains, and remove.",
+        "insert returns true when the key was new; dropHashSet releases the storage."
+      ],
+      "details": [
+        "insert returns true when the key was new; contains reports presence; remove deletes a key.",
+        "Call dropHashSet when the set is no longer needed to release the backing storage."
+      ],
+      "examples": [
+        "import std::collections::hashset;\nimport std::io;\n\n// Keep track of which feature flags are enabled.\nfn main() s32 @public {\n    var enabled := hashset::newHashSet[s32]();\n\n    var flagA: s32 = 7;\n\n    hashset::insert[s32](ref enabled, ref flagA);\n\n    if hashset::contains[s32](ref enabled, ref flagA) {\n        io::print(\"flag A is enabled\\n\");\n    }\n\n    hashset::dropHashSet[s32](ref enabled);\n\n    return 0;\n}",
+        "import std::collections::hashset;\nimport std::io;\n\n// Revoke a guest tag from the allowed set and report what remains.\nfn main() s32 @public {\n    var tags := hashset::newHashSet[s32]();\n\n    var admin: s32 = 1;\n    var guest: s32 = 2;\n\n    hashset::insert[s32](ref tags, ref admin);\n    hashset::insert[s32](ref tags, ref guest);\n\n    hashset::remove[s32](ref tags, ref guest);\n\n    io::print(\"remaining tags: %d\\n\", hashset::getLength[s32](ref tags));\n\n    hashset::dropHashSet[s32](ref tags);\n\n    return 0;\n}",
+        "import std::collections::hashset;\nimport std::io;\n\n// Pre-size a set of known VIP ids, then check membership.\nfn main() s32 @public {\n    var vips := hashset::withCapacity[s32](8);\n\n    var id: s32 = 5;\n\n    hashset::insert[s32](ref vips, ref id);\n\n    if hashset::contains[s32](ref vips, ref id) {\n        io::print(\"welcome, VIP\\n\");\n    }\n\n    hashset::dropHashSet[s32](ref vips);\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "contains reports presence without removing the key.",
+        "insert returns true only for newly added keys."
+      ]
+    },
+    "intrinsics/int": {
+      "title": "std::intrinsics::int",
+      "summary": "Integer intrinsics: overflow checks, saturation, and bit operations.",
+      "source": "intrinsics/int.thrust",
+      "overview": [
+        "std::intrinsics::int exposes low-level integer operations through intrinsic bindings: overflow-checked arithmetic, saturating arithmetic, and bit manipulations.",
+        "Use these when you need defined overflow behavior or direct bit operations not covered by the normal operators."
+      ],
+      "details": [
+        "Overflow-checked and saturating arithmetic return a result struct with a value and an overflow flag.",
+        "Bit manipulation intrinsics map directly to LLVM instructions, so their behavior matches the target platform."
+      ],
+      "examples": [
+        "import std::intrinsics::int;\nimport std::io;\n\n// Add two counters without overflowing past the type maximum.\nfn main() s32 @public {\n    var total: s32 = int::saturatingAdd[s32](2147483640, 100);\n\n    io::print(\"total: %d\\n\", total);\n\n    return 0;\n}",
+        "import std::intrinsics::int;\nimport std::io;\n\n// Choose the larger of two sensor readings.\nfn main() s32 @public {\n    var high: s32 = int::max[s32](-3, 7);\n\n    io::print(\"high reading: %d\\n\", high);\n\n    return 0;\n}",
+        "import std::intrinsics::int;\nimport std::io;\n\n// Turn a signed difference into a magnitude.\nfn main() s32 @public {\n    var magnitude: s32 = int::absolute[s32](-12);\n\n    io::print(\"magnitude: %d\\n\", magnitude);\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "These are primitive building blocks; wrap them in checked helpers for normal code.",
+        "Behavior follows the underlying platform integer instructions."
+      ]
+    },
+    "intrinsics/float": {
+      "title": "std::intrinsics::float",
+      "summary": "Floating-point intrinsics: abs, min, max, sqrt, fused multiply-add.",
+      "source": "intrinsics/float.thrust",
+      "overview": [
+        "std::intrinsics::float exposes low-level floating-point operations through intrinsic bindings: absolute value, minimum, maximum, square root, and fused multiply-add.",
+        "Use these when you need precise control over floating-point behavior."
+      ],
+      "details": [
+        "These intrinsics wrap LLVM floating-point operations such as abs, min, max, sqrt, and fma.",
+        "Use them when the normal operators do not expose the exact operation or rounding you need."
+      ],
+      "examples": [
+        "import std::intrinsics::float;\nimport std::io;\n\n// Compute the diagonal of a square with side 3.\nfn main() s32 @public {\n    var diagonal: f64 = float::squareRoot[f64](18.0);\n\n    io::print(\"diagonal: %d\\n\", (diagonal as s32));\n\n    return 0;\n}",
+        "import std::intrinsics::float;\nimport std::io;\n\n// Round a measurement down to whole units.\nfn main() s32 @public {\n    var whole: f64 = float::floor[f64](2.7);\n\n    io::print(\"whole units: %d\\n\", (whole as s32));\n\n    return 0;\n}",
+        "import std::intrinsics::float;\nimport std::io;\n\n// Evaluate a*x + b as a single fused operation.\nfn main() s32 @public {\n    var y: f64 = float::fusedMultiplyAdd[f64](2.0, 3.0, 1.0);\n\n    io::print(\"y: %d\\n\", (y as s32));\n\n    return 0;\n}"
+      ],
+      "notes": [
+        "These map closely to LLVM floating-point intrinsics.",
+        "Wrap them in helpers when used across many call sites."
+      ]
+    },
+    "ffi/c/env": {
+      "title": "std::ffi::c::env",
+      "summary": "Raw C bindings for environment access.",
+      "source": "ffi/c/env.thrust",
+      "overview": [
+        "std::ffi::c::env exposes C environment functions such as getenv, setenv, unsetenv, and clearenv.",
+        "Prefer std::env for application code; use this layer when you need the raw C symbols directly."
+      ],
+      "details": [
+        "These functions call directly into the platform C library environment helpers.",
+        "Prefer std::env unless you specifically need the raw C symbols."
+      ],
+      "notes": [
+        "These follow the behavior of the C library on the target platform.",
+        "Calling setenv or unsetenv changes process-wide state."
+      ]
+    },
+    "ffi/c/int": {
+      "title": "std::ffi::c::int",
+      "summary": "Raw C bindings for integer text conversion.",
+      "source": "ffi/c/int.thrust",
+      "overview": [
+        "std::ffi::c::int exposes C conversion functions such as atoi, strtol, strtoll, strtoul, and strtoull.",
+        "These return raw C results; check the end pointer or errno when conversion can fail."
+      ],
+      "details": [
+        "The conversion functions return raw C results and may set errno on failure.",
+        "Check the end pointer or errno when a conversion can fail."
+      ],
+      "notes": [
+        "Prefer std::int for safer parsing with result structs.",
+        "Follow the C semantics for overflow and invalid input."
+      ]
+    },
+    "ffi/c/float": {
+      "title": "std::ffi::c::float",
+      "summary": "Raw C bindings for floating-point text conversion.",
+      "source": "ffi/c/float.thrust",
+      "overview": [
+        "std::ffi::c::float exposes C conversion functions such as atof, strtof, strtod, and strtold.",
+        "These return raw C results; check the end pointer or errno when conversion can fail."
+      ],
+      "details": [
+        "The conversion functions return raw C results and may set errno on failure.",
+        "Check the end pointer or errno when a conversion can fail."
+      ],
+      "notes": [
+        "Prefer std::float for safer parsing with result structs.",
+        "Follow the C semantics for overflow and invalid input."
+      ]
+    },
+    "ffi/c/random": {
+      "title": "std::ffi::c::random",
+      "summary": "Raw C bindings for time and random numbers.",
+      "source": "ffi/c/random.thrust",
+      "overview": [
+        "std::ffi::c::random exposes C functions such as time, clock, rand, and srand.",
+        "These call directly into the platform C library."
+      ],
+      "details": [
+        "These functions call directly into the platform C library.",
+        "Prefer std::random for application code unless you need the raw C symbols."
+      ],
+      "notes": [
+        "This is the raw C layer; std::random offers a higher-level interface.",
+        "rand is not cryptographic and follows the C library behavior."
+      ]
+    }
+  },
+  "language-reference": {
+    "types": {
+      "title": "Types",
+      "summary": "Primitive and built-in type forms used by Thrust.",
+      "source": "syntax/types/",
+      "overview": [
+        "Thrust types are written explicitly. Integers, floats, pointers, arrays, function references, and void all appear directly in source code.",
+        "This makes declarations easy to read. When a function takes u32, ptr[s32], or array[char; 64], the size and shape of the value are visible at the call boundary.",
+        "Use concrete types in public APIs unless there is a clear reason to introduce a type alias or a generic parameter."
+      ],
+      "semantics": [
+        "Fixed-width integers are best for public APIs and binary formats because their size is part of the name.",
+        "Pointers and arrays mean different things. A pointer refers to memory elsewhere, while an array type describes a sequence of elements."
+      ],
+      "guidance": [
+        "Prefer explicit widths like `u32` or `s64` when size matters.",
+        "Represent fixed-size protocol data with arrays, not dynamic buffers.",
+        "Use aliases when a plain type needs a clearer name."
+      ],
+      "reference_sections": [
+        {
+          "title": "Scalar Types",
+          "intro": "Scalar values are stored directly and are usually passed by value.",
+          "items": [
+            "Signed integers use the s prefix, such as s8, s16, s32, and s64. Use them when negative values are part of the domain.",
+            "Unsigned integers use the u prefix, such as u8, u16, u32, and u64. Use them for sizes, bit masks, and values that cannot be negative.",
+            "Floating-point values use f32 or f64 in normal code. Wider or target-specific forms include f80, f128, and fppc_128 (IBM PowerPC 128-bit).",
+            "bool represents true or false values. Keep boolean names descriptive because the type alone does not explain the condition.",
+            "char stores a byte-sized character value. Strings and UTF-8 data should still be treated as byte sequences unless a helper decodes code points."
+          ]
+        },
+        {
+          "title": "Pointer and Array Types",
+          "intro": "Pointer and array syntax makes memory shape visible at the use site.",
+          "items": [
+            "ptr[T] points to a value of type T. The pointer may still be null or invalid, so code must check the value before dereferencing when the source is not trusted.",
+            "ptr[T, N] points to a value of type T in address space N.",
+            "ptr without a subtype is a raw pointer. Use it at FFI or allocator boundaries and cast back to a concrete pointer before reading typed values.",
+            "array[T] describes a dynamic array form. Its length is not part of the type.",
+            "array[T; N] describes a fixed-size array. The element count is part of the type and can be used by compile-time layout checks.",
+            "CString is the builtin alias used for null-terminated character arrays passed to C-style APIs.",
+            "Fn[param, ...] -> ret describes a function reference type. Use @arbitraryArgs to mark it variadic."
+          ]
+        },
+        {
+          "title": "Aliases and Layout",
+          "intro": "Aliases and layout builtins help keep public declarations readable without hiding representation.",
+          "items": [
+            "type aliases give a name to an existing type. They do not create a separate runtime representation.",
+            "sizeOf, alignOf, and typeWidth report layout information known to the compiler. Use them for constants and static checks instead of repeating numeric assumptions.",
+            "ABI-oriented builtins such as abiSizeOf and abiAlignOf describe the representation required by the target ABI. Use them when interfacing with external code."
+          ]
+        }
+      ],
+      "signatures": "var signed: s32 = -1;\nvar unsigned: u64 = 1;\nvar decimal: f64 = 3.14;\nvar bufferPtr: ptr[u8] = nullptr;\nvar dynamic: array[s32] = [1, 2, 3];\nvar fixedValues: array[u16; 4] = fixed[0, 1, 2, 3];",
+      "example": "fn main() s32 @public {\n    var values: array[s32; 3] = fixed[2, 4, 6];\n\n    var sum: s32 =\n        (deref values[0]) +\n        (deref values[1]) +\n        (deref values[2]);\n\n    return sum;\n}"
+    },
+    "variables": {
+      "title": "Variables",
+      "summary": "Declaration and mutation patterns for local and static storage.",
+      "source": "syntax/variables/",
+      "overview": [
+        "Local variables are declared with var. You can write the type yourself or use := when the compiler can infer it from the initializer.",
+        "Static declarations store values for the lifetime of the program. They can also be marked public or bound to external names when needed.",
+        "Keep mutable variables close to the code that uses them. This makes loops and branches easier to follow."
+      ],
+      "semantics": [
+        "Assignments change the current value of a variable. In longer functions, avoid spreading related assignments far apart.",
+        "Be careful with mutable static state. It is shared program state, so updates should happen through clear code paths."
+      ],
+      "guidance": [
+        "Prefer block-local variables over function-wide mutable state.",
+        "Reset temporary state explicitly between loop iterations when needed.",
+        "Keep static mutable variables behind dedicated API functions."
+      ],
+      "reference_sections": [
+        {
+          "title": "Local Declarations",
+          "intro": "Local variables live inside the block where they are declared.",
+          "items": [
+            "var name: Type = value declares a local with an explicit type.",
+            ":= asks the compiler to infer the type from the initializer. Use it when the initializer already makes the type obvious.",
+            "A local declared in an inner block is not available after that block ends.",
+            "Mutation is explicit through assignment and compound assignment operators. Keep related mutations close together."
+          ]
+        },
+        {
+          "title": "Static Storage",
+          "intro": "Static declarations describe storage that exists for the lifetime of the program.",
+          "items": [
+            "static values are module-level storage. They are useful for exported symbols, shared state, and data that must have a stable address.",
+            "static mut allows mutation of static storage. Treat it as shared state and keep writes in a small API.",
+            "@public exports a static symbol. @extern binds it to an external symbol name."
+          ]
+        }
+      ],
+      "signatures": "var counter: s32 = 0;\ncounter = counter + 1;\nstatic mut depth: u16 @public @extern(\"depth\") = 3;",
+      "example": "fn main() s32 @public {\n    var i: s32 = 0;\n    var total: s32 = 0;\n\n    while i < 10 {\n        total += i;\n        i++;\n    }\n\n    return total;\n}"
+    },
+    "constants": {
+      "title": "Constants",
+      "summary": "Compile-time values that cannot be reassigned.",
+      "source": "syntax/constants/",
+      "overview": [
+        "Constants define values known at compile time. They are useful for sizes, flags, protocol values, and other numbers that should not be repeated throughout the code.",
+        "Constants can be built from compile-time helpers such as sizeOf and alignOf. That keeps layout-related values tied to the type they describe.",
+        "Use constants when the value is part of the program definition, not something that changes at runtime."
+      ],
+      "semantics": [
+        "A constant cannot be reassigned. The compiler can use the value directly wherever the constant is referenced.",
+        "Keep constants near the code or module they describe. Very large global constant files are harder to maintain."
+      ],
+      "guidance": [
+        "Define capacities once and reuse them across modules.",
+        "Use constants to derive array sizes and static checks.",
+        "Name constants after what they mean, not just after their type."
+      ],
+      "reference_sections": [
+        {
+          "title": "Compile-Time Values",
+          "intro": "Constants are resolved while the program is compiled.",
+          "items": [
+            "const name: Type = value declares a value that cannot be reassigned.",
+            "A constant expression can include literals and compile-time builtins such as sizeOf, alignOf, and pointerWidth.",
+            "Use constants for protocol values, flags, array sizes, ABI checks, and limits that are part of the program definition."
+          ]
+        },
+        {
+          "title": "Constants Versus Variables",
+          "intro": "Use constants when the value is a rule, not state.",
+          "items": [
+            "A variable stores runtime state and can change as the function executes.",
+            "A constant documents a fixed decision and lets the compiler reuse that value directly.",
+            "If a value depends on input, file contents, allocation, or an external call, it belongs in runtime code instead of a const declaration."
+          ]
+        }
+      ],
+      "signatures": "const U32_SIZE: usize = sizeOf(u32);\nconst F64_ALIGN: u32 = alignOf(f64);\nconst READY: bool = true;",
+      "example": "const BUFFER_CAPACITY: usize = 1024;\n\nfn capacity() usize @public {\n    return BUFFER_CAPACITY;\n}"
+    },
+    "functions": {
+      "title": "Functions",
+      "summary": "Function declarations, arguments, return types, and visibility.",
+      "source": "syntax/function/function.md",
+      "overview": [
+        "Functions declare their parameters and return type in the signature. If no return type is written, the function returns void.",
+        "Attributes can be placed after the signature to export the function, bind it to an external symbol, or set a calling convention.",
+        "Write small functions with clear inputs and clear return behavior. This is especially important when a function owns memory or reports errors through status codes."
+      ],
+      "semantics": [
+        "Use the return type to make the result clear. If a function can fail, choose a status code, nullable pointer, or another convention and use it consistently.",
+        "Put calling and linking attributes on functions that connect to outside code. Keep internal helpers simple."
+      ],
+      "guidance": [
+        "Keep function bodies small and move complexity into helpers.",
+        "Document important input rules near the function declaration.",
+        "Keep exported functions focused on one job."
+      ],
+      "reference_sections": [
+        {
+          "title": "Signature Parts",
+          "intro": "A function signature states the name, parameters, return type, and optional attributes.",
+          "items": [
+            "Parameters are written as name: Type and are checked at call sites.",
+            "The return type follows the parameter list. If omitted, the function returns void.",
+            "@public exports the function. @extern and @convention describe how the function connects to external symbols.",
+            "Named arguments can make call sites clearer when several parameters have the same type."
+          ]
+        },
+        {
+          "title": "Return and Ownership Conventions",
+          "intro": "The signature should make error and ownership behavior predictable.",
+          "items": [
+            "Use status-code returns when a function can fail but does not produce a value.",
+            "Use nullptr or another documented sentinel when returning a pointer that may be absent.",
+            "If a function returns owned memory, document which function releases it and keep that convention consistent."
+          ]
+        }
+      ],
+      "signatures": "fn sum(a: s32, b: s32) s32 @public {\n    return a + b;\n}\n\nfn main() s32 @public {\n    return sum(2, 3);\n}",
+      "example": "fn clamp(x: s32, low: s32, high: s32) s32 @public {\n    if x < low {\n        return low;\n    }\n    if x > high {\n        return high;\n    }\n    return x;\n}"
+    },
+    "generics": {
+      "title": "Generics",
+      "summary": "Compile-time generic templates for functions and structures.",
+      "source": "syntax/generics/generics.md",
+      "overview": [
+        "Generics let one function or struct work with more than one type. The compiler creates concrete versions from the types used at call sites.",
+        "Type arguments are written in square brackets, such as add[s32](1, 2) or Vector[u8]. This keeps the chosen type visible.",
+        "Use generics for repeated patterns like containers or small helpers. Avoid using them when a concrete type would be clearer."
+      ],
+      "semantics": [
+        "A generic instantiation behaves like ordinary concrete code after compilation.",
+        "Generic functions should make their assumptions obvious from the operations they use on T."
+      ],
+      "guidance": [
+        "Write type arguments explicitly where it helps readers understand the call.",
+        "Use generics for repeated patterns, not to hide unrelated behavior.",
+        "Be clear about who owns memory in generic containers."
+      ],
+      "reference_sections": [
+        {
+          "title": "Instantiation",
+          "intro": "Generic code is turned into concrete code for the types used by the program.",
+          "items": [
+            "Function type arguments are written after the function name, for example add[s32](1, 2).",
+            "Struct type arguments are written after the struct name, for example Vector[u8].",
+            "Once instantiated, generic code follows the same type-checking and code generation rules as non-generic code."
+          ]
+        },
+        {
+          "title": "Constraints by Use",
+          "intro": "Current generic assumptions are expressed by the operations used inside the generic body.",
+          "items": [
+            "If a generic function adds two values, each concrete T must support that operation.",
+            "If a generic container stores pointers or owns memory, document ownership at the API boundary.",
+            "Prefer concrete types when only one type is expected. Generics should remove duplication, not hide intent."
+          ]
+        }
+      ],
+      "signatures": "fn add[T](a: T, b: T) T @public {\n    return a + b;\n}\n\nstruct Vector[T] @public {\n    data: ptr[T],\n    length: usize,\n    capacity: usize,\n}",
+      "example": "fn main() s32 @public {\n    var value: s32 = add[s32](20, 22);\n\n    var vec := new Vector[s32] {\n        data: nullptr,\n        length: 0,\n        capacity: 0\n    };\n\n    return value + (vec->length as s32);\n}"
+    },
+    "modules": {
+      "title": "Modules",
+      "summary": "Imports, aliases, and selective import scopes.",
+      "source": "syntax/modules/import.md",
+      "overview": [
+        "Modules are brought into a file with import. A file can import a full module, give it an alias, or import only selected names.",
+        "Use selective imports when a file only needs a few symbols. This keeps the dependency list easier to scan.",
+        "Aliases are useful when a module path is long or repeated often."
+      ],
+      "semantics": [
+        "Imports should show what the file actually depends on. Avoid importing large modules when one or two names are enough.",
+        "Use a consistent import style across nearby files so readers do not have to adjust to a new pattern each time."
+      ],
+      "guidance": [
+        "Use `only` imports when a file needs just a few names.",
+        "Use aliases when module paths become repetitive.",
+        "Avoid circular imports by moving shared definitions into smaller files."
+      ],
+      "reference_sections": [
+        {
+          "title": "Import Forms",
+          "intro": "Imports control which external names are available in the current file.",
+          "items": [
+            "import std::io brings a module into scope through its module path.",
+            "import \"file.thrust\" imports a source file by path.",
+            "as gives an imported module or file a shorter local name.",
+            "only limits the import to selected symbols. Use it when a file depends on a small part of another module."
+          ]
+        },
+        {
+          "title": "Name Resolution",
+          "intro": "Qualified names make module boundaries explicit.",
+          "items": [
+            "Use module::symbol when a name comes from an imported module.",
+            "Aliases reduce repeated long paths but should still describe the imported code.",
+            "If two imports expose the same unqualified name, keep the access qualified instead of relying on reader memory."
+          ]
+        }
+      ],
+      "signatures": "import std::io;\nimport std::collections::vector;\nimport \"other.thrust\" as dep;\nimport \"other.thrust\" only { stack, counter };",
+      "example": "import std::io;\n\nfn main() s32 @public {\n    io::print(\"module import works\\n\");\n    return 0;\n}"
+    },
+    "statements": {
+      "title": "Statements",
+      "summary": "Conditional and control statements for runtime execution.",
+      "source": "syntax/statements/",
+      "overview": [
+        "Statements control what a function does step by step. Thrust uses explicit blocks for branches, loops, returns, and control statements.",
+        "Clear blocks make error handling easier to follow. They also make it easier to see where a function exits or changes state.",
+        "Prefer readable control flow over clever shortcuts, especially in code that handles pointers, files, or memory."
+      ],
+      "semantics": [
+        "Use early returns for invalid input or error cases when that makes the main path clearer.",
+        "Avoid deeply nested conditionals when a small helper function would make the branch easier to understand."
+      ],
+      "guidance": [
+        "Return early when input is invalid.",
+        "Keep branch bodies short and focused.",
+        "Use break and continue when they make the loop clearer."
+      ],
+      "reference_sections": [
+        {
+          "title": "Blocks and Branches",
+          "intro": "Statements are grouped with braces so control flow is visible.",
+          "items": [
+            "if and else select runtime paths based on boolean expressions.",
+            "A block creates a nested scope for local declarations.",
+            "return exits the current function. Code after an unconditional terminator is treated as unreachable by later checks."
+          ]
+        },
+        {
+          "title": "Loop Control",
+          "intro": "break and continue only make sense inside loops.",
+          "items": [
+            "break exits the current loop.",
+            "continue skips the rest of the current iteration and proceeds with the next one.",
+            "breakAll and continueAll are broader loop-control forms. Keep them rare and close to the loop logic they affect."
+          ]
+        }
+      ],
+      "signatures": "if ready {\n    return 0;\n} else {\n    return 1;\n}\n\nbreak;\ncontinue;",
+      "example": "fn classify(n: s32) s32 @public {\n    if n < 0 {\n        return -1;\n    }\n    if n == 0 {\n        return 0;\n    }\n    return 1;\n}"
+    },
+    "compile-time-conditionals": {
+      "title": "Compile-Time Conditionals",
+      "summary": "Target-dependent branching using @if, @elif, and @else.",
+      "source": "syntax/statements/compiletime.md",
+      "overview": [
+        "Compile-time conditionals choose code before the program is generated. The inactive branches are not emitted.",
+        "They are useful for platform-specific imports, constants, and declarations.",
+        "Use @if with target builtins such as isUnix, isLinux, or isWindows when a program needs different code for different targets."
+      ],
+      "semantics": [
+        "Only the selected branch is kept. Each branch should still be valid for the target where it can be selected.",
+        "If many files need the same target decision, put that decision in one small module instead of repeating it everywhere."
+      ],
+      "guidance": [
+        "Use compile-time branches when the code really differs by target.",
+        "Keep branch predicates simple and testable.",
+        "Test each target branch so unused code does not go stale."
+      ],
+      "reference_sections": [
+        {
+          "title": "Selection Time",
+          "intro": "Compile-time conditionals are evaluated before code generation.",
+          "items": [
+            "The selected branch remains in the program for that compilation target.",
+            "Inactive branches are not emitted, which allows target-specific declarations and imports.",
+            "Each branch should still be valid for the target where its predicate can become true."
+          ]
+        },
+        {
+          "title": "Predicates",
+          "intro": "Predicates usually come from target and compiler builtins.",
+          "items": [
+            "Use target checks such as isUnix, isLinux, isWindows, isWasm, and pointerWidth for platform-dependent declarations.",
+            "Keep predicates small. Complex target rules are easier to maintain when moved into named constants or helper modules.",
+            "When a branch imports a platform file, test that branch on the matching target so it does not silently become stale."
+          ]
+        }
+      ],
+      "signatures": "@if(isLinux()) const PLATFORM: u32 = 1;\n@elif(isWindows()) const PLATFORM: u32 = 2;\n@else const PLATFORM: u32 = 0;",
+      "example": "@if(isLinux()) const PLATFORM: u32 = 2;\n@elif(isWindows()) const PLATFORM: u32 = 1;\n@else const PLATFORM: u32 = 3;\n\nfn currentPlatform() u32 @public {\n    return PLATFORM;\n}"
+    },
+    "attributes": {
+      "title": "Attributes",
+      "summary": "Declaration modifiers for linkage, calling convention, and compile-time behavior.",
+      "source": "syntax/attributes/attributes.md",
+      "overview": [
+        "Attributes add extra instructions to a declaration. They can make a symbol public, bind it to a C name, change how a function is called, or give the compiler a code generation hint.",
+        "They are written next to the declaration they affect, so the rule is visible where the function, constant, static, struct, or enum is defined.",
+        "Most code only needs a few attributes, usually @public, @extern, @convention, @align, or @packed. Keep experimental attributes in narrow places where their purpose is clear."
+      ],
+      "semantics": [
+        "Attribute order does not change what they mean, but using a consistent order makes declarations easier to read.",
+        "Be careful with @extern and @convention. They describe how Thrust code connects to external symbols, so changing them can break linking or calls into C code."
+      ],
+      "guidance": [
+        "Use @public only for symbols that should be visible outside the module.",
+        "Use @extern and @convention on functions that connect to outside code.",
+        "If an attribute combination is unusual, explain it near the declaration."
+      ],
+      "attribute_catalog": [
+        "@public - exports the declaration with public visibility. Required alongside @extern.",
+        "@extern(\"symbol\") - binds a declaration to an external symbol name.",
+        "@convention(\"name\") - chooses calling convention, for example C, fast, Win64, or X86_64_SysV.",
+        "@linkage(\"kind\") - sets LLVM linkage behavior. Accepted kinds include standard, common, dllimport, dllexport, externweak, weak, internal, linkerprivate, and linkerprivateweak.",
+        "@align(N) - sets explicit alignment in bytes (static/const/local contexts depending on declaration kind).",
+        "@heap - requests heap storage for local declarations.",
+        "@stack - requests stack storage for local declarations.",
+        "@packed - uses packed struct layout with reduced/removed padding.",
+        "@hot - marks a function as frequently executed.",
+        "@minSize - asks the compiler to prefer smaller generated code.",
+        "@inline - inline hint that allows the backend to inline when beneficial.",
+        "@noInline - prevents inlining of the function.",
+        "@alwaysInline - requests mandatory inlining at call sites.",
+        "@safeStack - recognized by the lexer, but the current attribute checker does not accept it on functions.",
+        "@weakStack - enables lighter stack protection mode.",
+        "@strongStack - enables stronger stack protection mode.",
+        "@preciseFloatingPoint - preserves strict floating-point behavior where supported.",
+        "@noUnwind - marks function as non-unwinding.",
+        "@noReturn - marks a function as non-returning. The compiler enforces a void return type and a terminating body.",
+        "@optFuzzing - marks a function for fuzzing-related compiler behavior.",
+        "@pure - recognized by the lexer, but the current attribute checker does not accept it on functions.",
+        "@thunk - marks function as thunk/trampoline style entry.",
+        "@constructor - runs at load/init stage and must be public.",
+        "@destructor - runs at unload/finalization stage and must be public.",
+        "@cuda - marks a function for a CUDA-oriented code generation path.",
+        "@asmSyntax(\"Intel\"|\"AT&T\") - selects assembler syntax for asm functions (unstable).",
+        "@asmAlignStack - requests stack alignment for assembler function contexts (unstable).",
+        "@asmEffects - declares that assembler block has side effects (unstable).",
+        "@asmThrow - enables assembler error propagation behavior (unstable).",
+        "@promote(T1 -> T2, ...) - configures promotion map between types (unstable).",
+        "@arbitraryArgs - marks a function as variadic in user-facing syntax.",
+        "@if / @elif / @else - compile-time conditional directives (attribute-like syntax, handled in statement processing)."
+      ],
+      "applicability_notes": [
+        "For functions, the compiler accepts attributes for visibility, linking, calling convention, inlining, stack behavior, floating-point behavior, constructors, destructors, cuda, and promote.",
+        "Assembler functions also accept asm-specific attributes such as @asmSyntax, @asmAlignStack, @asmEffects, and @asmThrow.",
+        "Static and const declarations accept a narrower set: @public, @extern, @linkage, and @align.",
+        "Struct declarations accept @public and @packed. Enum declarations accept @public. Local declarations accept @heap and @align."
+      ],
+      "reference_sections": [
+        {
+          "title": "Linkage and Visibility",
+          "intro": "Visibility attributes decide whether a symbol remains internal or is visible outside the module.",
+          "items": [
+            "@public exports a declaration through the generated object file.",
+            "@extern binds a declaration to a symbol name that exists outside the normal Thrust name mangling path.",
+            "@linkage selects the LLVM linkage mode. Use non-standard linkage only when object-file or platform behavior requires it."
+          ]
+        },
+        {
+          "title": "Calling and Code Generation",
+          "intro": "Some attributes affect how a function is called or emitted by the backend.",
+          "items": [
+            "@convention selects the calling convention. It must match the caller and callee across FFI boundaries.",
+            "Inlining and size attributes are backend hints or requirements. They should describe a specific need, not be applied everywhere.",
+            "@constructor and @destructor create load and unload hooks. Keep their bodies small and avoid hidden dependencies between them."
+          ]
+        },
+        {
+          "title": "Layout and Storage",
+          "intro": "Layout attributes should be tied to the data format or ABI that requires them.",
+          "items": [
+            "@align(N) sets an explicit byte alignment where the declaration kind accepts it.",
+            "@packed changes struct padding. It can make field access less natural for the target, so use it for external layouts rather than normal data.",
+            "@heap requests heap storage for local declarations that need it. Keep ownership and destruction rules visible near the allocation."
+          ]
+        }
+      ],
+      "signatures": "fn printf(fmt: const array[char]) s32\n    @public\n    @arbitraryArgs\n    @extern(\"printf\")\n    @convention(\"C\");\n\n@if(isLinux()) const PLATFORM: u32 = 2;",
+      "example": [
+        "fn c_puts(text: CString) s32\n    @public\n    @extern(\"puts\")\n    @convention(\"C\");",
+        "fn exported_add(a: s32, b: s32) s32\n    @public\n    @convention(\"C\") {\n    return a + b;\n}"
+      ]
+    },
+    "builtins": {
+      "title": "Builtins",
+      "summary": "Compiler-provided functions, low-level memory and ABI operations, and builtin types for type, target, host, and compile-time work.",
+      "source": "syntax/builtins/README.md",
+      "overview": [
+        "Builtins are compiler-provided functions and reserved operations. Some return information about types, some return information about the target or host, and some help validate assumptions while compiling.",
+        "They are often used in constants and static checks. For example, sizeOf(u32) can define a constant, staticAssert can stop compilation if an assumption is wrong, and target builtins can select one branch over another before code generation.",
+        "Use builtins when the value belongs to the compiler, the ABI, the target machine, or low-level memory operations rather than to ordinary runtime program state."
+      ],
+      "semantics": [
+        "Compile-time builtins are evaluated while the compiler processes the program, and memory and ABI builtins lower directly to low-level memory operations, ABI queries, or compiler-managed variadic argument access.",
+        "When staticAssert or compileError fails, compilation stops immediately. Warnings produced by compileWarning continue compilation but still affect diagnostics output."
+      ],
+      "guidance": [
+        "Use staticAssert for layout and target assumptions.",
+        "Store builtin results in named constants when they are reused.",
+        "Prefer the highest-level builtin that states your intent clearly, then drop to memory and ABI builtins only when you really need raw memory behavior or ABI-level access.",
+        "Write staticAssert messages that clearly say what failed."
+      ],
+      "reference_sections": [
+        {
+          "title": "Type Layout Builtins",
+          "intro": "These builtins describe the size and layout of a type as the compiler sees it.",
+          "items": [
+            "sizeOf(Type) - returns the size of a type in bytes as usize.",
+            "alignOf(Type) - returns the memory alignment of a type as u32.",
+            "typeWidth(Type) - returns the bit width of a type as usize.",
+            "fieldCount(Type) - returns the number of fields in a struct type as usize."
+          ]
+        },
+        {
+          "title": "Type Information Builtins",
+          "intro": "These builtins answer structural questions about types.",
+          "items": [
+            "fixedArraySize(Type) - returns the element count of a fixed-size array type as usize.",
+            "isSameType(A, B) - returns true when both types are exactly the same.",
+            "isPtrLike(Type) - returns true when the type is a pointer or another pointer-like type.",
+            "isFixedArrayOfSize(Type, N) - returns true when the type is a fixed array with exactly N elements."
+          ]
+        },
+        {
+          "title": "Source Location Builtins",
+          "intro": "These builtins expose the source position currently being compiled.",
+          "items": [
+            "file() - returns the current source file as a constant string.",
+            "fileLine() - returns the current source line as u32.",
+            "currentFuncName() - returns the current function name as a constant string."
+          ]
+        },
+        {
+          "title": "Compile-Time Check Builtins",
+          "intro": "These builtins validate assumptions or emit diagnostics during compilation.",
+          "items": [
+            "staticAssert(condition, \"message\") - stops compilation when the constant condition is false.",
+            "compileError(\"message\") - always stops compilation with the given error message.",
+            "compileWarning(\"message\") - emits a compile-time warning with the given message."
+          ]
+        },
+        {
+          "title": "Compiler Information Builtins",
+          "intro": "These builtins report facts about the compiler itself.",
+          "items": [
+            "compilerVersion() - returns the compiler version as a constant string.",
+            "debugBuild() - returns true when the compiler itself is a debug build."
+          ]
+        },
+        {
+          "title": "String Builtins",
+          "intro": "These builtins operate on constant strings known to the compiler.",
+          "items": [
+            "stringLength(string) - returns the length of a constant string as usize."
+          ]
+        },
+        {
+          "title": "Type Predicate Builtins",
+          "intro": "These builtins return booleans about general type categories.",
+          "items": [
+            "isSigned(Type) - returns true when the type is a signed integer type.",
+            "isUnsigned(Type) - returns true when the type is an unsigned integer type.",
+            "isInteger(Type) - returns true when the type is any integer type.",
+            "isFloat(Type) - returns true when the type is a floating-point type.",
+            "isBool(Type) - returns true when the type is bool.",
+            "isChar(Type) - returns true when the type is char.",
+            "isPointer(Type) - returns true when the type is a pointer.",
+            "isArray(Type) - returns true when the type is an array form.",
+            "isFixedArray(Type) - returns true when the type is a fixed-size array.",
+            "isStruct(Type) - returns true when the type is a struct type.",
+            "isVoid(Type) - returns true when the type is void.",
+            "isConst(Type) - returns true when the type has const qualification.",
+            "isNumeric(Type) - returns true when the type is numeric.",
+            "isFunction(Type) - returns true when the type is a function reference type."
+          ]
+        },
+        {
+          "title": "Target Information Builtins",
+          "intro": "These builtins report what kind of machine and ABI the compiler is targeting.",
+          "items": [
+            "targetOS() - returns the target operating system name as a constant string.",
+            "targetArch() - returns the target architecture name as a constant string.",
+            "targetVendor() - returns the target vendor name as a constant string.",
+            "targetAbi() - returns the target ABI name as a constant string.",
+            "targetTriple() - returns the full target triple as a constant string.",
+            "isLinux() - returns true when the target OS is Linux.",
+            "isWindows() - returns true when the target OS is Windows.",
+            "isDarwin() - returns true when the target OS is Darwin-based.",
+            "isApple() - returns true when the target vendor or platform is Apple-related.",
+            "isAix() - returns true when the target OS is AIX.",
+            "isUnix() - returns true when the target is a Unix-like platform (Linux, Darwin, BSD, Solaris/Illumos, AIX, or Haiku).",
+            "isBSD() - returns true when the target OS is a BSD derivative.",
+            "isFreeBSD() - returns true when the target OS is FreeBSD.",
+            "isNetBSD() - returns true when the target OS is NetBSD.",
+            "isOpenBSD() - returns true when the target OS is OpenBSD.",
+            "isAndroid() - returns true when the target OS is Android.",
+            "isIOS() - returns true when the target OS is iOS.",
+            "isSolaris() - returns true when the target OS is Solaris or Illumos.",
+            "isHaiku() - returns true when the target OS is Haiku.",
+            "is64Bit() - returns true when the target pointer width is 64 bits.",
+            "is32Bit() - returns true when the target pointer width is 32 bits.",
+            "isBigEndian() - returns true when the target byte order is big-endian.",
+            "isLittleEndian() - returns true when the target byte order is little-endian.",
+            "isX86() - returns true when the target architecture is x86.",
+            "isX8664() - returns true when the target architecture is x86_64.",
+            "isArm() - returns true when the target architecture is ARM.",
+            "isAarch64() - returns true when the target architecture is AArch64.",
+            "isRiscv64() - returns true when the target architecture is RISC-V 64-bit.",
+            "isPpc() - returns true when the target architecture is PowerPC.",
+            "isPpc64() - returns true when the target architecture is PowerPC 64-bit.",
+            "isMips64() - returns true when the target architecture is MIPS64.",
+            "isSystemz() - returns true when the target architecture is IBM System z.",
+            "isLoongarch64() - returns true when the target architecture is LoongArch64.",
+            "isWasm() - returns true when the target architecture is WebAssembly.",
+            "isWasm32() - returns true when the target architecture is WebAssembly 32-bit.",
+            "isWasm64() - returns true when the target architecture is WebAssembly 64-bit.",
+            "isElf() - returns true when the target object format is ELF.",
+            "isMachO() - returns true when the target object format is Mach-O.",
+            "isCoff() - returns true when the target object format is COFF.",
+            "hasPosixThreads() - returns true when the target environment supports POSIX threads.",
+            "hasSysvAbi() - returns true when the target follows the System V ABI family.",
+            "pointerWidth() - returns the target ptr width in bits as usize.",
+            "isizeWidth() - returns the target ssize width in bits as usize.",
+            "usizeWidth() - returns the target usize width in bits as usize.",
+            "pointerAlign() - returns the pointer alignment in bytes as usize.",
+            "maxAlignment() - returns the maximum supported alignment in bytes as usize.",
+            "targetCPU() - returns the target CPU name as a constant string.",
+            "targetCpuFeatures() - returns the enabled target CPU features as a constant string.",
+            "hasFeature(\"name\") - returns true when the target CPU supports the named feature."
+          ]
+        },
+        {
+          "title": "Atomic Builtins (Unstable)",
+          "intro": "These builtins perform atomic read-modify-write and compare-and-swap operations. They require the compiler to run in unstable mode. The destination must be a variable declared with an atomic ordering modificator, and the operation inherits that ordering.",
+          "items": [
+            "atomicStore(counter, value) - stores a new value and returns the previous one.",
+            "atomicAdd(counter, value) - atomic addition. The destination and value must be integers.",
+            "atomicSubtract(counter, value) - atomic subtraction.",
+            "atomicAnd(counter, value) - atomic bitwise and.",
+            "atomicNand(counter, value) - atomic bitwise nand.",
+            "atomicOr(counter, value) - atomic bitwise or.",
+            "atomicXor(counter, value) - atomic bitwise xor.",
+            "atomicSignedMaximum(counter, value) - atomic signed maximum.",
+            "atomicSignedMinimum(counter, value) - atomic signed minimum.",
+            "atomicUnsignedMaximum(counter, value) - atomic unsigned maximum.",
+            "atomicUnsignedMinimum(counter, value) - atomic unsigned minimum.",
+            "atomicCompareAndSwap(counter, expected, new, success, failure) - compares and swaps; returns true when the swap happened. expected is updated with the current value on failure."
+          ]
+        },
+        {
+          "title": "Host Information Builtins",
+          "intro": "These builtins report facts about the machine running the compiler, not the machine being targeted.",
+          "items": [
+            "hostOsName() - returns the host operating system name as a constant string.",
+            "hostArch() - returns the host architecture name as a constant string.",
+            "hostEndian() - returns the host endianness as a constant string.",
+            "currentTimestamp() - returns the current host timestamp as usize."
+          ]
+        },
+        {
+          "title": "Memory and ABI Builtins",
+          "intro": "These builtins lower directly to low-level memory operations, ABI queries, or variadic argument access.",
+          "items": [
+            "halloc(Type) - allocates heap memory for one value of the given type and returns ptr[Type].",
+            "memcpy(dst, src, size) - copies a block of memory and returns ptr.",
+            "memmove(dst, src, size) - moves a block of memory safely for overlapping ranges and returns ptr.",
+            "memset(dst, value, size) - fills a memory block with a byte value and returns ptr.",
+            "abiSizeOf(Type) - returns the ABI-defined size of a type in bytes as u64.",
+            "bitSizeOf(Type) - returns the size of a type in bits as u64.",
+            "abiAlignOf(Type) - returns the ABI-defined alignment of a type as u32.",
+            "arbitraryArgs() - returns the current variadic argument list as ptr.",
+            "arbitraryArg(Type) - reads one variadic argument of the given type."
+          ]
+        },
+        {
+          "title": "Builtin Type",
+          "intro": "The language also exposes one builtin alias that appears in many APIs.",
+          "items": [
+            "CString - builtin alias for array[char], used for null-terminated string values."
+          ]
+        },
+        {
+          "title": "Using Builtins in Declarations",
+          "intro": "Builtins are most useful when they keep declarations tied to target facts.",
+          "items": [
+            "Use sizeOf and alignOf to define capacities or layout checks that follow the referenced type.",
+            "Use target builtins to select platform-specific constants and imports through compile-time conditionals.",
+            "Use compileError and compileWarning for explicit diagnostics when a configuration is unsupported or unusual."
+          ]
+        }
+      ],
+      "signatures": "const SIZE: usize = sizeOf(u32);\nconst ALIGN: u32 = alignOf(u32);\n\nfn verifyTypes() void {\n    staticAssert(isSameType(u32, u32), \"type mismatch\");\n}",
+      "example": "const PTR_BITS: usize = pointerWidth();\n\nfn verify() void @public {\n    staticAssert(PTR_BITS == 64 or PTR_BITS == 32, \"unsupported pointer width\");\n}"
+    },
+    "casts": {
+      "title": "Casts",
+      "summary": "Explicit type conversion between compatible source and target types.",
+      "source": "syntax/cast/casts.md",
+      "overview": [
+        "Casts convert a value to another type with as. They are useful when changing integer width, signedness, or pointer form.",
+        "Because casts are explicit, readers can see where a conversion happens instead of guessing which conversions the compiler inserted.",
+        "Use casts close to the boundary that needs them. If the rest of the function can use one clear type, prefer that."
+      ],
+      "semantics": [
+        "Narrowing casts can lose information. Check ranges before converting to a smaller type.",
+        "Pointer casts should stay in low-level code where the memory layout is understood."
+      ],
+      "guidance": [
+        "Check the range before converting to a smaller type.",
+        "Avoid casting back and forth repeatedly.",
+        "Keep cast-heavy code close to the low-level code that needs it."
+      ],
+      "reference_sections": [
+        {
+          "title": "Numeric Casts",
+          "intro": "Numeric casts are explicit because they can change representation.",
+          "items": [
+            "Casting from a wider integer to a narrower integer can discard high bits.",
+            "Casting between signed and unsigned types changes how the same bits are interpreted.",
+            "Casting between integer and floating-point types can lose precision. Check ranges before relying on the result."
+          ]
+        },
+        {
+          "title": "Pointer Casts",
+          "intro": "Pointer casts should stay near code that knows the memory layout.",
+          "items": [
+            "A raw ptr can be converted to a typed pointer when the pointed storage is known to hold that type.",
+            "A typed pointer can be converted to raw ptr for FFI and allocation APIs.",
+            "Do not use casts to bypass type errors in ordinary code. Prefer the correct type at the boundary."
+          ]
+        }
+      ],
+      "signatures": "var x: s32 = 10;\nvar y: u32 = x as u32;\nvar raw: ptr = y as ptr;",
+      "example": "fn toUnsigned(x: s32) u32 @public {\n    if x < 0 {\n        return 0;\n    }\n    return x as u32;\n}"
+    },
+    "loops": {
+      "title": "Loops",
+      "summary": "while, for, and loop constructs for repeated execution.",
+      "source": "syntax/loops/",
+      "overview": [
+        "Loops repeat a block while a condition holds, while a counter changes, or until the code breaks out explicitly.",
+        "In Thrust, loop state is usually visible in local variables. That makes it easy to see how the loop starts, changes, and stops.",
+        "Keep loops simple when they work with arrays or pointers. Small, direct loops are easier to check for off-by-one mistakes."
+      ],
+      "semantics": [
+        "Use while when the condition is the main part of the loop. Use for when the initializer, condition, and step belong together. Use loop when the exit condition is inside the body.",
+        "Use break and continue sparingly. They are helpful, but too many exits make a loop harder to follow."
+      ],
+      "guidance": [
+        "Keep loop assumptions simple and visible near the loop.",
+        "Move values that do not change outside the loop.",
+        "Check bounds clearly when iterating over arrays."
+      ],
+      "reference_sections": [
+        {
+          "title": "Loop Forms",
+          "intro": "Use the loop form that matches where the exit condition lives.",
+          "items": [
+            "while is best when the condition is checked before every iteration.",
+            "for keeps initializer, condition, step, and body together.",
+            "loop repeats until a break or return exits from inside the body."
+          ]
+        },
+        {
+          "title": "State and Bounds",
+          "intro": "Loop state should be visible and updated in one predictable place.",
+          "items": [
+            "Keep counters and limits close to the loop header.",
+            "When indexing arrays or pointers, compare against the known length before the access.",
+            "Move invariant calculations before the loop to make the body easier to inspect."
+          ]
+        }
+      ],
+      "signatures": "while index < length {\n    index++;\n}\n\nfor var i: s32 = 0; i < 10; i++; {\n    total += i;\n}\n\nloop {\n    if done {\n        break;\n    }\n}",
+      "example": "fn sumTo(n: s32) s32 @public {\n    var i: s32 = 0;\n    var acc: s32 = 0;\n\n    while i <= n {\n        acc += i;\n        i++;\n    }\n\n    return acc;\n}"
+    },
+    "structs": {
+      "title": "Structs",
+      "summary": "User-defined aggregate types with named fields.",
+      "source": "syntax/structure/structure.md",
+      "overview": [
+        "Structs group related fields under one type. Each field has a name and an explicit type.",
+        "They are useful for records, configuration values, handles, and small pieces of program state.",
+        "When a struct has rules about valid values, use helper functions to create or update it in one place."
+      ],
+      "semantics": [
+        "Use field access to read or write named fields. If a field must stay consistent with another field, keep that update in a helper function.",
+        "For structs shared with C code, check field order and field sizes against the C definition."
+      ],
+      "guidance": [
+        "Initialize every field explicitly in helper constructors.",
+        "Avoid structs that group unrelated data.",
+        "Use dedicated functions for mutation when fields must stay in sync."
+      ],
+      "reference_sections": [
+        {
+          "title": "Fields and Construction",
+          "intro": "A struct value is built by naming each field and assigning a value.",
+          "items": [
+            "Each field has its own explicit type in the struct declaration.",
+            "new StructName { ... } creates a value with the listed field values.",
+            "Use helper constructors when a struct has required defaults or related fields that must agree."
+          ]
+        },
+        {
+          "title": "Layout and Interop",
+          "intro": "Structs used across FFI boundaries need stable field expectations.",
+          "items": [
+            "Field order matters when matching an external layout.",
+            "@packed changes padding behavior. Use it only when the external format requires it.",
+            "When a struct is shared with C code, verify field sizes and alignment with compile-time builtins."
+          ]
+        }
+      ],
+      "signatures": "struct Pair @public {\n    left: s32,\n    right: s32,\n}\n\nvar p: Pair = new Pair {\n    left: 1,\n    right: 2,\n};",
+      "example": "struct Config @public {\n    threads: u32,\n    verbose: bool,\n}\n\nfn defaultConfig() Config @public {\n    return new Config {\n        threads: 4,\n        verbose: false,\n    };\n}"
+    },
+    "enums": {
+      "title": "Enums",
+      "summary": "Named constants grouped under a common enum name.",
+      "source": "syntax/enum/",
+      "overview": [
+        "Enums group related named values under one name. In current Thrust, each member writes its type and value explicitly.",
+        "Members are accessed with the enum access operator, for example Mode=>Safe. The expression evaluates to the member value.",
+        "An enum name is not used as a variable type in the current compiler. Store the underlying value type, such as u32 or s32."
+      ],
+      "semantics": [
+        "Treat the listed members as the expected values for that domain.",
+        "If those values must match an external format, keep that mapping in one place."
+      ],
+      "guidance": [
+        "Use variant names that clearly describe the value.",
+        "Keep enum sets focused. Split unrelated states into separate enums.",
+        "Review enum changes carefully when other code depends on their values."
+      ],
+      "reference_sections": [
+        {
+          "title": "Members and Values",
+          "intro": "Current enums are named groups of explicit constant values.",
+          "items": [
+            "Each member writes its value type and concrete value.",
+            "Members are read with EnumName=>MemberName.",
+            "Store enum results in the underlying value type, such as u32 or s32."
+          ]
+        },
+        {
+          "title": "Closed Domains",
+          "intro": "Enums document the expected values for a small domain.",
+          "items": [
+            "Use enums for modes, status codes, tags, and external numeric constants.",
+            "Keep values stable when they are part of a file format, ABI, or public API.",
+            "When behavior depends on every enum member, review all matches or condition chains after adding a member."
+          ]
+        }
+      ],
+      "signatures": "enum Mode @public {\n    Fast: u32 = 0;\n    Safe: u32 = 1;\n    Debug: u32 = 2;\n}",
+      "example": "enum ExitCode @public {\n    Ok: s32 = 0;\n    InvalidInput: s32 = 1;\n    IOError: s32 = 2;\n}\n\nfn codeOf(value: s32) s32 @public {\n    if value == ExitCode=>Ok {\n        return 0;\n    }\n\n    if value == ExitCode=>InvalidInput {\n        return 1;\n    }\n\n    return ExitCode=>IOError;\n}"
+    },
+    "ffi": {
+      "title": "Foreign Function Interface",
+      "summary": "Calling C functions through @extern and @convention attributes.",
+      "source": "syntax/function/ffi.md",
+      "overview": [
+        "FFI declarations let Thrust call functions provided by C libraries or the system. The declaration writes the Thrust signature, the external symbol name, and the calling convention.",
+        "These declarations are low-level. A good pattern is to keep them in one module and expose small wrapper functions to the rest of the program.",
+        "The signature must match the external function. Pay close attention to pointer types, strings, integer widths, and variadic arguments."
+      ],
+      "semantics": [
+        "@extern gives the linked symbol name.",
+        "@convention(\"C\") uses the normal C calling convention."
+      ],
+      "guidance": [
+        "Keep raw extern declarations in dedicated modules.",
+        "Prefer wrapper functions for code used by the rest of the program.",
+        "Retest external bindings when upgrading C libraries."
+      ],
+      "reference_sections": [
+        {
+          "title": "External Symbols",
+          "intro": "FFI declarations describe symbols that are defined outside Thrust code.",
+          "items": [
+            "@extern(\"name\") gives the exact linked symbol name.",
+            "@convention(\"C\") selects the C calling convention for calls across the boundary.",
+            "@arbitraryArgs marks variadic functions such as printf-style declarations."
+          ]
+        },
+        {
+          "title": "Safety Boundary",
+          "intro": "The compiler cannot verify that a C declaration matches the real C function.",
+          "items": [
+            "Match integer widths, pointer types, return type, and variadic arguments exactly.",
+            "Keep raw declarations in one module and expose wrapper functions with clearer Thrust types.",
+            "Retest bindings when the target platform, C library, or header declaration changes."
+          ]
+        }
+      ],
+      "signatures": "fn printf(fmt: const array[char]) s32\n    @public\n    @arbitraryArgs\n    @extern(\"printf\")\n    @convention(\"C\");\n\nfn atoi(text: const array[char]) s32\n    @public\n    @extern(\"atoi\")\n    @convention(\"C\");",
+      "example": "fn atoi(text: const array[char]) s32\n    @public\n    @extern(\"atoi\")\n    @convention(\"C\");\n\nfn parseInt(text: const array[char]) s32 @public {\n    return atoi(text);\n}"
+    },
+    "deref": {
+      "title": "Deref and Pointers",
+      "summary": "Pointer access, references, and dereference operations.",
+      "source": "syntax/deref/",
+      "overview": [
+        "Pointers refer to memory by address. Dereference operations read or write the value stored at that address.",
+        "Because pointer mistakes are easy to make, Thrust keeps reference and dereference syntax visible in source.",
+        "Check pointers before dereferencing them, and keep raw pointer code small when possible."
+      ],
+      "semantics": [
+        "Dereferencing nullptr or another invalid pointer is unsafe. Validate pointers before using them.",
+        "Pointer indexing should stay close to the code that knows the buffer size and layout."
+      ],
+      "guidance": [
+        "Check pointers for null before dereference.",
+        "Keep pointer arithmetic in small, well-explained blocks.",
+        "Copy pointed values into locals when that makes the code simpler."
+      ],
+      "reference_sections": [
+        {
+          "title": "References and Dereference",
+          "intro": "ref and deref make address-taking and memory reads explicit.",
+          "items": [
+            "ref value creates a pointer to storage that already exists.",
+            "deref pointer reads the value at the pointer location.",
+            "Writing through a pointer changes the storage reached by that pointer, not a copy."
+          ]
+        },
+        {
+          "title": "Pointer Indexing",
+          "intro": "Indexing a pointer or array relies on a valid base and a valid element offset.",
+          "items": [
+            "Check for nullptr before dereferencing pointers from external code or allocation routines.",
+            "Keep the length or capacity used for bounds checks near the indexing code.",
+            "Use typed pointers when possible so the element type is visible at the access site."
+          ]
+        }
+      ],
+      "signatures": "var number: s32 = 42;\nvar pointer: ptr[s32] = ref number;\nvar value: s32 = (deref pointer);",
+      "example": "fn readOrZero(pointer: ptr[s32]) s32 @public {\n    if pointer == nullptr {\n        return 0;\n    }\n\n    return (deref pointer);\n}\n\nfn main() s32 @public {\n    var number: s32 = 42;\n    return readOrZero(ref number);\n}"
+    },
+    "variadic": {
+      "title": "Variadic Functions",
+      "summary": "Functions that accept a variable number of arguments.",
+      "source": "syntax/variadic/variadic.md",
+      "overview": [
+        "A function marked with @arbitraryArgs accepts any number of extra arguments. The extra arguments are collected into a variable argument list that the body reads with the arbitraryArgs builtins.",
+        "The named parameters are declared as usual; the extra arguments are implicit. Callers can pass any number of them."
+      ],
+      "semantics": [
+        "For variadic functions defined in Thrust without @extern, the compiler prepends a hidden usize argument with the number of extra arguments. Use arbitraryArgsCount to read it.",
+        "FFI variadic functions (@extern) keep the C ABI and do not carry the hidden count."
+      ],
+      "guidance": [
+        "Use @noArgCount when forwarding arbitraryArgs() to an FFI variadic such as the vprintf family, so the ABI stays C-compatible.",
+        "A variadic function without @noArgCount emits the always-active W0033 warning.",
+        "Read arguments with arbitraryArgFrom in the same order they were passed."
+      ],
+      "reference_sections": [
+        {
+          "title": "Reading Arguments",
+          "intro": "The list is read with the arbitraryArgs builtins.",
+          "items": [
+            "arbitraryArgs() returns the current variable argument list as ptr.",
+            "arbitraryArgFrom(list, T) reads the next argument of type T from list.",
+            "arbitraryArgsCopy(list) copies list so it can be read independently.",
+            "arbitraryArgsEnd(list) ends a list created with arbitraryArgsCopy or arbitraryArgsStart.",
+            "arbitraryArgsCount() returns the hidden argument count of the current variadic function.",
+            "arbitraryArgsStart() starts a new list for later use."
+          ]
+        },
+        {
+          "title": "Supported Types",
+          "intro": "arbitraryArgFrom only accepts scalar and pointer types.",
+          "items": [
+            "Allowed types: integers, floats, pointers, bool, and char.",
+            "Reading a struct or array type is rejected; pass a pointer instead."
+          ]
+        }
+      ],
+      "signatures": "fn printValues(fmt: CString) s32 @public @arbitraryArgs {\n    // ...\n}\n\nfn readTwo(first: s32) s32 @public @arbitraryArgs {\n    var list: ptr = arbitraryArgs();\n    var a: s32 = arbitraryArgFrom(list, s32);\n    var b: s32 = arbitraryArgFrom(list, s32);\n    return a + b;\n}",
+      "example": "fn countArgs(first: s32) s32 @public @arbitraryArgs {\n    return arbitraryArgsCount() as s32;\n}\n\nfn main() s32 @public {\n    return countArgs(0, 1, 2, 3);\n}"
+    },
+    "atomics": {
+      "title": "Atomic Operations",
+      "summary": "Atomic read-modify-write and compare-and-swap builtins (unstable).",
+      "source": "syntax/atomics/atomics.md",
+      "overview": [
+        "The atomic builtins perform read-modify-write and compare-and-swap operations on a memory location. They map to the LLVM atomicrmw and cmpxchg instructions.",
+        "This feature is unstable. It only works when the compiler runs in unstable mode, and it can change or disappear."
+      ],
+      "semantics": [
+        "The destination of an atomic operation must be a variable declared with an atomic ordering modificator, such as atomicRelax or atomicSync.",
+        "The operation inherits the ordering from the destination declaration. atomicNone and atomicFree do not describe an atomic operation and are rejected.",
+        "Compare-and-swap follows the C11 model: expected is passed by address and is updated with the current value on failure. The builtin returns true when the swap happened."
+      ],
+      "guidance": [
+        "Keep the destination's ordering modificator consistent with the operation.",
+        "Use the success and failure orderings so they remain valid for LLVM lowering.",
+        "Run with -mode unstable to use these builtins."
+      ],
+      "reference_sections": [
+        {
+          "title": "Read-Modify-Write Builtins",
+          "intro": "Each builtin writes a value atomically and returns the previous value. The destination and value must be integers.",
+          "items": [
+            "atomicStore(counter, value) - stores a new value, returns the previous one.",
+            "atomicAdd(counter, value) - addition.",
+            "atomicSubtract(counter, value) - subtraction.",
+            "atomicAnd(counter, value) - bitwise and.",
+            "atomicNand(counter, value) - bitwise nand.",
+            "atomicOr(counter, value) - bitwise or.",
+            "atomicXor(counter, value) - bitwise xor.",
+            "atomicSignedMaximum(counter, value) - signed maximum.",
+            "atomicSignedMinimum(counter, value) - signed minimum.",
+            "atomicUnsignedMaximum(counter, value) - unsigned maximum.",
+            "atomicUnsignedMinimum(counter, value) - unsigned minimum."
+          ]
+        },
+        {
+          "title": "Compare-And-Swap",
+          "intro": "atomicCompareAndSwap compares the destination against an expected value and swaps in a new value when they match.",
+          "items": [
+            "atomicCompareAndSwap(counter, expected, new, success, failure)",
+            "expected is an lvalue holding the expected value; it is updated on failure.",
+            "success and failure are atomic ordering arguments using the atomic keyword literals."
+          ]
+        }
+      ],
+      "signatures": "fn example() void @public {\n    var atomicRelax counter: u32 = 10;\n    var old: u32 = atomicAdd(counter, 5);\n}",
+      "example": "fn main() s32 @public {\n    var atomicRelax counter: u32 = 20;\n    var expected: u32 = 20;\n    var swapped: bool = atomicCompareAndSwap(counter, expected, 30, atomicSync, atomicRelax);\n\n    if swapped && counter == 30 {\n        return 0;\n    }\n\n    return 1;\n}"
+    },
+    "assembler": {
+      "title": "Inline Assembler",
+      "summary": "Assembler functions and assembler values (unstable).",
+      "source": "syntax/assembler/asmfunctions.md",
+      "overview": [
+        "Assembler functions are written entirely in inline assembler. They support Intel and AT&T x86_64 assembler.",
+        "This feature is unstable. It only works when the compiler runs in unstable mode, and it can change or disappear."
+      ],
+      "semantics": [
+        "An assembler function body has two blocks: the assembler lines and the constraints.",
+        "Assembler functions accept parameters, a return type, and attributes like normal functions.",
+        "The current asmfn parser expects assembler parameters as name Type without a colon. Assembler values (asm T { ... } { ... }) can carry attributes and typed arguments."
+      ],
+      "guidance": [
+        "Use @asmSyntax(\"Intel\") or @asmSyntax(\"AT&T\") to choose the assembler syntax.",
+        "Global assembler is written at the top level with global_asm.",
+        "Run with -mode unstable to use assembler functions and values."
+      ],
+      "reference_sections": [
+        {
+          "title": "Related Attributes",
+          "intro": "Assembler constructs use these unstable attributes.",
+          "items": [
+            "@asmSyntax(\"Intel\" | \"AT&T\") - selects the inline assembler syntax.",
+            "@asmAlignStack - aligns the stack for an assembler block.",
+            "@asmThrow - lets assembler errors propagate.",
+            "@asmEffects - tells the backend the assembler block has side effects."
+          ]
+        },
+        {
+          "title": "LLVM Inline Assembler",
+          "intro": "The assembler strings follow the LLVM inline assembler format.",
+          "items": [
+            "See the LLVM language reference for the constraint and template syntax.",
+            "Assembler values can take attributes after the type and arguments inside parentheses after the type."
+          ]
+        }
+      ],
+      "signatures": "asmfn add(a u32, b u32) u32 @public @asmSyntax(\"Intel\") {\n    \"mov %eax, $0\"\n} {\n    \"=r\"\n}",
+      "example": "asmfn invoke_exit_syscall() void {\n    \"mov $$60, %rax\",\n    \"mov $$1, %rdi\",\n    \"syscall\"\n} {\n    \"~{rax}~{rdi}\"\n}\n\nfn main() s32 @public {\n    invoke_exit_syscall();\n    return 0;\n}"
+    }
+  }
+}
