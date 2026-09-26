@@ -86,7 +86,7 @@ def rewrite_paths(output: Path, base_path: str) -> None:
             path.write_text(rewritten)
 
 
-def build_subpath(source: Path, output: Path, base_path: str) -> None:
+def normalize_website_path_for_gh_pages(source: Path, output: Path, base_path: str) -> None:
     source = source.resolve()
     output = output.resolve()
 
@@ -116,7 +116,7 @@ def build_subpath(source: Path, output: Path, base_path: str) -> None:
 
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(
-        description="Build a copy of the website that can be served from a subpath.",
+        description="Normalize website paths for GitHub Pages subpath deployment.",
     )
     parser.add_argument(
         "--base-path",
@@ -137,7 +137,7 @@ def main(argv=None) -> None:
     )
 
     args = parser.parse_args(argv)
-    build_subpath(args.source, args.output, args.base_path)
+    normalize_website_path_for_gh_pages(args.source, args.output, args.base_path)
     print(args.output.resolve())
 
 

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Thrust Lenguaje de Programacion</title>
-  <meta name="description" content="Thrust es un lenguaje de programacion de sistemas, estatico y tipado, para escribir codigo verboso, preciso y rapido.">
+  <title>Thrust Lenguaje de Programación</title>
+  <meta name="description" content="Thrust es un lenguaje de programación de sistemas, estático y tipado, para escribir código verboso, preciso y rápido.">
   <link rel="icon" type="image/png" sizes="32x32" href="../assets/brand/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="../assets/brand/favicon-16.png">
   <link rel="canonical" href="/website/es/">
@@ -22,7 +22,7 @@
       </a>
       <nav class="nav-links" aria-label="Navegacion principal">
         <a class="current" href="/website/es/">Inicio</a>
-        <a href="/website/es/features/">Caracteristicas</a>
+        <a href="/website/es/features/">Características</a>
         <a href="/website/es/downloads/">Descargas</a>
         <a href="/website/documentation/index.html">Documentation</a>
         <a class="lang-link" href="/website/en/">EN</a>
@@ -38,60 +38,109 @@
             <img src="../assets/brand/thrustlang-logo-banner-text-italic.png" alt="Banner oficial de Thrust">
           </div>
           <h1>Thrust Programming Language</h1>
-          <p>Un lenguaje de sistemas, estatico y tipado, para escribir codigo verboso, preciso y rapido.</p>
+          <p>Un lenguaje de sistemas, estático y tipado, para escribir código verboso, preciso y rápido.</p>
           <div class="hero-actions">
             <a class="btn" href="#downloads">Descargar</a>
             <a class="btn" href="https://github.com/thrustlang/thrustc" target="_blank" rel="noopener noreferrer">Repositorio del Compilador</a>
+            <a class="btn" href="https://github.com/thrustlang/torio" target="_blank" rel="noopener noreferrer">Repositorio del Gestor de Paquetes</a>
           </div>
         </section>
 
         <article class="panel panel-philosophy">
           <h2>Filosofia</h2>
-          <p>Thrust ofrece control de bajo nivel como C, y al mismo tiempo permite usar abstracciones de alto nivel cuando las necesitas. La idea es mantener un modelo mental simple: si razonas en C, tambien puedes razonar en Thrust.</p>
+          <p>Thrust expone operaciones de memoria, disposición de datos, alineación de memoria explícita, convenciones de llamada e información del objetivo en el código fuente, al mismo tiempo que ofrece abstracciones de alto nivel de costo cero con simplicidad.</p>
+          <p>Thrust mantiene la gestión de memoria directa y simple. El programador controla la asignación, la validez de los punteros, el ciclo de vida de los recursos y el punto exacto en que se libera la memoria, como en C.</p>
         </article>
 
         <section class="section section-downloads" id="downloads">
           <article class="panel">
             <h2>Descargas</h2>
-            <p class="muted">Enlaces directos al ejecutable desde GitHub Releases.</p>
-            <p><a class="btn no-corner" href="https://github.com/thrustlang/thrustc/releases" target="_blank" rel="noopener noreferrer">Todas las Releases</a></p>
-            <div class="downloads-grid">
-              <article class="download-card">
-                <div class="download-head">
-                  <svg class="icon" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-windows"></use></svg>
-                  <strong>Windows x64</strong>
-                </div>
-                <p class="download-meta"><span data-version="windows">v0.2.1</span> - ejecutable <code>thrustc.exe</code></p>
-                <a class="btn" data-download="windows" href="#">Descargar</a>
-                <a class="btn" data-download-alt="windows" href="#">Descargar Stripped</a>
-              </article>
-              <article class="download-card">
-                <div class="download-head">
-                  <svg class="icon icon-linux" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-linux"></use></svg>
-                  <strong>Linux x64</strong>
-                </div>
-                <p class="download-meta"><span data-version="linux">v0.2.1</span> - ejecutable <code>thrustc</code></p>
-                <a class="btn" data-download="linux" href="#">Descargar</a>
-                <a class="btn" data-download-alt="linux" href="#">Descargar Stripped</a>
-              </article>
-              <article class="download-card">
-                <div class="download-head">
-                  <svg class="icon" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-apple"></use></svg>
-                  <strong>macOS x64</strong>
-                </div>
-                <p class="download-meta"><span data-version="macos_intel">v0.2.1</span> - ejecutable <code>thrustc</code></p>
-                <a class="btn" data-download="macos_intel" href="#">Descargar</a>
-                <a class="btn" data-download-alt="macos_intel" href="#">Descargar Stripped</a>
-              </article>
-              <article class="download-card">
-                <div class="download-head">
-                  <svg class="icon" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-apple"></use></svg>
-                  <strong>macOS ARM64</strong>
-                </div>
-                <p class="download-meta"><span data-version="macos_arm">v0.2.1</span> - ejecutable <code>thrustc</code></p>
-                <a class="btn" data-download="macos_arm" href="#">Descargar</a>
-                <a class="btn" data-download-alt="macos_arm" href="#">Descargar Stripped</a>
-              </article>
+            <div class="downloads-group">
+              <div class="releases-links">
+                <a class="btn no-corner" href="https://github.com/thrustlang/torio/releases" target="_blank" rel="noopener noreferrer">Gestor de paquetes - Todas las Releases</a>
+                <a class="btn no-corner" href="https://github.com/thrustlang/thrustc/releases" target="_blank" rel="noopener noreferrer">Compilador - Todas las Releases</a>
+              </div>
+              <h3 class="downloads-group-title">Gestor de paquetes</h3>
+              <div class="downloads-grid">
+                <article class="download-card">
+                  <div class="download-head">
+                    <svg class="icon" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-windows"></use></svg>
+                    <strong>Windows x64</strong>
+                  </div>
+                  <p class="download-meta"><span data-group="package" data-version="windows">v0.1.2</span> - ejecutable <code>torio.exe</code></p>
+                  <a class="btn" data-group="package" data-download="windows" href="#">Descargar</a>
+                  <a class="btn" data-group="package" data-download-alt="windows" href="#">Descargar Stripped</a>
+                </article>
+                <article class="download-card">
+                  <div class="download-head">
+                    <svg class="icon icon-linux" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-linux"></use></svg>
+                    <strong>Linux x64</strong>
+                  </div>
+                  <p class="download-meta"><span data-group="package" data-version="linux">v0.1.2</span> - ejecutable <code>torio</code></p>
+                  <a class="btn" data-group="package" data-download="linux" href="#">Descargar</a>
+                  <a class="btn" data-group="package" data-download-alt="linux" href="#">Descargar Stripped</a>
+                </article>
+                <article class="download-card">
+                  <div class="download-head">
+                    <svg class="icon" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-apple"></use></svg>
+                    <strong>macOS x64</strong>
+                  </div>
+                  <p class="download-meta"><span data-group="package" data-version="macos_intel">v0.1.2</span> - ejecutable <code>torio</code></p>
+                  <a class="btn" data-group="package" data-download="macos_intel" href="#">Descargar</a>
+                  <a class="btn" data-group="package" data-download-alt="macos_intel" href="#">Descargar Stripped</a>
+                </article>
+                <article class="download-card">
+                  <div class="download-head">
+                    <svg class="icon" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-apple"></use></svg>
+                    <strong>macOS ARM64</strong>
+                  </div>
+                  <p class="download-meta"><span data-group="package" data-version="macos_arm">v0.1.2</span> - ejecutable <code>torio</code></p>
+                  <a class="btn" data-group="package" data-download="macos_arm" href="#">Descargar</a>
+                  <a class="btn" data-group="package" data-download-alt="macos_arm" href="#">Descargar Stripped</a>
+                </article>
+              </div>
+            </div>
+
+            <div class="downloads-group">
+              <h3 class="downloads-group-title">Compilador</h3>
+              <div class="downloads-grid">
+                <article class="download-card">
+                  <div class="download-head">
+                    <svg class="icon" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-windows"></use></svg>
+                    <strong>Windows x64</strong>
+                  </div>
+                  <p class="download-meta"><span data-group="compiler" data-version="windows">v0.2.2</span> - ejecutable <code>thrustc.exe</code></p>
+                  <a class="btn" data-group="compiler" data-download="windows" href="#">Descargar</a>
+                  <a class="btn" data-group="compiler" data-download-alt="windows" href="#">Descargar Stripped</a>
+                </article>
+                <article class="download-card">
+                  <div class="download-head">
+                    <svg class="icon icon-linux" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-linux"></use></svg>
+                    <strong>Linux x64</strong>
+                  </div>
+                  <p class="download-meta"><span data-group="compiler" data-version="linux">v0.2.2</span> - ejecutable <code>thrustc</code></p>
+                  <a class="btn" data-group="compiler" data-download="linux" href="#">Descargar</a>
+                  <a class="btn" data-group="compiler" data-download-alt="linux" href="#">Descargar Stripped</a>
+                </article>
+                <article class="download-card">
+                  <div class="download-head">
+                    <svg class="icon" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-apple"></use></svg>
+                    <strong>macOS x64</strong>
+                  </div>
+                  <p class="download-meta"><span data-group="compiler" data-version="macos_intel">v0.2.2</span> - ejecutable <code>thrustc</code></p>
+                  <a class="btn" data-group="compiler" data-download="macos_intel" href="#">Descargar</a>
+                  <a class="btn" data-group="compiler" data-download-alt="macos_intel" href="#">Descargar Stripped</a>
+                </article>
+                <article class="download-card">
+                  <div class="download-head">
+                    <svg class="icon" aria-hidden="true"><use href="../assets/icons/brands.svg#icon-apple"></use></svg>
+                    <strong>macOS ARM64</strong>
+                  </div>
+                  <p class="download-meta"><span data-group="compiler" data-version="macos_arm">v0.2.2</span> - ejecutable <code>thrustc</code></p>
+                  <a class="btn" data-group="compiler" data-download="macos_arm" href="#">Descargar</a>
+                  <a class="btn" data-group="compiler" data-download-alt="macos_arm" href="#">Descargar Stripped</a>
+                </article>
+              </div>
             </div>
           </article>
         </section>
@@ -101,8 +150,11 @@
       <div class="layout-right">
         <article class="panel panel-quickstart">
           <h2>Inicio Rapido</h2>
-          <pre><code data-no-highlight>./thrustc fibonacci.thrust -cc-args="-o fibonacci" && ./fibonacci</code></pre>
-          <pre class="code-thrust"><code class="language-thrust">import std::io;
+          <pre><code data-no-highlight>torio toolchain install</code></pre>
+          <pre><code data-no-highlight>torio new fibonacci</code></pre>
+          <pre><code data-no-highlight>torio run</code></pre>
+          <pre class="code-thrust"><code class="language-thrust">// content: main.thrust
+import std::io;
 
 fn fibonacci [T] (n: T) T @public {
     if n <= 0 { return 0; }
@@ -135,7 +187,7 @@ fn main() s32 @public {
           <div class="features-grid">
             <article class="feature-card">
               <h3>Claridad C-Style</h3>
-              <p>Un modelo mental cercano a C, con comportamiento explicito y predecible para sistemas.</p>
+              <p>Un modelo mental cercano a C, con locales explicitos, loops explicitos y control directo sobre valores y ramas.</p>
             </article>
             <article class="feature-card">
               <h3>Generics en Compile-Time</h3>
@@ -150,8 +202,8 @@ fn main() s32 @public {
               <p>Usa <code>@if</code>, <code>@elif</code> y <code>@else</code> para elegir codigo por plataforma al compilar.</p>
             </article>
             <article class="feature-card">
-              <h3>Targets Multiplataforma</h3>
-              <p>Compila para Linux, Windows, macOS, RISC-V, WebAssembly y mas desde una sola maquina.</p>
+              <h3>Imports Utiles</h3>
+              <p>Combina modulos de <code>std::</code>, aliases e imports selectivos para mantener dependencias explicitas sin ensuciar el archivo.</p>
             </article>
             <article class="feature-card">
               <h3>Builtins Utiles</h3>

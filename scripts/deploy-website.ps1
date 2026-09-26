@@ -38,7 +38,7 @@ if (-not $remoteBranch) {
 
 Write-Host "Building website for $BasePath..."
 if (Test-Path $TempSite) { Remove-Item -Recurse -Force $TempSite }
-& $PythonBin "scripts/build_subpath.py" --base-path $BasePath --output $TempSite
+& $PythonBin "scripts/normalize_website_path_for_gh_pages.py" --base-path $BasePath --output $TempSite
 
 Write-Host "Deploying website to GitHub Pages..."
 if (Test-Path $PagesWorktree) { Remove-Item -Recurse -Force $PagesWorktree }

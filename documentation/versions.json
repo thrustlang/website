@@ -1,8 +1,21 @@
 {
-  "latest": "v0.2.1",
+  "latest": "v0.2.2",
   "versions": [
-    { "id": "v0.2.1", "label": "v0.2.1 (latest)", "status": "current" },
-    { "id": "v0.2.0", "label": "v0.2.0", "status": "archived" }
+    {
+      "id": "v0.2.2",
+      "label": "v0.2.2 (latest)",
+      "status": "current"
+    },
+    {
+      "id": "v0.2.1",
+      "label": "v0.2.1",
+      "status": "archived"
+    },
+    {
+      "id": "v0.2.0",
+      "label": "v0.2.0",
+      "status": "archived"
+    }
   ],
   "defaultSection": "language-reference"
 }

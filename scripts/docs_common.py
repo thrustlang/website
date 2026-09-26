@@ -331,7 +331,7 @@ def render_std_page(version: str, badge: str, slug: str, data: dict):
     social_image = f"/documentation/{version}/social/std/{slug_filename(slug)}"
 
     return f"""{render_head(data['title'] + ' ' + version, data['summary'], canonical, og_title=f"{data['title']} | Thrust", og_description=data['summary'], og_image=social_image, og_url=canonical)}
-  <main class=\"site-main\">\n{docs_hero(data['title'], data['summary'], version, badge)}\n    <section class=\"container section panel docs-content\">\n      <h2>Overview</h2>\n{render_paragraphs(data['overview'])}\n      <p class=\"muted\">Source: <code>{html.escape(source_view)}</code></p>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Public Signatures</h2>\n      <p class=\"muted\">Exported declarations for this module snapshot.</p>\n      <pre class=\"code-thrust\"><code class=\"language-thrust\">{html.escape(signature_block)}</code></pre>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Behavior and Use</h2>\n{render_paragraphs(data['details'])}\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Examples</h2>\n{render_code_blocks(data['examples'])}\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Notes</h2>\n      <ul>\n{render_items(data['notes'])}\n      </ul>\n      <p><a class=\"btn\" href=\"{doc_href(f'/documentation/{version}/std/')}\">Back to std index</a></p>\n    </section>\n  </main>\n{FOOTER}"""
+  <main class=\"site-main\">\n{docs_hero(data['title'], data['summary'], version, badge)}\n    <section class=\"container section panel docs-content\">\n      <h2>Overview</h2>\n{render_paragraphs(data.get('overview', ''))}\n      <p class=\"muted\">Source: <code>{html.escape(source_view)}</code></p>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Public Signatures</h2>\n      <p class=\"muted\">Exported declarations for this module snapshot.</p>\n      <pre class=\"code-thrust\"><code class=\"language-thrust\">{html.escape(signature_block)}</code></pre>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Behavior and Use</h2>\n{render_paragraphs(data.get('details', ''))}\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Examples</h2>\n{render_code_blocks(data.get('examples', []))}\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Notes</h2>\n      <ul>\n{render_items(data.get('notes', []))}\n      </ul>\n      <p><a class=\"btn\" href=\"{doc_href(f'/documentation/{version}/std/')}\">Back to std index</a></p>\n    </section>\n  </main>\n{FOOTER}"""
 
 
 def render_lang_page(version: str, badge: str, slug: str, data: dict):
@@ -568,10 +568,14 @@ def render_docs_hub(versions_data):
 
     for entry in archived:
         archived_cards.append(
-            f"      <p><a class=\"btn\" href=\"/documentation/{html.escape(entry['id'])}/index.html\">Open {html.escape(entry['id'])}</a></p>"
+            f"      <a class=\"btn\" href=\"/documentation/{html.escape(entry['id'])}/index.html\">Open {html.escape(entry['id'])}</a>"
         )
 
-    archived_html = "".join(archived_cards) if archived_cards else '      <p class="muted">No archived versions yet.</p>'
+    archived_html = (
+        f"      <div class=\"archived-links\">\n{chr(10).join(archived_cards)}\n      </div>"
+        if archived_cards
+        else '      <p class="muted">No archived versions yet.</p>'
+    )
 
     return f"""<!doctype html>
 <html lang=\"en\">

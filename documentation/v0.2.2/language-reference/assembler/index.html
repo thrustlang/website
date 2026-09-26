@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inline Assembler v0.2.2 | Thrust</title>
+  <meta name="description" content="Assembler functions and assembler values (unstable).">
+  <link rel="icon" type="image/png" sizes="32x32" href="/website/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/website/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/website/documentation/v0.2.2/language-reference/assembler/">
+
+  <link rel="stylesheet" href="/website/assets/css/site.css">
+  <link rel="stylesheet" href="/website/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/website/en/">
+        <img class="brand-logo" src="/website/assets/brand/thrustlang-logo-128.png" srcset="/website/assets/brand/thrustlang-logo-128.png 128w, /website/assets/brand/thrustlang-logo-256.png 256w, /website/assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/website/en/">Home</a>
+        <a href="/website/en/features/">Features</a>
+        <a href="/website/en/downloads/">Downloads</a>
+        <a class="current" href="/website/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/website/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>Inline Assembler (v0.2.2)</h1>
+      <p>Assembler functions and assembler values (unstable).</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.2">Version</label>
+        <select id="docs-version-v0.2.2" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Latest</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>Assembler functions are written entirely in inline assembler. They support Intel and AT&amp;T x86_64 assembler.</p>
+      <p>This feature is unstable. It only works when the compiler runs in unstable mode, and it can change or disappear.</p>
+      <p class="muted">Primary source: <code>syntax/assembler/asmfunctions.md</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Syntax Signatures</h2>
+      <pre class="code-thrust"><code class="language-thrust">asmfn add(a u32, b u32) u32 @public @asmSyntax(&quot;Intel&quot;) {
+    &quot;mov %eax, $0&quot;
+} {
+    &quot;=r&quot;
+}</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>An assembler function body has two blocks: the assembler lines and the constraints.</p>
+      <p>Assembler functions accept parameters, a return type, and attributes like normal functions.</p>
+      <p>The current asmfn parser expects assembler parameters as name Type without a colon. Assembler values (asm T { ... } { ... }) can carry attributes and typed arguments.</p>
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Use @asmSyntax(&quot;Intel&quot;) or @asmSyntax(&quot;AT&amp;T&quot;) to choose the assembler syntax.</li>
+        <li>Global assembler is written at the top level with global_asm.</li>
+        <li>Run with -mode unstable to use assembler functions and values.</li>
+      </ul>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Related Attributes</h2>
+      <p>Assembler constructs use these unstable attributes.</p>
+      <ul>
+        <li><code>@asmSyntax(&quot;Intel&quot; | &quot;AT&amp;T&quot;)</code> - selects the inline assembler syntax.</li>
+        <li><code>@asmAlignStack</code> - aligns the stack for an assembler block.</li>
+        <li><code>@asmThrow</code> - lets assembler errors propagate.</li>
+        <li><code>@asmEffects</code> - tells the backend the assembler block has side effects.</li>
+      </ul>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>LLVM Inline Assembler</h2>
+      <p>The assembler strings follow the LLVM inline assembler format.</p>
+      <ul>
+        <li>See the LLVM language reference for the constraint and template syntax.</li>
+        <li>Assembler values can take attributes after the type and arguments inside parentheses after the type.</li>
+      </ul>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Example</h2>
+      <pre class="code-thrust"><code class="language-thrust">asmfn invoke_exit_syscall() void {
+    &quot;mov $$60, %rax&quot;,
+    &quot;mov $$1, %rdi&quot;,
+    &quot;syscall&quot;
+} {
+    &quot;~{rax}~{rdi}&quot;
+}
+
+fn main() s32 @public {
+    invoke_exit_syscall();
+    return 0;
+}</code></pre>
+      <p><a class="btn" href="/website/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/website/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/website/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/website/assets/js/thrust-highlight.js"></script>
+  <script src="/website/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/website/documentation/assets/docs-search.js"></script>
+</body>
+</html>

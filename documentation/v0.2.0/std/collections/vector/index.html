@@ -73,7 +73,7 @@ fn at [T] (vector: ptr[Vector[T]], index: usize) T @public;
 fn front [T] (vector: ptr[Vector[T]]) T @public;
 fn back [T] (vector: ptr[Vector[T]]) T @public;
 fn ensureCapacity [T] (vector: ptr[Vector[T]], minimum: usize) void @public;
-fn pushBack [T] (vector: ptr[Vector[T]], value: T) void @public;
+fn push [T] (vector: ptr[Vector[T]], value: T) void @public;
 fn popBack [T] (vector: ptr[Vector[T]]) T @public;
 fn insertAt [T] (vector: ptr[Vector[T]], index: usize, value: T) void @public;
 fn removeAt [T] (vector: ptr[Vector[T]], index: usize) T @public;

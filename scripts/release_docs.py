@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import shutil
+import subprocess
 
 from docs_common import (
     CONTENT_ROOT,
@@ -15,7 +16,22 @@ from docs_common import (
     save_versions,
 )
 
-def release_documentation(new_version: str, source_version: str | None = None) -> None:
+def commit_release(new_version: str) -> None:
+    subprocess.run(["git", "add", "documentation"], check=True)
+
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--quiet", "--", "documentation"],
+        check=False,
+    )
+
+    if result.returncode == 0:
+        print("no documentation changes to commit")
+        return
+
+    subprocess.run(["git", "commit", "-m", f"Release docs {new_version}"], check=True)
+
+
+def release_documentation(new_version: str, source_version: str | None = None, commit: bool = True) -> None:
     versions = load_versions()
 
     original_versions = {
@@ -74,21 +90,34 @@ def release_documentation(new_version: str, source_version: str | None = None) -
         shutil.rmtree(DOCS_ROOT / new_version, ignore_errors=True)
         raise
 
+    if commit:
+        commit_release(new_version)
+
     print(f"released {new_version} from {source}")
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Release a new documentation version.",
-        epilog="Examples:\n  python scripts/release_docs.py --new-version v0.2.2\n  python scripts/release_docs.py --new-version v0.2.2 --from v0.2.1",
+        epilog=(
+            "Examples:\n"
+            "  python scripts/release_docs.py --new-version v0.2.2\n"
+            "  python scripts/release_docs.py --new-version v0.2.2 --from v0.2.1\n"
+            "  python scripts/release_docs.py --new-version v0.2.2 --no-commit"
+        ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     parser.add_argument("--new-version", required=True)
     parser.add_argument("--from", dest="from_version")
+    parser.add_argument(
+        "--no-commit",
+        action="store_true",
+        help="Generate the release without creating the release commit.",
+    )
 
     args = parser.parse_args(argv)
 
-    release_documentation(args.new_version, args.from_version)
+    release_documentation(args.new_version, args.from_version, not args.no_commit)
 
 
 if __name__ == "__main__":

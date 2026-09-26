@@ -33,50 +33,96 @@
     <section class="container hero">
       <h1>Descargas</h1>
       <p>Enlaces directos al ejecutable desde GitHub Releases.</p>
-      <div class="hero-actions">
-        <a class="btn no-corner" href="https://github.com/thrustlang/thrustc/releases" target="_blank" rel="noopener noreferrer">Todas las Releases</a>
-      </div>
     </section>
 
     <section class="container section" id="downloads">
       <article class="panel">
-        <div class="downloads-grid">
-          <article class="download-card">
-            <div class="download-head">
-              <svg class="icon" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-windows"></use></svg>
-              <strong>Windows x64</strong>
-            </div>
-            <p class="download-meta"><span data-version="windows">v0.2.1</span> - ejecutable <code>thrustc.exe</code></p>
-            <a class="btn" data-download="windows" href="#">Descargar</a>
-            <a class="btn" data-download-alt="windows" href="#">Descargar Stripped</a>
-          </article>
-          <article class="download-card">
-            <div class="download-head">
-              <svg class="icon icon-linux" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-linux"></use></svg>
-              <strong>Linux x64</strong>
-            </div>
-            <p class="download-meta"><span data-version="linux">v0.2.1</span> - ejecutable <code>thrustc</code></p>
-            <a class="btn" data-download="linux" href="#">Descargar</a>
-            <a class="btn" data-download-alt="linux" href="#">Descargar Stripped</a>
-          </article>
-          <article class="download-card">
-            <div class="download-head">
-              <svg class="icon" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-apple"></use></svg>
-              <strong>macOS x64</strong>
-            </div>
-            <p class="download-meta"><span data-version="macos_intel">v0.2.1</span> - ejecutable <code>thrustc</code></p>
-            <a class="btn" data-download="macos_intel" href="#">Descargar</a>
-            <a class="btn" data-download-alt="macos_intel" href="#">Descargar Stripped</a>
-          </article>
-          <article class="download-card">
-            <div class="download-head">
-              <svg class="icon" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-apple"></use></svg>
-              <strong>macOS ARM64</strong>
-            </div>
-            <p class="download-meta"><span data-version="macos_arm">v0.2.1</span> - ejecutable <code>thrustc</code></p>
-            <a class="btn" data-download="macos_arm" href="#">Descargar</a>
-            <a class="btn" data-download-alt="macos_arm" href="#">Descargar Stripped</a>
-          </article>
+        <div class="downloads-group">
+          <div class="releases-links">
+            <a class="btn no-corner" href="https://github.com/thrustlang/torio/releases" target="_blank" rel="noopener noreferrer">Gestor de paquetes - Todas las Releases</a>
+            <a class="btn no-corner" href="https://github.com/thrustlang/thrustc/releases" target="_blank" rel="noopener noreferrer">Compilador - Todas las Releases</a>
+          </div>
+          <h2 class="downloads-group-title">Gestor de paquetes</h2>
+          <div class="downloads-grid">
+            <article class="download-card">
+              <div class="download-head">
+                <svg class="icon" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-windows"></use></svg>
+                <strong>Windows x64</strong>
+              </div>
+              <p class="download-meta"><span data-group="package" data-version="windows">v0.1.2</span> - ejecutable <code>torio.exe</code></p>
+              <a class="btn" data-group="package" data-download="windows" href="#">Descargar</a>
+              <a class="btn" data-group="package" data-download-alt="windows" href="#">Descargar Stripped</a>
+            </article>
+            <article class="download-card">
+              <div class="download-head">
+                <svg class="icon icon-linux" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-linux"></use></svg>
+                <strong>Linux x64</strong>
+              </div>
+              <p class="download-meta"><span data-group="package" data-version="linux">v0.1.2</span> - ejecutable <code>torio</code></p>
+              <a class="btn" data-group="package" data-download="linux" href="#">Descargar</a>
+              <a class="btn" data-group="package" data-download-alt="linux" href="#">Descargar Stripped</a>
+            </article>
+            <article class="download-card">
+              <div class="download-head">
+                <svg class="icon" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-apple"></use></svg>
+                <strong>macOS x64</strong>
+              </div>
+              <p class="download-meta"><span data-group="package" data-version="macos_intel">v0.1.2</span> - ejecutable <code>torio</code></p>
+              <a class="btn" data-group="package" data-download="macos_intel" href="#">Descargar</a>
+              <a class="btn" data-group="package" data-download-alt="macos_intel" href="#">Descargar Stripped</a>
+            </article>
+            <article class="download-card">
+              <div class="download-head">
+                <svg class="icon" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-apple"></use></svg>
+                <strong>macOS ARM64</strong>
+              </div>
+              <p class="download-meta"><span data-group="package" data-version="macos_arm">v0.1.2</span> - ejecutable <code>torio</code></p>
+              <a class="btn" data-group="package" data-download="macos_arm" href="#">Descargar</a>
+              <a class="btn" data-group="package" data-download-alt="macos_arm" href="#">Descargar Stripped</a>
+            </article>
+          </div>
+        </div>
+
+        <div class="downloads-group">
+          <h2 class="downloads-group-title">Compilador</h2>
+          <div class="downloads-grid">
+            <article class="download-card">
+              <div class="download-head">
+                <svg class="icon" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-windows"></use></svg>
+                <strong>Windows x64</strong>
+              </div>
+              <p class="download-meta"><span data-group="compiler" data-version="windows">v0.2.2</span> - ejecutable <code>thrustc.exe</code></p>
+              <a class="btn" data-group="compiler" data-download="windows" href="#">Descargar</a>
+              <a class="btn" data-group="compiler" data-download-alt="windows" href="#">Descargar Stripped</a>
+            </article>
+            <article class="download-card">
+              <div class="download-head">
+                <svg class="icon icon-linux" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-linux"></use></svg>
+                <strong>Linux x64</strong>
+              </div>
+              <p class="download-meta"><span data-group="compiler" data-version="linux">v0.2.2</span> - ejecutable <code>thrustc</code></p>
+              <a class="btn" data-group="compiler" data-download="linux" href="#">Descargar</a>
+              <a class="btn" data-group="compiler" data-download-alt="linux" href="#">Descargar Stripped</a>
+            </article>
+            <article class="download-card">
+              <div class="download-head">
+                <svg class="icon" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-apple"></use></svg>
+                <strong>macOS x64</strong>
+              </div>
+              <p class="download-meta"><span data-group="compiler" data-version="macos_intel">v0.2.2</span> - ejecutable <code>thrustc</code></p>
+              <a class="btn" data-group="compiler" data-download="macos_intel" href="#">Descargar</a>
+              <a class="btn" data-group="compiler" data-download-alt="macos_intel" href="#">Descargar Stripped</a>
+            </article>
+            <article class="download-card">
+              <div class="download-head">
+                <svg class="icon" aria-hidden="true"><use href="../../assets/icons/brands.svg#icon-apple"></use></svg>
+                <strong>macOS ARM64</strong>
+              </div>
+              <p class="download-meta"><span data-group="compiler" data-version="macos_arm">v0.2.2</span> - ejecutable <code>thrustc</code></p>
+              <a class="btn" data-group="compiler" data-download="macos_arm" href="#">Descargar</a>
+              <a class="btn" data-group="compiler" data-download-alt="macos_arm" href="#">Descargar Stripped</a>
+            </article>
+          </div>
         </div>
       </article>
     </section>

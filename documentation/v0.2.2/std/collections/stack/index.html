@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>std::collections::stack v0.2.2 | Thrust</title>
+  <meta name="description" content="Last-in first-out container.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/website/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/website/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/website/documentation/v0.2.2/std/collections/stack/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="std::collections::stack | Thrust">
+  <meta property="og:description" content="Last-in first-out container.">
+  <meta property="og:image" content="/website/documentation/v0.2.2/social/std/collections-stack.png">
+  <meta property="og:url" content="/website/documentation/v0.2.2/std/collections/stack/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="std::collections::stack | Thrust">
+  <meta name="twitter:description" content="Last-in first-out container.">
+  <meta name="twitter:image" content="/website/documentation/v0.2.2/social/std/collections-stack.png">
+  <link rel="stylesheet" href="/website/assets/css/site.css">
+  <link rel="stylesheet" href="/website/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/website/en/">
+        <img class="brand-logo" src="/website/assets/brand/thrustlang-logo-128.png" srcset="/website/assets/brand/thrustlang-logo-128.png 128w, /website/assets/brand/thrustlang-logo-256.png 256w, /website/assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/website/en/">Home</a>
+        <a href="/website/en/features/">Features</a>
+        <a href="/website/en/downloads/">Downloads</a>
+        <a class="current" href="/website/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/website/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>std::collections::stack (v0.2.2)</h1>
+      <p>Last-in first-out container.</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.2">Version</label>
+        <select id="docs-version-v0.2.2" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Latest</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>std::collections::stack is a generic LIFO container backed by contiguous storage.</p>
+      <p>push adds to the top, pop removes from the top, and peek reads the top without removing it. dropStack releases the storage.</p>
+      <p class="muted">Source: <code>thrustc/std/v0.2.2/collections/stack.thrust</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Public Signatures</h2>
+      <p class="muted">Exported declarations for this module snapshot.</p>
+      <pre class="code-thrust"><code class="language-thrust">struct Stack [T] @public {
+fn newStack [T] () Stack[T] @public;
+fn withCapacity [T] (capacity: usize) Stack[T] @public;
+fn dropStack [T] (stack: ptr[Stack[T]]) void @public @deallocator;
+fn getLength [T] (stack: ptr[Stack[T]]) usize @public;
+fn getCapacity [T] (stack: ptr[Stack[T]]) usize @public;
+fn isEmpty [T] (stack: ptr[Stack[T]]) bool @public;
+fn push [T] (stack: ptr[Stack[T]], value: T) void @public;
+fn pop [T] (stack: ptr[Stack[T]]) T @public;
+fn peek [T] (stack: ptr[Stack[T]]) T @public;
+fn clear [T] (stack: ptr[Stack[T]]) void @public;
+fn reserveCapacity [T] (stack: ptr[Stack[T]], capacity: usize) void @public;
+fn shrinkToFit [T] (stack: ptr[Stack[T]]) void @public;</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>push adds an element to the top; pop removes and returns the top element; peek reads it without removal.</p>
+      <p>Call dropStack when the stack is no longer needed to release the backing storage.</p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Examples</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::collections::stack;
+import std::io;
+
+// Peek at the most recent action in an undo stack.
+fn main() s32 @public {
+    var undo := stack::newStack[s32]();
+
+    stack::push[s32](ref undo, 5);
+    stack::push[s32](ref undo, 6);
+
+    var top: s32 = stack::peek[s32](ref undo);
+
+    io::print(&quot;last action: %d\n&quot;, top);
+
+    stack::dropStack[s32](ref undo);
+
+    return 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::collections::stack;
+import std::io;
+
+// Undo the last action and report what was removed.
+fn main() s32 @public {
+    var undo := stack::newStack[s32]();
+
+    stack::push[s32](ref undo, 5);
+    stack::push[s32](ref undo, 6);
+
+    var removed: s32 = stack::pop[s32](ref undo);
+
+    io::print(&quot;removed: %d\n&quot;, removed);
+
+    stack::dropStack[s32](ref undo);
+
+    return 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::collections::stack;
+import std::io;
+
+// Report how many actions are pending before clearing the stack.
+fn main() s32 @public {
+    var undo := stack::newStack[s32]();
+
+    stack::push[s32](ref undo, 1);
+
+    io::print(&quot;pending: %d\n&quot;, stack::getLength[s32](ref undo));
+
+    stack::dropStack[s32](ref undo);
+
+    return 0;
+}</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Notes</h2>
+      <ul>
+        <li>peek and pop require a non-empty stack.</li>
+        <li>Reserve capacity when the maximum size is known.</li>
+      </ul>
+      <p><a class="btn" href="/website/documentation/v0.2.2/std/index.html">Back to std index</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/website/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/website/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/website/assets/js/thrust-highlight.js"></script>
+  <script src="/website/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/website/documentation/assets/docs-search.js"></script>
+</body>
+</html>

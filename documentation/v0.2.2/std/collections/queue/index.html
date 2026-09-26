@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>std::collections::queue v0.2.2 | Thrust</title>
+  <meta name="description" content="First-in first-out container.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/website/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/website/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/website/documentation/v0.2.2/std/collections/queue/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="std::collections::queue | Thrust">
+  <meta property="og:description" content="First-in first-out container.">
+  <meta property="og:image" content="/website/documentation/v0.2.2/social/std/collections-queue.png">
+  <meta property="og:url" content="/website/documentation/v0.2.2/std/collections/queue/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="std::collections::queue | Thrust">
+  <meta name="twitter:description" content="First-in first-out container.">
+  <meta name="twitter:image" content="/website/documentation/v0.2.2/social/std/collections-queue.png">
+  <link rel="stylesheet" href="/website/assets/css/site.css">
+  <link rel="stylesheet" href="/website/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/website/en/">
+        <img class="brand-logo" src="/website/assets/brand/thrustlang-logo-128.png" srcset="/website/assets/brand/thrustlang-logo-128.png 128w, /website/assets/brand/thrustlang-logo-256.png 256w, /website/assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/website/en/">Home</a>
+        <a href="/website/en/features/">Features</a>
+        <a href="/website/en/downloads/">Downloads</a>
+        <a class="current" href="/website/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/website/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>std::collections::queue (v0.2.2)</h1>
+      <p>First-in first-out container.</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.2">Version</label>
+        <select id="docs-version-v0.2.2" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Latest</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>std::collections::queue is a generic FIFO container. enqueue adds at the back, dequeue removes from the front, and front or back read the ends without removing.</p>
+      <p>dropQueue releases the storage when the container is no longer needed.</p>
+      <p class="muted">Source: <code>thrustc/std/v0.2.2/collections/queue.thrust</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Public Signatures</h2>
+      <p class="muted">Exported declarations for this module snapshot.</p>
+      <pre class="code-thrust"><code class="language-thrust">struct Queue [T] @public {
+fn newQueue [T] () Queue[T] @public;
+fn withCapacity [T] (capacity: usize) Queue[T] @public;
+fn dropQueue [T] (queue: ptr[Queue[T]]) void @public @deallocator;
+fn getLength [T] (queue: ptr[Queue[T]]) usize @public;
+fn getCapacity [T] (queue: ptr[Queue[T]]) usize @public;
+fn isEmpty [T] (queue: ptr[Queue[T]]) bool @public;
+fn enqueue [T] (queue: ptr[Queue[T]], value: T) void @public;
+fn dequeue [T] (queue: ptr[Queue[T]]) T @public;
+fn front [T] (queue: ptr[Queue[T]]) T @public;
+fn back [T] (queue: ptr[Queue[T]]) T @public;
+fn clear [T] (queue: ptr[Queue[T]]) void @public;
+fn reserveCapacity [T] (queue: ptr[Queue[T]], capacity: usize) void @public;
+fn shrinkToFit [T] (queue: ptr[Queue[T]]) void @public;</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>enqueue adds at the back; dequeue removes from the front; front and back read the ends without removal.</p>
+      <p>Call dropQueue when the container is no longer needed to release the backing storage.</p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Examples</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::collections::queue;
+import std::io;
+
+// Process print jobs in the order they arrived.
+fn main() s32 @public {
+    var jobs := queue::newQueue[s32]();
+
+    queue::enqueue[s32](ref jobs, 10);
+    queue::enqueue[s32](ref jobs, 20);
+
+    var job: s32 = queue::dequeue[s32](ref jobs);
+
+    io::print(&quot;processing job: %d\n&quot;, job);
+
+    queue::dropQueue[s32](ref jobs);
+
+    return 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::collections::queue;
+import std::io;
+
+// Inspect the next job and the last one queued.
+fn main() s32 @public {
+    var jobs := queue::newQueue[s32]();
+
+    queue::enqueue[s32](ref jobs, 10);
+    queue::enqueue[s32](ref jobs, 20);
+
+    io::print(&quot;next: %d, last: %d\n&quot;, queue::front[s32](ref jobs), queue::back[s32](ref jobs));
+
+    queue::dropQueue[s32](ref jobs);
+
+    return 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::collections::queue;
+import std::io;
+
+// Drain the queue, handling each job in turn.
+fn main() s32 @public {
+    var jobs := queue::newQueue[s32]();
+
+    queue::enqueue[s32](ref jobs, 1);
+    queue::enqueue[s32](ref jobs, 2);
+
+    while !queue::isEmpty[s32](ref jobs) {
+        var job: s32 = queue::dequeue[s32](ref jobs);
+        io::print(&quot;processing: %d\n&quot;, job);
+    }
+
+    queue::dropQueue[s32](ref jobs);
+
+    return 0;
+}</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Notes</h2>
+      <ul>
+        <li>dequeue requires a non-empty queue.</li>
+        <li>front and back read without removing the element.</li>
+      </ul>
+      <p><a class="btn" href="/website/documentation/v0.2.2/std/index.html">Back to std index</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/website/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/website/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/website/assets/js/thrust-highlight.js"></script>
+  <script src="/website/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/website/documentation/assets/docs-search.js"></script>
+</body>
+</html>

@@ -14,17 +14,22 @@ It contains the public landing pages, versioned language documentation, standard
 - The generated versioned documentation under `documentation/`
 - The editable documentation content under `documentation/content/`
 - The documentation maintenance scripts under `scripts/`
-- The GitHub Pages deployment workflow under `.github/workflows/deploy-pages.yml`
 
 ## Documentation Guides
 
-- `guide/DOCUMENTATION_WORKFLOW.md`
-- `guide/UPDATE_DOCS.md`
-- `guide/RELEASE_DOCS.md`
-- `guide/ARCHIVE_DOCS.md`
+- [`guide/DOCUMENTATION_WORKFLOW.md`](https://github.com/thrustlang/website/blob/master/guide/DOCUMENTATION_WORKFLOW.md)
+- [`guide/DOCS_SCRIPTS_REFERENCE.md`](https://github.com/thrustlang/website/blob/master/guide/DOCS_SCRIPTS_REFERENCE.md)
+- [`guide/JSON_FORMAT.md`](https://github.com/thrustlang/website/blob/master/guide/JSON_FORMAT.md)
+- [`guide/CREATE_DOCS.md`](https://github.com/thrustlang/website/blob/master/guide/CREATE_DOCS.md)
+- [`guide/UPDATE_DOCS.md`](https://github.com/thrustlang/website/blob/master/guide/UPDATE_DOCS.md)
+- [`guide/UPDATE_DOWNLOADS.md`](https://github.com/thrustlang/website/blob/master/guide/UPDATE_DOWNLOADS.md)
+- [`guide/RELEASE_DOCS.md`](https://github.com/thrustlang/website/blob/master/guide/RELEASE_DOCS.md)
+- [`guide/ARCHIVE_DOCS.md`](https://github.com/thrustlang/website/blob/master/guide/ARCHIVE_DOCS.md)
+- [`guide/GENERATE_STD_SOCIAL_CARDS.md`](https://github.com/thrustlang/website/blob/master/guide/GENERATE_STD_SOCIAL_CARDS.md)
+- [`guide/NORMALIZE_WEBSITE_PATH_FOR_GH_PAGES.md`](https://github.com/thrustlang/website/blob/master/guide/NORMALIZE_WEBSITE_PATH_FOR_GH_PAGES.md)
+- [`guide/DEPLOY_WEBSITE.md`](https://github.com/thrustlang/website/blob/master/guide/DEPLOY_WEBSITE.md)
 
-## Deployment
+### Online 
 
-The repository can be deployed to GitHub Pages at `https://thrustlang.github.io/website/`.
-
-Automatic deployment is handled by `.github/workflows/deploy-pages.yml`. Manual deployment is available through `scripts/deploy-website.sh`, `scripts/deploy-website.fish`, `scripts/deploy-website.ps1`, and `scripts/deploy-website.bat`.
+The page is already available as a prototype in [Thrust Programming Language - Experimental Website](https://thrustlang.github.io/website/), it isn't the one
+yet that will be used in the official domain.

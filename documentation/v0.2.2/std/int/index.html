@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>std::int v0.2.2 | Thrust</title>
+  <meta name="description" content="Parsing of signed and unsigned integers from text.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/website/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/website/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/website/documentation/v0.2.2/std/int/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="std::int | Thrust">
+  <meta property="og:description" content="Parsing of signed and unsigned integers from text.">
+  <meta property="og:image" content="/website/documentation/v0.2.2/social/std/int.png">
+  <meta property="og:url" content="/website/documentation/v0.2.2/std/int/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="std::int | Thrust">
+  <meta name="twitter:description" content="Parsing of signed and unsigned integers from text.">
+  <meta name="twitter:image" content="/website/documentation/v0.2.2/social/std/int.png">
+  <link rel="stylesheet" href="/website/assets/css/site.css">
+  <link rel="stylesheet" href="/website/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/website/en/">
+        <img class="brand-logo" src="/website/assets/brand/thrustlang-logo-128.png" srcset="/website/assets/brand/thrustlang-logo-128.png 128w, /website/assets/brand/thrustlang-logo-256.png 256w, /website/assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/website/en/">Home</a>
+        <a href="/website/en/features/">Features</a>
+        <a href="/website/en/downloads/">Downloads</a>
+        <a class="current" href="/website/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/website/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>std::int (v0.2.2)</h1>
+      <p>Parsing of signed and unsigned integers from text.</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.2">Version</label>
+        <select id="docs-version-v0.2.2" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Latest</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>std::int parses integer values from C strings, TString values, and with explicit numeric bases.</p>
+      <p>parse[T] returns a result struct with the parsed value and a success flag. Variants such as parseWithBase and parseCString cover different inputs and bases.</p>
+      <p class="muted">Source: <code>thrustc/std/v0.2.2/int.thrust</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Public Signatures</h2>
+      <p class="muted">Exported declarations for this module snapshot.</p>
+      <pre class="code-thrust"><code class="language-thrust">struct ParseSignedResult @public {
+struct ParseUnsignedResult @public {
+fn parse [T] (text: CString) T @public;
+fn parseCString [T] (text: CString) T @public;
+fn parseWithBase [T] (text: CString, base: s32) T @public;
+fn parseCStringWithBase [T] (text: CString, base: s32) T @public;
+fn parseTString [T] (text: ptr[tstring::TString]) T @public;
+fn parseTStringWithBase [T] (text: ptr[tstring::TString], base: s32) T @public;
+fn parseSigned(text: CString) ParseSignedResult @public;
+fn parseSignedCString(text: CString) ParseSignedResult @public;
+fn parseSignedWithBase(text: CString, base: s32) ParseSignedResult @public;
+fn parseSignedCStringWithBase(text: CString, base: s32) ParseSignedResult @public;
+fn parseSignedTString(text: ptr[tstring::TString]) ParseSignedResult @public;
+fn parseSignedTStringWithBase(text: ptr[tstring::TString], base: s32) ParseSignedResult @public;
+fn parseUnsigned(text: CString) ParseUnsignedResult @public;
+fn parseUnsignedCString(text: CString) ParseUnsignedResult @public;
+fn parseUnsignedWithBase(text: CString, base: s32) ParseUnsignedResult @public;
+fn parseUnsignedCStringWithBase(text: CString, base: s32) ParseUnsignedResult @public;
+fn parseUnsignedTString(text: ptr[tstring::TString]) ParseUnsignedResult @public;
+fn parseUnsignedTStringWithBase(text: ptr[tstring::TString], base: s32) ParseUnsignedResult @public;</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>parse[T] returns a result struct with a success flag, so callers can detect failures without exceptions.</p>
+      <p>Use parseWithBase for explicit numeric bases, and parseCString or parseTString when the source is a C string or TString.</p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Examples</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::int;
+import std::io;
+
+// Parse a number typed by the user into a real integer.
+fn main() s32 @public {
+    var value: s32 = int::parse[s32](&quot;1024&quot;);
+
+    io::print(&quot;parsed: %d\n&quot;, value);
+
+    return 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::int;
+import std::io;
+
+// Read a hexadecimal value such as a color code.
+fn main() s32 @public {
+    var color: s32 = int::parseWithBase[s32](&quot;ff&quot;, 16);
+
+    io::print(&quot;color: %d\n&quot;, color);
+
+    return 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::int;
+import std::io;
+
+// Parse input that may be invalid, checking the result before using it.
+fn main() s32 @public {
+    var result := int::parseSigned(&quot;123&quot;);
+
+    if !(result-&gt;ok) {
+        io::print(&quot;invalid number\n&quot;);
+        return 0;
+    }
+
+    io::print(&quot;value: %d\n&quot;, (result-&gt;value as s32));
+
+    return 0;
+}</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Notes</h2>
+      <ul>
+        <li>Check the success flag before reading the value.</li>
+        <li>Base variants accept bases from 2 to 36.</li>
+      </ul>
+      <p><a class="btn" href="/website/documentation/v0.2.2/std/index.html">Back to std index</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/website/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/website/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/website/assets/js/thrust-highlight.js"></script>
+  <script src="/website/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/website/documentation/assets/docs-search.js"></script>
+</body>
+</html>

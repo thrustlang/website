@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>std::random v0.2.2 | Thrust</title>
+  <meta name="description" content="Random numbers and buffer filling.">
+  <link rel="icon" type="image/png" sizes="32x32" href="/website/assets/brand/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/website/assets/brand/favicon-16.png">
+  <link rel="canonical" href="/website/documentation/v0.2.2/std/random/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="std::random | Thrust">
+  <meta property="og:description" content="Random numbers and buffer filling.">
+  <meta property="og:image" content="/website/documentation/v0.2.2/social/std/random.png">
+  <meta property="og:url" content="/website/documentation/v0.2.2/std/random/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="std::random | Thrust">
+  <meta name="twitter:description" content="Random numbers and buffer filling.">
+  <meta name="twitter:image" content="/website/documentation/v0.2.2/social/std/random.png">
+  <link rel="stylesheet" href="/website/assets/css/site.css">
+  <link rel="stylesheet" href="/website/assets/css/gruvbox-code.css">
+</head>
+<body class="docs-page">
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="/website/en/">
+        <img class="brand-logo" src="/website/assets/brand/thrustlang-logo-128.png" srcset="/website/assets/brand/thrustlang-logo-128.png 128w, /website/assets/brand/thrustlang-logo-256.png 256w, /website/assets/brand/thrustlang-logo-512.png 512w" sizes="44px" alt="Thrust logo">
+        <span class="brand-title">Thrust</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="/website/en/">Home</a>
+        <a href="/website/en/features/">Features</a>
+        <a href="/website/en/downloads/">Downloads</a>
+        <a class="current" href="/website/documentation/index.html">Documentation</a>
+        <a class="lang-link" href="/website/es/">ES</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="site-main">
+    <section class="container hero">
+      <h1>std::random (v0.2.2)</h1>
+      <p>Random numbers and buffer filling.</p>
+      <div class="docs-version-row">
+        <label for="docs-version-v0.2.2">Version</label>
+        <select id="docs-version-v0.2.2" class="docs-version-select" data-docs-version-select></select>
+        <span class="doc-badge">Latest</span>
+      </div>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Overview</h2>
+      <p>std::random produces pseudo-random unsigned integers and fills buffers with random bytes.</p>
+      <p>randomU64 and randomUsize return a random value, fillRandomBytes fills a buffer, and seedRandom seeds the generator.</p>
+      <p class="muted">Source: <code>thrustc/std/v0.2.2/random.thrust</code></p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Public Signatures</h2>
+      <p class="muted">Exported declarations for this module snapshot.</p>
+      <pre class="code-thrust"><code class="language-thrust">fn randomU64() u64 @public;
+fn randomUsize() usize @public;
+fn fillRandomBytes(buffer: ptr, length: usize) void @public;
+fn seedRandom(seed: u64) void @public;</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Behavior and Use</h2>
+      <p>randomU64 and randomUsize return unsigned pseudo-random values; fillRandomBytes fills a buffer in place.</p>
+      <p>Call seedRandom before generating values if reproducible output is required.</p>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Examples</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::random;
+import std::io;
+
+// Roll a six-sided die using the low bits of a random number.
+fn main() s32 @public {
+    var roll: u64 = random::randomU64();
+
+    io::print(&quot;die face: %d\n&quot;, ((roll % 6) as s32) + 1);
+
+    return 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::random;
+import std::io;
+
+// Fill a buffer with random bytes, for example to build a token.
+fn main() s32 @public {
+    var token: array[u8; 4];
+
+    random::seedRandom(123456);
+    random::fillRandomBytes((ref token) as ptr, 4);
+
+    io::print(&quot;token ready\n&quot;);
+
+    return 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::random;
+import std::io;
+
+// Reuse a seed to reproduce the same random sequence.
+fn main() s32 @public {
+    random::seedRandom(999);
+    var first: u64 = random::randomU64();
+
+    random::seedRandom(999);
+    var second: u64 = random::randomU64();
+
+    if first == second {
+        io::print(&quot;sequence reproduced\n&quot;);
+    }
+
+    return 0;
+}</code></pre>
+    </section>
+
+    <section class="container section panel docs-content">
+      <h2>Notes</h2>
+      <ul>
+        <li>This is not a cryptographic source of randomness.</li>
+        <li>Seed the generator when reproducible output is required.</li>
+      </ul>
+      <p><a class="btn" href="/website/documentation/v0.2.2/std/index.html">Back to std index</a></p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span class="muted">Thrust Programming Language</span>
+      <div class="social">
+        <a class="btn" href="https://github.com/thrustlang" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/website/assets/icons/brands.svg#icon-github"></use></svg>
+          GitHub
+        </a>
+        <a class="btn" href="https://discord.gg/MhVpCSxnhV" target="_blank" rel="noopener noreferrer">
+          <svg class="icon icon-sm" aria-hidden="true"><use href="/website/assets/icons/brands.svg#icon-discord"></use></svg>
+          Discord
+        </a>
+      </div>
+    </div>
+  </footer>
+  <script src="/website/assets/js/thrust-highlight.js"></script>
+  <script src="/website/documentation/assets/docs-version-switcher.js"></script>
+  <script src="/website/documentation/assets/docs-search.js"></script>
+</body>
+</html>
