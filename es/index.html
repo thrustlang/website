@@ -187,11 +187,11 @@ fn main() s32 @public {
           <div class="features-grid">
             <article class="feature-card">
               <h3>Claridad C-Style</h3>
-              <p>Un modelo mental cercano a C, con locales explicitos, loops explicitos y control directo sobre valores y ramas.</p>
+              <p>Un modelo mental cercano a C, con control explicito.</p>
             </article>
             <article class="feature-card">
               <h3>Generics en Compile-Time</h3>
-              <p>Funciones y estructuras genericas con instanciacion explicita, sin costo dinamico extra.</p>
+              <p>Funciones y estructuras genericas, especializadas en compile-time.</p>
             </article>
             <article class="feature-card">
               <h3>Interoperabilidad con C</h3>
@@ -203,11 +203,27 @@ fn main() s32 @public {
             </article>
             <article class="feature-card">
               <h3>Imports Utiles</h3>
-              <p>Combina modulos de <code>std::</code>, aliases e imports selectivos para mantener dependencias explicitas sin ensuciar el archivo.</p>
+              <p>Combina modulos de <code>std::</code>, aliases e imports selectivos.</p>
             </article>
             <article class="feature-card">
               <h3>Builtins Utiles</h3>
               <p>Builtins de tipos/layout como <code>sizeOf</code>, <code>alignOf</code> e <code>isSameType</code>.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Ownership por Scope</h3>
+              <p>Liberacion automatica al salir del scope, sin tracking en runtime. La memoria se libera exactamente al terminar el scope.</p>
+            </article>
+            <article class="feature-card">
+              <h3>AOT y JIT</h3>
+              <p>Binarios nativos por adelantado, o ejecucion mediante el JIT.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Abstracciones de Costo Cero</h3>
+              <p>Los generics se especializan y las ramas muertas se eliminan en compile-time.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Control Explicito de Memoria y Target</h3>
+              <p>Control directo de layout, alineacion, convenciones de llamada y targets.</p>
             </article>
           </div>
         </section>

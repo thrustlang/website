@@ -156,9 +156,9 @@ fn main() s32 @public {
 
     vector::forEach(ref readings, calibrate, 2 as s32, 5 as s32);
 
-    vector::dropVector[s32](ref readings);
-
     io::print(&quot;calibrated total: %d\n&quot;, calibrated);
+
+    vector::dropVector[s32](ref readings);
 
     return 0;
 }</code></pre>
