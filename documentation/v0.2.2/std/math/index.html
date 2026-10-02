@@ -263,6 +263,27 @@ fn main() s32 @public {
 
     return 1;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::math;
+
+// Convert user-facing degree values before passing them to trig helpers.
+fn degreesToRadians(degrees: f64) f64 @public {
+    return degrees * math::RADIANS_PER_DEGREE;
+}
+
+fn isQuarterTurn(degrees: f64) bool @public {
+    var radians: f64 = degreesToRadians(degrees);
+    return math::absolute(radians - math::PI_2) &lt; 0.001;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::math;
+
+// Keep a sensor value inside a range before using it in later calculations.
+fn clampTemperature(value: f64, low: f64, high: f64) f64 @public {
+    return math::minimum(math::maximum(value, low), high);
+}
+
+fn smoothReading(previous: f64, current: f64) f64 @public {
+    return math::fusedMultiplyAdd(previous, 0.75, current * 0.25);
+}</code></pre>
     </section>
 
     <section class="container section panel docs-content">

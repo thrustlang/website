@@ -73,7 +73,57 @@ fn strtold(text: CString, end: ptr[ptr])           f80 @public @extern(&quot;str
 
     <section class="container section panel docs-content">
       <h2>Examples</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::float as c;
 
+// atof is useful at a very small C boundary, but normal code should prefer
+// std::float parsing helpers.
+fn readScale(text: CString) f64 @public {
+    var value: f64 = c::atof(text);
+
+    if value &lt; 0.0 {
+        return 0.0;
+    }
+
+    return value;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::float as c;
+
+// strtod gives a raw C conversion with an end pointer for callers that need it.
+fn parseThreshold(text: CString) f64 @public {
+    var end: ptr = nullptr;
+    var value: f64 = c::strtod(text, ref end);
+
+    if end == (text as ptr) {
+        return 0.0;
+    }
+
+    if value &lt; 0.0 {
+        return 0.0;
+    }
+
+    if value &gt; 1.0 {
+        return 1.0;
+    }
+
+    return value;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::float as c;
+
+// Use a narrow wrapper when a C-facing configuration expects f32 values.
+fn parseGain(text: CString) f32 @public {
+    var end: ptr = nullptr;
+    var value: f32 = c::strtof(text, ref end);
+
+    if end == (text as ptr) {
+        return 0.0 as f32;
+    }
+
+    if value &lt; 0.0 {
+        return 0.0 as f32;
+    }
+
+    return value;
+}</code></pre>
     </section>
 
     <section class="container section panel docs-content">

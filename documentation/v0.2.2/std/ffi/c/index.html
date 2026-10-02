@@ -244,6 +244,34 @@ fn printLine(msg: CString) void @public {
 fn absValue(v: f64) f64 @public {
     return c::fabs(v);
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::mem as c;
+
+// Wrap raw allocation so callers have one place to check for nullptr.
+fn allocateScratch(size: usize) ptr @public {
+    var block: ptr = c::calloc(1, size);
+
+    if block == nullptr {
+        return nullptr;
+    }
+
+    return block;
+}
+
+fn releaseScratch(block: ptr) void @public {
+    if block != nullptr {
+        c::free(block);
+    }
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::io as c;
+
+// Keep direct FILE* handling small and explicit at the C boundary.
+fn closeIfOpen(file: ptr) s32 @public {
+    if file == nullptr {
+        return 0;
+    }
+
+    return c::fclose(file);
+}</code></pre>
     </section>
 
     <section class="container section panel docs-content">

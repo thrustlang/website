@@ -76,7 +76,57 @@ fn strtoull(text: CString, end: ptr[ptr], base: s32)    u64 @public @extern(&quo
 
     <section class="container section panel docs-content">
       <h2>Examples</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::int as c;
 
+// atoi is raw and simple. Wrap it when the surrounding code only needs a
+// small, trusted decimal value.
+fn readWorkers(text: CString) s32 @public {
+    var workers: s32 = c::atoi(text);
+
+    if workers &lt; 1 {
+        return 1;
+    }
+
+    return workers;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::int as c;
+
+// strtol lets the wrapper choose the numeric base at the boundary.
+fn parsePort(text: CString) s32 @public {
+    var end: ptr = nullptr;
+    var value: s64 = c::strtol(text, ref end, 10);
+
+    if end == (text as ptr) {
+        return 0;
+    }
+
+    if value &lt; 0 {
+        return 0;
+    }
+
+    if value &gt; 65535 {
+        return 65535;
+    }
+
+    return value as s32;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::int as c;
+
+// Keep hexadecimal parsing in one helper so callers do not repeat raw C calls.
+fn parseColorChannel(text: CString) u32 @public {
+    var end: ptr = nullptr;
+    var value: u64 = c::strtoul(text, ref end, 16);
+
+    if end == (text as ptr) {
+        return 0;
+    }
+
+    if value &gt; 255 {
+        return 255;
+    }
+
+    return value as u32;
+}</code></pre>
     </section>
 
     <section class="container section panel docs-content">

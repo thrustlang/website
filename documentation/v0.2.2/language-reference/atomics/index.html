@@ -109,6 +109,17 @@
 
     return 1;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">// Requires -mode unstable.
+fn main() s32 @public {
+    var atomicRelax nextTicket: u32 = 100;
+    var ticket: u32 = atomicAdd(nextTicket, 1);
+
+    if ticket == 100 &amp;&amp; nextTicket == 101 {
+        return 0;
+    }
+
+    return 1;
+}</code></pre>
       <p><a class="btn" href="/website/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

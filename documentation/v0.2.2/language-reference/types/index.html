@@ -118,6 +118,21 @@ var fixedValues: array[u16; 4] = fixed[0, 1, 2, 3];</code></pre>
 
     return sum;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">struct BufferView @public {
+    data: ptr[u8],
+    length: usize,
+}
+
+fn hasBytes(view: BufferView) bool @public {
+    return view-&gt;data != nullptr &amp;&amp; view-&gt;length &gt; 0;
+}
+
+fn emptyView() BufferView @public {
+    return new BufferView {
+        data: nullptr,
+        length: 0,
+    };
+}</code></pre>
       <p><a class="btn" href="/website/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

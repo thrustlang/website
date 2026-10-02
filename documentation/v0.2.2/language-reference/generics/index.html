@@ -95,16 +95,36 @@ struct Vector[T] @public {
 
     <section class="container section panel docs-content">
       <h2>Example</h2>
-      <pre class="code-thrust"><code class="language-thrust">fn main() s32 @public {
-    var value: s32 = add[s32](20, 22);
+      <pre class="code-thrust"><code class="language-thrust">fn add[T](a: T, b: T) T @public {
+    return a + b;
+}
 
-    var vec := new Vector[s32] {
-        data: nullptr,
-        length: 0,
-        capacity: 0
+fn main() s32 @public {
+    var subtotal: s32 = add[s32](20, 22);
+    var shipping: s32 = add(3, 4);
+
+    return subtotal + shipping;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">struct Slot[T] @public {
+    value: T,
+    occupied: bool,
+}
+
+fn filledSlot[T](value: T) Slot[T] @public {
+    return new Slot[T] {
+        value: value,
+        occupied: true,
     };
+}
 
-    return value + (vec-&gt;length as s32);
+fn main() s32 @public {
+    var slot := filledSlot[s32](42);
+
+    if slot-&gt;occupied {
+        return slot-&gt;value;
+    }
+
+    return 0;
 }</code></pre>
       <p><a class="btn" href="/website/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>

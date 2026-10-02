@@ -39,7 +39,9 @@
       ],
       "examples": [
         "import std::math;\n\nfn main() s32 @public {\n    var angle: f64 = math::PI_4;\n    var s: f64 = math::sine(angle);\n    var c: f64 = math::cosine(angle);\n\n    if s > 0.70 && c > 0.70 {\n        return 0;\n    }\n\n    return 1;\n}",
-        "import std::math;\n\nfn main() s32 @public {\n    var hyp: f64 = math::hypotenuse(3.0, 4.0);\n    var root: f64 = math::squareRoot(144.0);\n\n    if hyp == 5.0 && root == 12.0 {\n        return 0;\n    }\n\n    return 1;\n}"
+        "import std::math;\n\nfn main() s32 @public {\n    var hyp: f64 = math::hypotenuse(3.0, 4.0);\n    var root: f64 = math::squareRoot(144.0);\n\n    if hyp == 5.0 && root == 12.0 {\n        return 0;\n    }\n\n    return 1;\n}",
+        "import std::math;\n\n// Convert user-facing degree values before passing them to trig helpers.\nfn degreesToRadians(degrees: f64) f64 @public {\n    return degrees * math::RADIANS_PER_DEGREE;\n}\n\nfn isQuarterTurn(degrees: f64) bool @public {\n    var radians: f64 = degreesToRadians(degrees);\n    return math::absolute(radians - math::PI_2) < 0.001;\n}",
+        "import std::math;\n\n// Keep a sensor value inside a range before using it in later calculations.\nfn clampTemperature(value: f64, low: f64, high: f64) f64 @public {\n    return math::minimum(math::maximum(value, low), high);\n}\n\nfn smoothReading(previous: f64, current: f64) f64 @public {\n    return math::fusedMultiplyAdd(previous, 0.75, current * 0.25);\n}"
       ],
       "notes": [
         "Public constants are exported as f64 and intended for direct reuse.",
@@ -62,7 +64,9 @@
       ],
       "examples": [
         "import std::mem;\n\nfn main() s32 @public {\n    var block: ptr = mem::allocateMemory(128);\n    if block == nullptr {\n        return 1;\n    }\n\n    mem::setMemory(block, 0, 128);\n    mem::freeMemory(block);\n    return 0;\n}",
-        "import std::mem;\n\nfn main() s32 @public {\n    var src: array[u8; 6] = fixed[10, 20, 30, 40, 50, 60];\n    var dst: array[u8; 6] = fixed[0, 0, 0, 0, 0, 0];\n\n    mem::copyMemory(\n        (ref dst) as ptr,\n        (ref src) as ptr,\n        sizeOf(array[u8; 6])\n    );\n\n    if (deref dst[2]) == 30 {\n        return 0;\n    }\n\n    return 1;\n}"
+        "import std::mem;\n\nfn main() s32 @public {\n    var src: array[u8; 6] = fixed[10, 20, 30, 40, 50, 60];\n    var dst: array[u8; 6] = fixed[0, 0, 0, 0, 0, 0];\n\n    mem::copyMemory(\n        (ref dst) as ptr,\n        (ref src) as ptr,\n        sizeOf(array[u8; 6])\n    );\n\n    if (deref dst[2]) == 30 {\n        return 0;\n    }\n\n    return 1;\n}",
+        "import std::mem;\n\n// Allocate zeroed counters for code that will fill them later.\nfn createCounters(count: usize) ptr @public {\n    return mem::allocateZeroedMemory(count, sizeOf(s32));\n}\n\nfn destroyCounters(counters: ptr) void @public {\n    if counters != nullptr {\n        mem::freeMemory(counters);\n    }\n}",
+        "import std::mem;\n\n// Compare a small binary header without copying it into a struct first.\nfn sameHeader(left: ptr, right: ptr) bool @public {\n    return mem::compareMemory(left, right, 16) == 0;\n}\n\nfn containsTerminator(buffer: ptr, length: usize) bool @public {\n    return mem::findByteInMemory(buffer, 0, length) != nullptr;\n}"
       ],
       "notes": [
         "Lifetime ownership is manual. There is no automatic memory release.",
@@ -141,7 +145,9 @@
       ],
       "examples": [
         "import std::ffi::c::io as c;\n\nfn printLine(msg: CString) void @public {\n    c::puts(msg);\n}",
-        "import std::ffi::c::math as c;\n\nfn absValue(v: f64) f64 @public {\n    return c::fabs(v);\n}"
+        "import std::ffi::c::math as c;\n\nfn absValue(v: f64) f64 @public {\n    return c::fabs(v);\n}",
+        "import std::ffi::c::mem as c;\n\n// Wrap raw allocation so callers have one place to check for nullptr.\nfn allocateScratch(size: usize) ptr @public {\n    var block: ptr = c::calloc(1, size);\n\n    if block == nullptr {\n        return nullptr;\n    }\n\n    return block;\n}\n\nfn releaseScratch(block: ptr) void @public {\n    if block != nullptr {\n        c::free(block);\n    }\n}",
+        "import std::ffi::c::io as c;\n\n// Keep direct FILE* handling small and explicit at the C boundary.\nfn closeIfOpen(file: ptr) s32 @public {\n    if file == nullptr {\n        return 0;\n    }\n\n    return c::fclose(file);\n}"
       ],
       "notes": [
         "Raw bindings follow the behavior of the C library on the target platform.",
@@ -426,6 +432,11 @@
         "These functions call directly into the platform C library environment helpers.",
         "Prefer std::env unless you specifically need the raw C symbols."
       ],
+      "examples": [
+        "import std::ffi::c::env as c;\n\n// Keep raw getenv behind a small helper so the rest of the program does not\n// have to deal with null C pointers directly.\nfn pathOrDefault() CString @public {\n    var value: CString = c::getenv(\"PATH\");\n\n    if (value as ptr[char]) == nullptr {\n        return \"/usr/bin\";\n    }\n\n    return value;\n}",
+        "import std::ffi::c::env as c;\n\n// This writes process-wide state. Prefer std::env in application code unless\n// the raw C behavior is exactly what you need.\nfn enableLocalMode() bool @public {\n    return c::setenv(\"THRUST_MODE\", \"local\", 1) == 0;\n}",
+        "import std::ffi::c::env as c;\n\n// A tiny cleanup wrapper keeps the raw unsetenv result visible to callers.\nfn clearLocalMode() s32 @public {\n    return c::unsetenv(\"THRUST_MODE\");\n}"
+      ],
       "notes": [
         "These follow the behavior of the C library on the target platform.",
         "Calling setenv or unsetenv changes process-wide state."
@@ -442,6 +453,11 @@
       "details": [
         "The conversion functions return raw C results and may set errno on failure.",
         "Check the end pointer or errno when a conversion can fail."
+      ],
+      "examples": [
+        "import std::ffi::c::int as c;\n\n// atoi is raw and simple. Wrap it when the surrounding code only needs a\n// small, trusted decimal value.\nfn readWorkers(text: CString) s32 @public {\n    var workers: s32 = c::atoi(text);\n\n    if workers < 1 {\n        return 1;\n    }\n\n    return workers;\n}",
+        "import std::ffi::c::int as c;\n\n// strtol lets the wrapper choose the numeric base at the boundary.\nfn parsePort(text: CString) s32 @public {\n    var end: ptr = nullptr;\n    var value: s64 = c::strtol(text, ref end, 10);\n\n    if end == (text as ptr) {\n        return 0;\n    }\n\n    if value < 0 {\n        return 0;\n    }\n\n    if value > 65535 {\n        return 65535;\n    }\n\n    return value as s32;\n}",
+        "import std::ffi::c::int as c;\n\n// Keep hexadecimal parsing in one helper so callers do not repeat raw C calls.\nfn parseColorChannel(text: CString) u32 @public {\n    var end: ptr = nullptr;\n    var value: u64 = c::strtoul(text, ref end, 16);\n\n    if end == (text as ptr) {\n        return 0;\n    }\n\n    if value > 255 {\n        return 255;\n    }\n\n    return value as u32;\n}"
       ],
       "notes": [
         "Prefer std::int for safer parsing with result structs.",
@@ -460,6 +476,11 @@
         "The conversion functions return raw C results and may set errno on failure.",
         "Check the end pointer or errno when a conversion can fail."
       ],
+      "examples": [
+        "import std::ffi::c::float as c;\n\n// atof is useful at a very small C boundary, but normal code should prefer\n// std::float parsing helpers.\nfn readScale(text: CString) f64 @public {\n    var value: f64 = c::atof(text);\n\n    if value < 0.0 {\n        return 0.0;\n    }\n\n    return value;\n}",
+        "import std::ffi::c::float as c;\n\n// strtod gives a raw C conversion with an end pointer for callers that need it.\nfn parseThreshold(text: CString) f64 @public {\n    var end: ptr = nullptr;\n    var value: f64 = c::strtod(text, ref end);\n\n    if end == (text as ptr) {\n        return 0.0;\n    }\n\n    if value < 0.0 {\n        return 0.0;\n    }\n\n    if value > 1.0 {\n        return 1.0;\n    }\n\n    return value;\n}",
+        "import std::ffi::c::float as c;\n\n// Use a narrow wrapper when a C-facing configuration expects f32 values.\nfn parseGain(text: CString) f32 @public {\n    var end: ptr = nullptr;\n    var value: f32 = c::strtof(text, ref end);\n\n    if end == (text as ptr) {\n        return 0.0 as f32;\n    }\n\n    if value < 0.0 {\n        return 0.0 as f32;\n    }\n\n    return value;\n}"
+      ],
       "notes": [
         "Prefer std::float for safer parsing with result structs.",
         "Follow the C semantics for overflow and invalid input."
@@ -476,6 +497,11 @@
       "details": [
         "These functions call directly into the platform C library.",
         "Prefer std::random for application code unless you need the raw C symbols."
+      ],
+      "examples": [
+        "import std::ffi::c::random as c;\n\n// Seed C rand from the C clock. Use std::random for normal application code.\nfn seedFromTime() void @public {\n    c::srand(c::time(nullptr) as u32);\n}",
+        "import std::ffi::c::random as c;\n\n// Keep modulo-based rand usage local so it can be replaced later if needed.\nfn smallTicketNumber() s32 @public {\n    var value: s32 = c::rand();\n\n    if value < 0 {\n        value = 0 - value;\n    }\n\n    return value % 100;\n}",
+        "import std::ffi::c::random as c;\n\n// getentropy is available on Linux and Darwin in this raw C layer.\n@if(isLinux() || isDarwin()) fn fillRandomBytes(buffer: ptr, length: usize) bool @public {\n    if length > 256 {\n        return false;\n    }\n\n    return c::getentropy(buffer, length) == 0;\n}\n@else fn fillRandomBytes(buffer: ptr, length: usize) bool @public {\n    return false;\n}"
       ],
       "notes": [
         "This is the raw C layer; std::random offers a higher-level interface.",
@@ -538,7 +564,10 @@
         }
       ],
       "signatures": "var signed: s32 = -1;\nvar unsigned: u64 = 1;\nvar decimal: f64 = 3.14;\nvar bufferPtr: ptr[u8] = nullptr;\nvar dynamic: array[s32] = [1, 2, 3];\nvar fixedValues: array[u16; 4] = fixed[0, 1, 2, 3];",
-      "example": "fn main() s32 @public {\n    var values: array[s32; 3] = fixed[2, 4, 6];\n\n    var sum: s32 =\n        (deref values[0]) +\n        (deref values[1]) +\n        (deref values[2]);\n\n    return sum;\n}"
+      "example": [
+        "fn main() s32 @public {\n    var values: array[s32; 3] = fixed[2, 4, 6];\n\n    var sum: s32 =\n        (deref values[0]) +\n        (deref values[1]) +\n        (deref values[2]);\n\n    return sum;\n}",
+        "struct BufferView @public {\n    data: ptr[u8],\n    length: usize,\n}\n\nfn hasBytes(view: BufferView) bool @public {\n    return view->data != nullptr && view->length > 0;\n}\n\nfn emptyView() BufferView @public {\n    return new BufferView {\n        data: nullptr,\n        length: 0,\n    };\n}"
+      ]
     },
     "variables": {
       "title": "Variables",
@@ -580,7 +609,10 @@
         }
       ],
       "signatures": "var counter: s32 = 0;\ncounter = counter + 1;\nstatic mut depth: u16 @public @extern(\"depth\") = 3;",
-      "example": "fn main() s32 @public {\n    var i: s32 = 0;\n    var total: s32 = 0;\n\n    while i < 10 {\n        total += i;\n        i++;\n    }\n\n    return total;\n}"
+      "example": [
+        "fn main() s32 @public {\n    var i: s32 = 0;\n    var total: s32 = 0;\n\n    while i < 10 {\n        total += i;\n        i++;\n    }\n\n    return total;\n}",
+        "fn attemptsBeforeSuccess(limit: s32) s32 @public {\n    var attempts: s32 = 0;\n    var connected: bool = false;\n\n    while !connected && attempts < limit {\n        attempts++;\n\n        if attempts == 3 {\n            connected = true;\n        }\n    }\n\n    return attempts;\n}"
+      ]
     },
     "constants": {
       "title": "Constants",
@@ -621,7 +653,11 @@
         }
       ],
       "signatures": "const U32_SIZE: usize = sizeOf(u32);\nconst F64_ALIGN: u32 = alignOf(f64);\nconst READY: bool = true;",
-      "example": "const BUFFER_CAPACITY: usize = 1024;\n\nfn capacity() usize @public {\n    return BUFFER_CAPACITY;\n}"
+      "example": [
+        "const BUFFER_CAPACITY: usize = 1024;\n\nfn capacity() usize @public {\n    return BUFFER_CAPACITY;\n}",
+        "const MAX_NAME_BYTES: usize = 64;\n\nstruct NameBuffer @public {\n    bytes: array[char; MAX_NAME_BYTES],\n}\n\nfn nameCapacity() usize @public {\n    return MAX_NAME_BYTES;\n}",
+        "const HEADER_BYTES: usize = sizeOf(u32) + sizeOf(u16);\n\nfn hasCompleteHeader(length: usize) bool @public {\n    return length >= HEADER_BYTES;\n}"
+      ]
     },
     "functions": {
       "title": "Functions",
@@ -704,7 +740,10 @@
         }
       ],
       "signatures": "fn add[T](a: T, b: T) T @public {\n    return a + b;\n}\n\nstruct Vector[T] @public {\n    data: ptr[T],\n    length: usize,\n    capacity: usize,\n}",
-      "example": "fn main() s32 @public {\n    var value: s32 = add[s32](20, 22);\n\n    var vec := new Vector[s32] {\n        data: nullptr,\n        length: 0,\n        capacity: 0\n    };\n\n    return value + (vec->length as s32);\n}"
+      "example": [
+        "fn add[T](a: T, b: T) T @public {\n    return a + b;\n}\n\nfn main() s32 @public {\n    var subtotal: s32 = add[s32](20, 22);\n    var shipping: s32 = add(3, 4);\n\n    return subtotal + shipping;\n}",
+        "struct Slot[T] @public {\n    value: T,\n    occupied: bool,\n}\n\nfn filledSlot[T](value: T) Slot[T] @public {\n    return new Slot[T] {\n        value: value,\n        occupied: true,\n    };\n}\n\nfn main() s32 @public {\n    var slot := filledSlot[s32](42);\n\n    if slot->occupied {\n        return slot->value;\n    }\n\n    return 0;\n}"
+      ]
     },
     "modules": {
       "title": "Modules",
@@ -746,7 +785,11 @@
         }
       ],
       "signatures": "import std::io;\nimport std::collections::vector;\nimport \"other.thrust\" as dep;\nimport \"other.thrust\" only { stack, counter };",
-      "example": "import std::io;\n\nfn main() s32 @public {\n    io::print(\"module import works\\n\");\n    return 0;\n}"
+      "example": [
+        "import std::io;\n\nfn main() s32 @public {\n    io::print(\"module import works\\n\");\n    return 0;\n}",
+        "import std::collections::vector as vec;\n\nfn main() s32 @public {\n    var values := vec::newVector[s32]();\n\n    vec::push[s32](ref values, 10);\n    vec::push[s32](ref values, 20);\n\n    var total: s32 = vec::front[s32](ref values) + vec::back[s32](ref values);\n\n    vec::dropVector[s32](ref values);\n    return total;\n}",
+        "import std::io only { print };\n\nfn main() s32 @public {\n    print(\"selective import keeps this file small\\n\");\n    return 0;\n}"
+      ]
     },
     "statements": {
       "title": "Statements",
@@ -1134,7 +1177,11 @@
         }
       ],
       "signatures": "const SIZE: usize = sizeOf(u32);\nconst ALIGN: u32 = alignOf(u32);\n\nfn verifyTypes() void {\n    staticAssert(isSameType(u32, u32), \"type mismatch\");\n}",
-      "example": "const PTR_BITS: usize = pointerWidth();\n\nfn verify() void @public {\n    staticAssert(PTR_BITS == 64 or PTR_BITS == 32, \"unsupported pointer width\");\n}"
+      "example": [
+        "const PTR_BITS: usize = pointerWidth();\n\nfn verify() void @public {\n    staticAssert(PTR_BITS == 64 or PTR_BITS == 32, \"unsupported pointer width\");\n}",
+        "struct PacketHeader @public {\n    kind: u16,\n    length: u16,\n}\n\nconst HEADER_SIZE: usize = sizeOf(PacketHeader);\nconst HEADER_ALIGN: u32 = alignOf(PacketHeader);\n\nfn hasHeader(bytes: usize) bool @public {\n    staticAssert(HEADER_SIZE >= 4, \"packet header is too small\");\n    staticAssert(HEADER_ALIGN >= 1, \"packet header alignment is invalid\");\n\n    return bytes >= HEADER_SIZE;\n}",
+        "@if(isLinux()) const DEFAULT_CONFIG_DIR: CString = \"/etc/thrust\";\n@elif(isDarwin()) const DEFAULT_CONFIG_DIR: CString = \"/Library/Application Support/Thrust\";\n@else const DEFAULT_CONFIG_DIR: CString = \".\";\n\nfn configDir() CString @public {\n    return DEFAULT_CONFIG_DIR;\n}"
+      ]
     },
     "casts": {
       "title": "Casts",
@@ -1175,7 +1222,10 @@
         }
       ],
       "signatures": "var x: s32 = 10;\nvar y: u32 = x as u32;\nvar raw: ptr = y as ptr;",
-      "example": "fn toUnsigned(x: s32) u32 @public {\n    if x < 0 {\n        return 0;\n    }\n    return x as u32;\n}"
+      "example": [
+        "fn toUnsigned(x: s32) u32 @public {\n    if x < 0 {\n        return 0;\n    }\n    return x as u32;\n}",
+        "fn readFirst(raw: ptr) s32 @public {\n    if raw == nullptr {\n        return 0;\n    }\n\n    var values: ptr[s32] = raw as ptr[s32];\n    return (deref values);\n}"
+      ]
     },
     "loops": {
       "title": "Loops",
@@ -1216,7 +1266,11 @@
         }
       ],
       "signatures": "while index < length {\n    index++;\n}\n\nfor var i: s32 = 0; i < 10; i++; {\n    total += i;\n}\n\nloop {\n    if done {\n        break;\n    }\n}",
-      "example": "fn sumTo(n: s32) s32 @public {\n    var i: s32 = 0;\n    var acc: s32 = 0;\n\n    while i <= n {\n        acc += i;\n        i++;\n    }\n\n    return acc;\n}"
+      "example": [
+        "fn sumTo(n: s32) s32 @public {\n    var i: s32 = 0;\n    var acc: s32 = 0;\n\n    while i <= n {\n        acc += i;\n        i++;\n    }\n\n    return acc;\n}",
+        "fn countNonZero(values: ptr[s32], length: usize) usize @public {\n    var count: usize = 0;\n\n    for var i: usize = 0; i < length; i++; {\n        if values->[i] != 0 {\n            count++;\n        }\n    }\n\n    return count;\n}",
+        "fn findFirstNegative(values: ptr[s32], length: s32) s32 @public {\n    var index: s32 = 0;\n\n    while index < length {\n        if values->[index] < 0 {\n            return index;\n        }\n\n        index++;\n    }\n\n    return -1;\n}"
+      ]
     },
     "structs": {
       "title": "Structs",
@@ -1298,7 +1352,11 @@
         }
       ],
       "signatures": "enum Mode @public {\n    Fast: u32 = 0;\n    Safe: u32 = 1;\n    Debug: u32 = 2;\n}",
-      "example": "enum ExitCode @public {\n    Ok: s32 = 0;\n    InvalidInput: s32 = 1;\n    IOError: s32 = 2;\n}\n\nfn codeOf(value: s32) s32 @public {\n    if value == ExitCode=>Ok {\n        return 0;\n    }\n\n    if value == ExitCode=>InvalidInput {\n        return 1;\n    }\n\n    return ExitCode=>IOError;\n}"
+      "example": [
+        "enum ExitCode @public {\n    Ok: s32 = 0;\n    InvalidInput: s32 = 1;\n    IOError: s32 = 2;\n}\n\nfn codeOf(value: s32) s32 @public {\n    if value == ExitCode=>Ok {\n        return 0;\n    }\n\n    if value == ExitCode=>InvalidInput {\n        return 1;\n    }\n\n    return ExitCode=>IOError;\n}",
+        "enum LogLevel @public {\n    Error: u32 = 1;\n    Warn: u32 = 2;\n    Info: u32 = 3;\n}\n\nfn shouldPrint(messageLevel: u32, activeLevel: u32) bool @public {\n    return messageLevel <= activeLevel;\n}\n\nfn defaultLogLevel() u32 @public {\n    return LogLevel=>Info;\n}",
+        "enum FileState @public {\n    Missing: s32 = 0;\n    Ready: s32 = 1;\n    Busy: s32 = 2;\n}\n\nfn canRead(state: s32) bool @public {\n    return state == FileState=>Ready;\n}"
+      ]
     },
     "ffi": {
       "title": "Foreign Function Interface",
@@ -1422,7 +1480,10 @@
         }
       ],
       "signatures": "fn printValues(fmt: CString) s32 @public @arbitraryArgs {\n    // ...\n}\n\nfn readTwo(first: s32) s32 @public @arbitraryArgs {\n    var list: ptr = arbitraryArgs();\n    var a: s32 = arbitraryArgFrom(list, s32);\n    var b: s32 = arbitraryArgFrom(list, s32);\n    return a + b;\n}",
-      "example": "fn countArgs(first: s32) s32 @public @arbitraryArgs {\n    return arbitraryArgsCount() as s32;\n}\n\nfn main() s32 @public {\n    return countArgs(0, 1, 2, 3);\n}"
+      "example": [
+        "fn countArgs(first: s32) s32 @public @arbitraryArgs {\n    return arbitraryArgsCount() as s32;\n}\n\nfn main() s32 @public {\n    return countArgs(0, 1, 2, 3);\n}",
+        "fn sumExtraValues(label: CString) s32 @public @arbitraryArgs {\n    var args: ptr = arbitraryArgs();\n    var total: s32 = 0;\n    var index: usize = 0;\n\n    while index < arbitraryArgsCount() {\n        total += arbitraryArgFrom(args, s32);\n        index++;\n    }\n\n    return total;\n}\n\nfn main() s32 @public {\n    return sumExtraValues(\"scores\", 10 as s32, 20 as s32, 30 as s32);\n}"
+      ]
     },
     "atomics": {
       "title": "Atomic Operations",
@@ -1471,7 +1532,10 @@
         }
       ],
       "signatures": "fn example() void @public {\n    var atomicRelax counter: u32 = 10;\n    var old: u32 = atomicAdd(counter, 5);\n}",
-      "example": "fn main() s32 @public {\n    var atomicRelax counter: u32 = 20;\n    var expected: u32 = 20;\n    var swapped: bool = atomicCompareAndSwap(counter, expected, 30, atomicSync, atomicRelax);\n\n    if swapped && counter == 30 {\n        return 0;\n    }\n\n    return 1;\n}"
+      "example": [
+        "fn main() s32 @public {\n    var atomicRelax counter: u32 = 20;\n    var expected: u32 = 20;\n    var swapped: bool = atomicCompareAndSwap(counter, expected, 30, atomicSync, atomicRelax);\n\n    if swapped && counter == 30 {\n        return 0;\n    }\n\n    return 1;\n}",
+        "// Requires -mode unstable.\nfn main() s32 @public {\n    var atomicRelax nextTicket: u32 = 100;\n    var ticket: u32 = atomicAdd(nextTicket, 1);\n\n    if ticket == 100 && nextTicket == 101 {\n        return 0;\n    }\n\n    return 1;\n}"
+      ]
     },
     "assembler": {
       "title": "Inline Assembler",

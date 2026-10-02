@@ -73,7 +73,37 @@ fn srand(seed: u32) void @public @extern(&quot;srand&quot;) @convention(&quot;C&
 
     <section class="container section panel docs-content">
       <h2>Examples</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::random as c;
 
+// Seed C rand from the C clock. Use std::random for normal application code.
+fn seedFromTime() void @public {
+    c::srand(c::time(nullptr) as u32);
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::random as c;
+
+// Keep modulo-based rand usage local so it can be replaced later if needed.
+fn smallTicketNumber() s32 @public {
+    var value: s32 = c::rand();
+
+    if value &lt; 0 {
+        value = 0 - value;
+    }
+
+    return value % 100;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::random as c;
+
+// getentropy is available on Linux and Darwin in this raw C layer.
+@if(isLinux() || isDarwin()) fn fillRandomBytes(buffer: ptr, length: usize) bool @public {
+    if length &gt; 256 {
+        return false;
+    }
+
+    return c::getentropy(buffer, length) == 0;
+}
+@else fn fillRandomBytes(buffer: ptr, length: usize) bool @public {
+    return false;
+}</code></pre>
     </section>
 
     <section class="container section panel docs-content">
