@@ -1,7 +1,7 @@
 (function () {
   var groups = {
     package: {
-      version: "0.1.2",
+      version: "0.1.4",
       base: "https://github.com/thrustlang/torio/releases/download/",
       platforms: {
         windows: {
