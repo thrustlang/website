@@ -59,12 +59,6 @@ static mut depth: u16 @public @extern(&quot;depth&quot;) = 3;</code></pre>
       <h2>Behavior and Use</h2>
       <p>Assignments change the current value of a variable. In longer functions, avoid spreading related assignments far apart.</p>
       <p>Be careful with mutable static state. It is shared program state, so updates should happen through clear code paths.</p>
-      <h3>Best Practices</h3>
-      <ul>
-        <li>Prefer block-local variables over function-wide mutable state.</li>
-        <li>Reset temporary state explicitly between loop iterations when needed.</li>
-        <li>Keep static mutable variables behind dedicated API functions.</li>
-      </ul>
     </section>
 
     <section class="container section panel docs-content">

@@ -523,11 +523,7 @@
         "Fixed-width integers are best for public APIs and binary formats because their size is part of the name.",
         "Pointers and arrays mean different things. A pointer refers to memory elsewhere, while an array type describes a sequence of elements."
       ],
-      "guidance": [
-        "Prefer explicit widths like `u32` or `s64` when size matters.",
-        "Represent fixed-size protocol data with arrays, not dynamic buffers.",
-        "Use aliases when a plain type needs a clearer name."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Scalar Types",
@@ -582,11 +578,7 @@
         "Assignments change the current value of a variable. In longer functions, avoid spreading related assignments far apart.",
         "Be careful with mutable static state. It is shared program state, so updates should happen through clear code paths."
       ],
-      "guidance": [
-        "Prefer block-local variables over function-wide mutable state.",
-        "Reset temporary state explicitly between loop iterations when needed.",
-        "Keep static mutable variables behind dedicated API functions."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Local Declarations",
@@ -627,11 +619,7 @@
         "A constant cannot be reassigned. The compiler can use the value directly wherever the constant is referenced.",
         "Keep constants near the code or module they describe. Very large global constant files are harder to maintain."
       ],
-      "guidance": [
-        "Define capacities once and reuse them across modules.",
-        "Use constants to derive array sizes and static checks.",
-        "Name constants after what they mean, not just after their type."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Compile-Time Values",
@@ -672,11 +660,7 @@
         "Use the return type to make the result clear. If a function can fail, choose a status code, nullable pointer, or another convention and use it consistently.",
         "Put calling and linking attributes on functions that connect to outside code. Keep internal helpers simple."
       ],
-      "guidance": [
-        "Keep function bodies small and move complexity into helpers.",
-        "Document important input rules near the function declaration.",
-        "Keep exported functions focused on one job."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Signature Parts",
@@ -714,11 +698,7 @@
         "A generic instantiation behaves like ordinary concrete code after compilation.",
         "Generic functions should make their assumptions obvious from the operations they use on T."
       ],
-      "guidance": [
-        "Write type arguments explicitly where it helps readers understand the call.",
-        "Use generics for repeated patterns, not to hide unrelated behavior.",
-        "Be clear about who owns memory in generic containers."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Instantiation",
@@ -758,11 +738,7 @@
         "Imports should show what the file actually depends on. Avoid importing large modules when one or two names are enough.",
         "Use a consistent import style across nearby files so readers do not have to adjust to a new pattern each time."
       ],
-      "guidance": [
-        "Use `only` imports when a file needs just a few names.",
-        "Use aliases when module paths become repetitive.",
-        "Avoid circular imports by moving shared definitions into smaller files."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Import Forms",
@@ -804,11 +780,7 @@
         "Use early returns for invalid input or error cases when that makes the main path clearer.",
         "Avoid deeply nested conditionals when a small helper function would make the branch easier to understand."
       ],
-      "guidance": [
-        "Return early when input is invalid.",
-        "Keep branch bodies short and focused.",
-        "Use break and continue when they make the loop clearer."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Blocks and Branches",
@@ -845,11 +817,7 @@
         "Only the selected branch is kept. Each branch should still be valid for the target where it can be selected.",
         "If many files need the same target decision, put that decision in one small module instead of repeating it everywhere."
       ],
-      "guidance": [
-        "Use compile-time branches when the code really differs by target.",
-        "Keep branch predicates simple and testable.",
-        "Test each target branch so unused code does not go stale."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Selection Time",
@@ -886,11 +854,7 @@
         "Attribute order does not change what they mean, but using a consistent order makes declarations easier to read.",
         "Be careful with @extern and @convention. They describe how Thrust code connects to external symbols, so changing them can break linking or calls into C code."
       ],
-      "guidance": [
-        "Use @public only for symbols that should be visible outside the module.",
-        "Use @extern and @convention on functions that connect to outside code.",
-        "If an attribute combination is unusual, explain it near the declaration."
-      ],
+      "guidance": [],
       "attribute_catalog": [
         "@public - exports the declaration with public visibility. Required alongside @extern.",
         "@extern(\"symbol\") - binds a declaration to an external symbol name.",
@@ -979,12 +943,7 @@
         "Compile-time builtins are evaluated while the compiler processes the program, and memory and ABI builtins lower directly to low-level memory operations, ABI queries, or compiler-managed variadic argument access.",
         "When staticAssert or compileError fails, compilation stops immediately. Warnings produced by compileWarning continue compilation but still affect diagnostics output."
       ],
-      "guidance": [
-        "Use staticAssert for layout and target assumptions.",
-        "Store builtin results in named constants when they are reused.",
-        "Prefer the highest-level builtin that states your intent clearly, then drop to memory and ABI builtins only when you really need raw memory behavior or ABI-level access.",
-        "Write staticAssert messages that clearly say what failed."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Type Layout Builtins",
@@ -1196,11 +1155,7 @@
         "Narrowing casts can lose information. Check ranges before converting to a smaller type.",
         "Pointer casts should stay in low-level code where the memory layout is understood."
       ],
-      "guidance": [
-        "Check the range before converting to a smaller type.",
-        "Avoid casting back and forth repeatedly.",
-        "Keep cast-heavy code close to the low-level code that needs it."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Numeric Casts",
@@ -1240,11 +1195,7 @@
         "Use while when the condition is the main part of the loop. Use for when the initializer, condition, and step belong together. Use loop when the exit condition is inside the body.",
         "Use break and continue sparingly. They are helpful, but too many exits make a loop harder to follow."
       ],
-      "guidance": [
-        "Keep loop assumptions simple and visible near the loop.",
-        "Move values that do not change outside the loop.",
-        "Check bounds clearly when iterating over arrays."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Loop Forms",
@@ -1285,11 +1236,7 @@
         "Use field access to read or write named fields. If a field must stay consistent with another field, keep that update in a helper function.",
         "For structs shared with C code, check field order and field sizes against the C definition."
       ],
-      "guidance": [
-        "Initialize every field explicitly in helper constructors.",
-        "Avoid structs that group unrelated data.",
-        "Use dedicated functions for mutation when fields must stay in sync."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Fields and Construction",
@@ -1326,11 +1273,7 @@
         "Treat the listed members as the expected values for that domain.",
         "If those values must match an external format, keep that mapping in one place."
       ],
-      "guidance": [
-        "Use variant names that clearly describe the value.",
-        "Keep enum sets focused. Split unrelated states into separate enums.",
-        "Review enum changes carefully when other code depends on their values."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Members and Values",
@@ -1371,11 +1314,7 @@
         "@extern gives the linked symbol name.",
         "@convention(\"C\") uses the normal C calling convention."
       ],
-      "guidance": [
-        "Keep raw extern declarations in dedicated modules.",
-        "Prefer wrapper functions for code used by the rest of the program.",
-        "Retest external bindings when upgrading C libraries."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "External Symbols",
@@ -1412,11 +1351,7 @@
         "Dereferencing nullptr or another invalid pointer is unsafe. Validate pointers before using them.",
         "Pointer indexing should stay close to the code that knows the buffer size and layout."
       ],
-      "guidance": [
-        "Check pointers for null before dereference.",
-        "Keep pointer arithmetic in small, well-explained blocks.",
-        "Copy pointed values into locals when that makes the code simpler."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "References and Dereference",
@@ -1452,11 +1387,7 @@
         "For variadic functions defined in Thrust without @extern, the compiler prepends a hidden usize argument with the number of extra arguments. Use arbitraryArgsCount to read it.",
         "FFI variadic functions (@extern) keep the C ABI and do not carry the hidden count."
       ],
-      "guidance": [
-        "Use @noArgCount when forwarding arbitraryArgs() to an FFI variadic such as the vprintf family, so the ABI stays C-compatible.",
-        "A variadic function without @noArgCount emits the always-active W0033 warning.",
-        "Read arguments with arbitraryArgFrom in the same order they were passed."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Reading Arguments",
@@ -1498,11 +1429,7 @@
         "The operation inherits the ordering from the destination declaration. atomicNone and atomicFree do not describe an atomic operation and are rejected.",
         "Compare-and-swap follows the C11 model: expected is passed by address and is updated with the current value on failure. The builtin returns true when the swap happened."
       ],
-      "guidance": [
-        "Keep the destination's ordering modificator consistent with the operation.",
-        "Use the success and failure orderings so they remain valid for LLVM lowering.",
-        "Run with -mode unstable to use these builtins."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Read-Modify-Write Builtins",
@@ -1550,11 +1477,7 @@
         "Assembler functions accept parameters, a return type, and attributes like normal functions.",
         "The current asmfn parser expects assembler parameters as name Type without a colon. Assembler values (asm T { ... } { ... }) can carry attributes and typed arguments."
       ],
-      "guidance": [
-        "Use @asmSyntax(\"Intel\") or @asmSyntax(\"AT&T\") to choose the assembler syntax.",
-        "Global assembler is written at the top level with global_asm.",
-        "Run with -mode unstable to use assembler functions and values."
-      ],
+      "guidance": [],
       "reference_sections": [
         {
           "title": "Related Attributes",

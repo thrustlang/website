@@ -59,12 +59,6 @@ var value: s32 = (deref pointer);</code></pre>
       <h2>Behavior and Use</h2>
       <p>Dereferencing nullptr or another invalid pointer is unsafe. Validate pointers before using them.</p>
       <p>Pointer indexing should stay close to the code that knows the buffer size and layout.</p>
-      <h3>Best Practices</h3>
-      <ul>
-        <li>Check pointers for null before dereference.</li>
-        <li>Keep pointer arithmetic in small, well-explained blocks.</li>
-        <li>Copy pointed values into locals when that makes the code simpler.</li>
-      </ul>
     </section>
 
     <section class="container section panel docs-content">

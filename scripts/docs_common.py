@@ -336,9 +336,15 @@ def render_std_page(version: str, badge: str, slug: str, data: dict):
 
 def render_lang_page(version: str, badge: str, slug: str, data: dict):
     extra_sections = render_attribute_sections(data) + render_reference_sections(data)
+    guidance = data.get("guidance", [])
+    guidance_block = (
+        f"      <h3>Best Practices</h3>\n      <ul>\n{render_items(guidance)}\n      </ul>\n"
+        if guidance
+        else ""
+    )
 
     return f"""{render_head(data['title'] + ' ' + version, data['summary'], f'/documentation/{version}/language-reference/{slug}/')}
-  <main class=\"site-main\">\n{docs_hero(data['title'], data['summary'], version, badge)}\n    <section class=\"container section panel docs-content\">\n      <h2>Overview</h2>\n{render_paragraphs(data['overview'])}\n      <p class=\"muted\">Primary source: <code>{html.escape(data['source'])}</code></p>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Syntax Signatures</h2>\n      <pre class=\"code-thrust\"><code class=\"language-thrust\">{html.escape(data['signatures'])}</code></pre>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Behavior and Use</h2>\n{render_paragraphs(data['semantics'])}\n      <h3>Best Practices</h3>\n      <ul>\n{render_items(data['guidance'])}\n      </ul>\n    </section>\n\n{extra_sections}\n\n    <section class=\"container section panel docs-content\">\n      <h2>Example</h2>\n{render_code_blocks(data['example'])}\n      <p><a class=\"btn\" href=\"{doc_href(f'/documentation/{version}/language-reference/')}\">Back to language reference</a></p>\n    </section>\n  </main>\n{FOOTER}"""
+  <main class=\"site-main\">\n{docs_hero(data['title'], data['summary'], version, badge)}\n    <section class=\"container section panel docs-content\">\n      <h2>Overview</h2>\n{render_paragraphs(data['overview'])}\n      <p class=\"muted\">Primary source: <code>{html.escape(data['source'])}</code></p>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Syntax Signatures</h2>\n      <pre class=\"code-thrust\"><code class=\"language-thrust\">{html.escape(data['signatures'])}</code></pre>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Behavior and Use</h2>\n{render_paragraphs(data['semantics'])}\n{guidance_block}    </section>\n\n{extra_sections}\n\n    <section class=\"container section panel docs-content\">\n      <h2>Example</h2>\n{render_code_blocks(data['example'])}\n      <p><a class=\"btn\" href=\"{doc_href(f'/documentation/{version}/language-reference/')}\">Back to language reference</a></p>\n    </section>\n  </main>\n{FOOTER}"""
 
 
 def render_std_index(version: str, badge: str, pages: dict):

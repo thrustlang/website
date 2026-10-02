@@ -65,12 +65,6 @@ fn readTwo(first: s32) s32 @public @arbitraryArgs {
       <h2>Behavior and Use</h2>
       <p>For variadic functions defined in Thrust without @extern, the compiler prepends a hidden usize argument with the number of extra arguments. Use arbitraryArgsCount to read it.</p>
       <p>FFI variadic functions (@extern) keep the C ABI and do not carry the hidden count.</p>
-      <h3>Best Practices</h3>
-      <ul>
-        <li>Use @noArgCount when forwarding arbitraryArgs() to an FFI variadic such as the vprintf family, so the ABI stays C-compatible.</li>
-        <li>A variadic function without @noArgCount emits the always-active W0033 warning.</li>
-        <li>Read arguments with arbitraryArgFrom in the same order they were passed.</li>
-      </ul>
     </section>
 
     <section class="container section panel docs-content">

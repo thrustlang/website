@@ -62,13 +62,6 @@ fn verifyTypes() void {
       <h2>Behavior and Use</h2>
       <p>Compile-time builtins are evaluated while the compiler processes the program, and memory and ABI builtins lower directly to low-level memory operations, ABI queries, or compiler-managed variadic argument access.</p>
       <p>When staticAssert or compileError fails, compilation stops immediately. Warnings produced by compileWarning continue compilation but still affect diagnostics output.</p>
-      <h3>Best Practices</h3>
-      <ul>
-        <li>Use staticAssert for layout and target assumptions.</li>
-        <li>Store builtin results in named constants when they are reused.</li>
-        <li>Prefer the highest-level builtin that states your intent clearly, then drop to memory and ABI builtins only when you really need raw memory behavior or ABI-level access.</li>
-        <li>Write staticAssert messages that clearly say what failed.</li>
-      </ul>
     </section>
 
     <section class="container section panel docs-content">

@@ -60,12 +60,6 @@
       <p>The destination of an atomic operation must be a variable declared with an atomic ordering modificator, such as atomicRelax or atomicSync.</p>
       <p>The operation inherits the ordering from the destination declaration. atomicNone and atomicFree do not describe an atomic operation and are rejected.</p>
       <p>Compare-and-swap follows the C11 model: expected is passed by address and is updated with the current value on failure. The builtin returns true when the swap happened.</p>
-      <h3>Best Practices</h3>
-      <ul>
-        <li>Keep the destination&#x27;s ordering modificator consistent with the operation.</li>
-        <li>Use the success and failure orderings so they remain valid for LLVM lowering.</li>
-        <li>Run with -mode unstable to use these builtins.</li>
-      </ul>
     </section>
 
     <section class="container section panel docs-content">
