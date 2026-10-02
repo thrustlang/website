@@ -683,7 +683,10 @@
         }
       ],
       "signatures": "fn sum(a: s32, b: s32) s32 @public {\n    return a + b;\n}\n\nfn main() s32 @public {\n    return sum(2, 3);\n}",
-      "example": "fn clamp(x: s32, low: s32, high: s32) s32 @public {\n    if x < low {\n        return low;\n    }\n    if x > high {\n        return high;\n    }\n    return x;\n}"
+      "example": [
+        "fn clamp(x: s32, low: s32, high: s32) s32 @public {\n    if x < low {\n        return low;\n    }\n    if x > high {\n        return high;\n    }\n    return x;\n}",
+        "fn sendBytes(buffer: ptr[u8], length: usize) s32 @public {\n    if buffer == nullptr {\n        return 1;\n    }\n\n    if length == 0 {\n        return 2;\n    }\n\n    return 0;\n}\n\nfn main() s32 @public {\n    var payload: array[u8; 3] = fixed[10, 20, 30];\n    return sendBytes((ref payload) as ptr[u8], 3);\n}"
+      ]
     },
     "generics": {
       "title": "Generics",
@@ -802,7 +805,10 @@
         }
       ],
       "signatures": "if ready {\n    return 0;\n} else {\n    return 1;\n}\n\nbreak;\ncontinue;",
-      "example": "fn classify(n: s32) s32 @public {\n    if n < 0 {\n        return -1;\n    }\n    if n == 0 {\n        return 0;\n    }\n    return 1;\n}"
+      "example": [
+        "fn classify(n: s32) s32 @public {\n    if n < 0 {\n        return -1;\n    }\n    if n == 0 {\n        return 0;\n    }\n    return 1;\n}",
+        "fn firstPositive(values: ptr[s32], length: usize) s32 @public {\n    if values == nullptr {\n        return -1;\n    }\n\n    var index: usize = 0;\n\n    while index < length {\n        if values->[index] > 0 {\n            return values->[index];\n        }\n\n        index++;\n    }\n\n    return 0;\n}"
+      ]
     },
     "compile-time-conditionals": {
       "title": "Compile-Time Conditionals",
@@ -839,7 +845,10 @@
         }
       ],
       "signatures": "@if(isLinux()) const PLATFORM: u32 = 1;\n@elif(isWindows()) const PLATFORM: u32 = 2;\n@else const PLATFORM: u32 = 0;",
-      "example": "@if(isLinux()) const PLATFORM: u32 = 2;\n@elif(isWindows()) const PLATFORM: u32 = 1;\n@else const PLATFORM: u32 = 3;\n\nfn currentPlatform() u32 @public {\n    return PLATFORM;\n}"
+      "example": [
+        "@if(isLinux()) const PLATFORM: u32 = 2;\n@elif(isWindows()) const PLATFORM: u32 = 1;\n@else const PLATFORM: u32 = 3;\n\nfn currentPlatform() u32 @public {\n    return PLATFORM;\n}",
+        "fn defaultPathSeparatorCode() s32 @public {\n    @if(isWindows()) {\n        return 92;\n    } @else {\n        return 47;\n    }\n}"
+      ]
     },
     "attributes": {
       "title": "Attributes",
@@ -1258,7 +1267,10 @@
         }
       ],
       "signatures": "struct Pair @public {\n    left: s32,\n    right: s32,\n}\n\nvar p: Pair = new Pair {\n    left: 1,\n    right: 2,\n};",
-      "example": "struct Config @public {\n    threads: u32,\n    verbose: bool,\n}\n\nfn defaultConfig() Config @public {\n    return new Config {\n        threads: 4,\n        verbose: false,\n    };\n}"
+      "example": [
+        "struct Config @public {\n    threads: u32,\n    verbose: bool,\n}\n\nfn defaultConfig() Config @public {\n    return new Config {\n        threads: 4,\n        verbose: false,\n    };\n}",
+        "struct Counter @public {\n    value: s32,\n    limit: s32,\n}\n\nfn tick(counter: ptr[Counter]) bool @public {\n    if counter == nullptr {\n        return false;\n    }\n\n    if counter->value >= counter->limit {\n        return false;\n    }\n\n    counter->value = counter->value + 1;\n    return true;\n}"
+      ]
     },
     "enums": {
       "title": "Enums",
@@ -1336,7 +1348,10 @@
         }
       ],
       "signatures": "fn printf(fmt: const array[char]) s32\n    @public\n    @arbitraryArgs\n    @extern(\"printf\")\n    @convention(\"C\");\n\nfn atoi(text: const array[char]) s32\n    @public\n    @extern(\"atoi\")\n    @convention(\"C\");",
-      "example": "fn atoi(text: const array[char]) s32\n    @public\n    @extern(\"atoi\")\n    @convention(\"C\");\n\nfn parseInt(text: const array[char]) s32 @public {\n    return atoi(text);\n}"
+      "example": [
+        "fn atoi(text: const array[char]) s32\n    @public\n    @extern(\"atoi\")\n    @convention(\"C\");\n\nfn parseInt(text: const array[char]) s32 @public {\n    return atoi(text);\n}",
+        "fn puts(text: CString) s32\n    @public\n    @extern(\"puts\")\n    @convention(\"C\");\n\nfn printStatus(ok: bool) s32 @public {\n    if ok {\n        return puts(\"ready\");\n    }\n\n    return puts(\"not ready\");\n}"
+      ]
     },
     "deref": {
       "title": "Deref and Pointers",
@@ -1373,7 +1388,10 @@
         }
       ],
       "signatures": "var number: s32 = 42;\nvar pointer: ptr[s32] = ref number;\nvar value: s32 = (deref pointer);",
-      "example": "fn readOrZero(pointer: ptr[s32]) s32 @public {\n    if pointer == nullptr {\n        return 0;\n    }\n\n    return (deref pointer);\n}\n\nfn main() s32 @public {\n    var number: s32 = 42;\n    return readOrZero(ref number);\n}"
+      "example": [
+        "fn readOrZero(pointer: ptr[s32]) s32 @public {\n    if pointer == nullptr {\n        return 0;\n    }\n\n    return (deref pointer);\n}\n\nfn main() s32 @public {\n    var number: s32 = 42;\n    return readOrZero(ref number);\n}",
+        "fn writeIfPresent(pointer: ptr[s32], value: s32) bool @public {\n    if pointer == nullptr {\n        return false;\n    }\n\n    pointer->[0] = value;\n    return true;\n}\n\nfn main() s32 @public {\n    var saved: s32 = 0;\n\n    if writeIfPresent(ref saved, 7) {\n        return (deref (ref saved));\n    }\n\n    return 1;\n}"
+      ]
     },
     "variadic": {
       "title": "Variadic Functions",
