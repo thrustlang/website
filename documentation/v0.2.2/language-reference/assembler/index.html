@@ -61,12 +61,6 @@
       <p>An assembler function body has two blocks: the assembler lines and the constraints.</p>
       <p>Assembler functions accept parameters, a return type, and attributes like normal functions.</p>
       <p>The current asmfn parser expects assembler parameters as name Type without a colon. Assembler values (asm T { ... } { ... }) can carry attributes and typed arguments.</p>
-      <h3>Best Practices</h3>
-      <ul>
-        <li>Use @asmSyntax(&quot;Intel&quot;) or @asmSyntax(&quot;AT&amp;T&quot;) to choose the assembler syntax.</li>
-        <li>Global assembler is written at the top level with global_asm.</li>
-        <li>Run with -mode unstable to use assembler functions and values.</li>
-      </ul>
     </section>
 
     <section class="container section panel docs-content">

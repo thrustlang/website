@@ -62,12 +62,6 @@ var fixedValues: array[u16; 4] = fixed[0, 1, 2, 3];</code></pre>
       <h2>Behavior and Use</h2>
       <p>Fixed-width integers are best for public APIs and binary formats because their size is part of the name.</p>
       <p>Pointers and arrays mean different things. A pointer refers to memory elsewhere, while an array type describes a sequence of elements.</p>
-      <h3>Best Practices</h3>
-      <ul>
-        <li>Prefer explicit widths like `u32` or `s64` when size matters.</li>
-        <li>Represent fixed-size protocol data with arrays, not dynamic buffers.</li>
-        <li>Use aliases when a plain type needs a clearer name.</li>
-      </ul>
     </section>
 
     <section class="container section panel docs-content">

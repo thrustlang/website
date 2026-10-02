@@ -59,12 +59,6 @@ var raw: ptr = y as ptr;</code></pre>
       <h2>Behavior and Use</h2>
       <p>Narrowing casts can lose information. Check ranges before converting to a smaller type.</p>
       <p>Pointer casts should stay in low-level code where the memory layout is understood.</p>
-      <h3>Best Practices</h3>
-      <ul>
-        <li>Check the range before converting to a smaller type.</li>
-        <li>Avoid casting back and forth repeatedly.</li>
-        <li>Keep cast-heavy code close to the low-level code that needs it.</li>
-      </ul>
     </section>
 
     <section class="container section panel docs-content">
