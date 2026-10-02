@@ -100,6 +100,23 @@ fn defaultConfig() Config @public {
         verbose: false,
     };
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">struct Counter @public {
+    value: s32,
+    limit: s32,
+}
+
+fn tick(counter: ptr[Counter]) bool @public {
+    if counter == nullptr {
+        return false;
+    }
+
+    if counter-&gt;value &gt;= counter-&gt;limit {
+        return false;
+    }
+
+    counter-&gt;value = counter-&gt;value + 1;
+    return true;
+}</code></pre>
       <p><a class="btn" href="/website/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

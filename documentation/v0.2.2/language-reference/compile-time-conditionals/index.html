@@ -90,6 +90,13 @@
 fn currentPlatform() u32 @public {
     return PLATFORM;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">fn defaultPathSeparatorCode() s32 @public {
+    @if(isWindows()) {
+        return 92;
+    } @else {
+        return 47;
+    }
+}</code></pre>
       <p><a class="btn" href="/website/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

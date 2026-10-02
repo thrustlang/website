@@ -95,6 +95,24 @@ fn main() s32 @public {
     var number: s32 = 42;
     return readOrZero(ref number);
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">fn writeIfPresent(pointer: ptr[s32], value: s32) bool @public {
+    if pointer == nullptr {
+        return false;
+    }
+
+    pointer-&gt;[0] = value;
+    return true;
+}
+
+fn main() s32 @public {
+    var saved: s32 = 0;
+
+    if writeIfPresent(ref saved, 7) {
+        return (deref (ref saved));
+    }
+
+    return 1;
+}</code></pre>
       <p><a class="btn" href="/website/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

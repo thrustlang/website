@@ -97,6 +97,22 @@ fn main() s32 @public {
     }
     return x;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">fn sendBytes(buffer: ptr[u8], length: usize) s32 @public {
+    if buffer == nullptr {
+        return 1;
+    }
+
+    if length == 0 {
+        return 2;
+    }
+
+    return 0;
+}
+
+fn main() s32 @public {
+    var payload: array[u8; 3] = fixed[10, 20, 30];
+    return sendBytes((ref payload) as ptr[u8], 3);
+}</code></pre>
       <p><a class="btn" href="/website/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

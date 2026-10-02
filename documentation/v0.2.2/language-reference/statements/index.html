@@ -97,6 +97,23 @@ continue;</code></pre>
     }
     return 1;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">fn firstPositive(values: ptr[s32], length: usize) s32 @public {
+    if values == nullptr {
+        return -1;
+    }
+
+    var index: usize = 0;
+
+    while index &lt; length {
+        if values-&gt;[index] &gt; 0 {
+            return values-&gt;[index];
+        }
+
+        index++;
+    }
+
+    return 0;
+}</code></pre>
       <p><a class="btn" href="/website/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

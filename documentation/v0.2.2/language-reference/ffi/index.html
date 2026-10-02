@@ -98,6 +98,18 @@ fn atoi(text: const array[char]) s32
 fn parseInt(text: const array[char]) s32 @public {
     return atoi(text);
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">fn puts(text: CString) s32
+    @public
+    @extern(&quot;puts&quot;)
+    @convention(&quot;C&quot;);
+
+fn printStatus(ok: bool) s32 @public {
+    if ok {
+        return puts(&quot;ready&quot;);
+    }
+
+    return puts(&quot;not ready&quot;);
+}</code></pre>
       <p><a class="btn" href="/website/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>
