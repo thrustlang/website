@@ -280,6 +280,27 @@ fn verifyTypes() void {
 fn verify() void @public {
     staticAssert(PTR_BITS == 64 or PTR_BITS == 32, &quot;unsupported pointer width&quot;);
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">struct PacketHeader @public {
+    kind: u16,
+    length: u16,
+}
+
+const HEADER_SIZE: usize = sizeOf(PacketHeader);
+const HEADER_ALIGN: u32 = alignOf(PacketHeader);
+
+fn hasHeader(bytes: usize) bool @public {
+    staticAssert(HEADER_SIZE &gt;= 4, &quot;packet header is too small&quot;);
+    staticAssert(HEADER_ALIGN &gt;= 1, &quot;packet header alignment is invalid&quot;);
+
+    return bytes &gt;= HEADER_SIZE;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">@if(isLinux()) const DEFAULT_CONFIG_DIR: CString = &quot;/etc/thrust&quot;;
+@elif(isDarwin()) const DEFAULT_CONFIG_DIR: CString = &quot;/Library/Application Support/Thrust&quot;;
+@else const DEFAULT_CONFIG_DIR: CString = &quot;.&quot;;
+
+fn configDir() CString @public {
+    return DEFAULT_CONFIG_DIR;
+}</code></pre>
       <p><a class="btn" href="/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

@@ -104,6 +104,22 @@ fn readTwo(first: s32) s32 @public @arbitraryArgs {
 fn main() s32 @public {
     return countArgs(0, 1, 2, 3);
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">fn sumExtraValues(label: CString) s32 @public @arbitraryArgs {
+    var args: ptr = arbitraryArgs();
+    var total: s32 = 0;
+    var index: usize = 0;
+
+    while index &lt; arbitraryArgsCount() {
+        total += arbitraryArgFrom(args, s32);
+        index++;
+    }
+
+    return total;
+}
+
+fn main() s32 @public {
+    return sumExtraValues(&quot;scores&quot;, 10 as s32, 20 as s32, 30 as s32);
+}</code></pre>
       <p><a class="btn" href="/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

@@ -1,9 +1,9 @@
 {
   "title": "Compiler Command Line Reference",
-  "summary": "Detailed reference for the Thrust compiler command line flags in v0.2.1.",
+  "summary": "Detailed reference for the Thrust compiler command line flags.",
   "source": "thrustc/thrustc_cli/src/help.rs",
   "overview": [
-    "This section explains the command line flags available in Thrust Compiler v0.2.1 and what each group of options is for in normal workflows.",
+    "This section explains the command line flags available in the Thrust Compiler and what each group of options is for in normal workflows.",
     "Use it as a practical reference when you need to choose a target, tune optimization, inspect compiler output, configure linking, or control diagnostics.",
     "Each category groups together the public flags shown by the compiler help and includes accepted values, examples, and short usage notes."
   ],
@@ -638,7 +638,7 @@
           "description": "Select the ABI used for code generation.",
           "details": [
             "The ABI affects calling conventions, data passing rules, and interoperability with external code.",
-            "In v0.2.1, the public help also lists `webassembly` as an available ABI option."
+            "The public help lists `webassembly` as an available ABI option."
           ],
           "examples": [
             "thrustc main.thrust -abi system-v",
@@ -1089,7 +1089,7 @@
           "allowed_values": [],
           "description": "Disable the default optimization work that would otherwise happen even without an explicit optimization flag.",
           "details": [
-            "This is the spelling used in the v0.2.1 compiler help.",
+            "This is the spelling used in the compiler help.",
             "It disables baseline optimization behavior even when no explicit `-opt` flag is selected."
           ],
           "examples": [

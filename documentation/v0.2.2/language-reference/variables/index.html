@@ -101,6 +101,20 @@ static mut depth: u16 @public @extern(&quot;depth&quot;) = 3;</code></pre>
 
     return total;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">fn attemptsBeforeSuccess(limit: s32) s32 @public {
+    var attempts: s32 = 0;
+    var connected: bool = false;
+
+    while !connected &amp;&amp; attempts &lt; limit {
+        attempts++;
+
+        if attempts == 3 {
+            connected = true;
+        }
+    }
+
+    return attempts;
+}</code></pre>
       <p><a class="btn" href="/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

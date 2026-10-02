@@ -94,6 +94,20 @@ const READY: bool = true;</code></pre>
 fn capacity() usize @public {
     return BUFFER_CAPACITY;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">const MAX_NAME_BYTES: usize = 64;
+
+struct NameBuffer @public {
+    bytes: array[char; MAX_NAME_BYTES],
+}
+
+fn nameCapacity() usize @public {
+    return MAX_NAME_BYTES;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">const HEADER_BYTES: usize = sizeOf(u32) + sizeOf(u16);
+
+fn hasCompleteHeader(length: usize) bool @public {
+    return length &gt;= HEADER_BYTES;
+}</code></pre>
       <p><a class="btn" href="/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

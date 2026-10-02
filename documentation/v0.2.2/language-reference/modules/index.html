@@ -97,6 +97,25 @@ fn main() s32 @public {
     io::print(&quot;module import works\n&quot;);
     return 0;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::collections::vector as vec;
+
+fn main() s32 @public {
+    var values := vec::newVector[s32]();
+
+    vec::push[s32](ref values, 10);
+    vec::push[s32](ref values, 20);
+
+    var total: s32 = vec::front[s32](ref values) + vec::back[s32](ref values);
+
+    vec::dropVector[s32](ref values);
+    return total;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::io only { print };
+
+fn main() s32 @public {
+    print(&quot;selective import keeps this file small\n&quot;);
+    return 0;
+}</code></pre>
       <p><a class="btn" href="/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

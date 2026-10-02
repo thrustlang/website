@@ -75,7 +75,32 @@ fn putenv(assignment: CString)   s32     @public @extern(&quot;putenv&quot;)    
 
     <section class="container section panel docs-content">
       <h2>Examples</h2>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::env as c;
 
+// Keep raw getenv behind a small helper so the rest of the program does not
+// have to deal with null C pointers directly.
+fn pathOrDefault() CString @public {
+    var value: CString = c::getenv(&quot;PATH&quot;);
+
+    if (value as ptr[char]) == nullptr {
+        return &quot;/usr/bin&quot;;
+    }
+
+    return value;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::env as c;
+
+// This writes process-wide state. Prefer std::env in application code unless
+// the raw C behavior is exactly what you need.
+fn enableLocalMode() bool @public {
+    return c::setenv(&quot;THRUST_MODE&quot;, &quot;local&quot;, 1) == 0;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::ffi::c::env as c;
+
+// A tiny cleanup wrapper keeps the raw unsetenv result visible to callers.
+fn clearLocalMode() s32 @public {
+    return c::unsetenv(&quot;THRUST_MODE&quot;);
+}</code></pre>
     </section>
 
     <section class="container section panel docs-content">

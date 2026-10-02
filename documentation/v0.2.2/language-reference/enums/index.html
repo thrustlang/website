@@ -108,6 +108,28 @@ fn codeOf(value: s32) s32 @public {
 
     return ExitCode=&gt;IOError;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">enum LogLevel @public {
+    Error: u32 = 1;
+    Warn: u32 = 2;
+    Info: u32 = 3;
+}
+
+fn shouldPrint(messageLevel: u32, activeLevel: u32) bool @public {
+    return messageLevel &lt;= activeLevel;
+}
+
+fn defaultLogLevel() u32 @public {
+    return LogLevel=&gt;Info;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">enum FileState @public {
+    Missing: s32 = 0;
+    Ready: s32 = 1;
+    Busy: s32 = 2;
+}
+
+fn canRead(state: s32) bool @public {
+    return state == FileState=&gt;Ready;
+}</code></pre>
       <p><a class="btn" href="/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

@@ -110,6 +110,30 @@ loop {
 
     return acc;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">fn countNonZero(values: ptr[s32], length: usize) usize @public {
+    var count: usize = 0;
+
+    for var i: usize = 0; i &lt; length; i++; {
+        if values-&gt;[i] != 0 {
+            count++;
+        }
+    }
+
+    return count;
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">fn findFirstNegative(values: ptr[s32], length: s32) s32 @public {
+    var index: s32 = 0;
+
+    while index &lt; length {
+        if values-&gt;[index] &lt; 0 {
+            return index;
+        }
+
+        index++;
+    }
+
+    return -1;
+}</code></pre>
       <p><a class="btn" href="/documentation/v0.2.2/language-reference/index.html">Back to language reference</a></p>
     </section>
   </main>

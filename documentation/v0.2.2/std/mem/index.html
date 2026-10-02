@@ -181,6 +181,28 @@ fn main() s32 @public {
 
     return 1;
 }</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::mem;
+
+// Allocate zeroed counters for code that will fill them later.
+fn createCounters(count: usize) ptr @public {
+    return mem::allocateZeroedMemory(count, sizeOf(s32));
+}
+
+fn destroyCounters(counters: ptr) void @public {
+    if counters != nullptr {
+        mem::freeMemory(counters);
+    }
+}</code></pre>
+      <pre class="code-thrust"><code class="language-thrust">import std::mem;
+
+// Compare a small binary header without copying it into a struct first.
+fn sameHeader(left: ptr, right: ptr) bool @public {
+    return mem::compareMemory(left, right, 16) == 0;
+}
+
+fn containsTerminator(buffer: ptr, length: usize) bool @public {
+    return mem::findByteInMemory(buffer, 0, length) != nullptr;
+}</code></pre>
     </section>
 
     <section class="container section panel docs-content">
