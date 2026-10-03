@@ -16,7 +16,7 @@ from docs_common import (
     save_versions,
 )
 
-def commit_release(new_version: str) -> None:
+def commit_new_version(new_version: str) -> None:
     subprocess.run(["git", "add", "documentation"], check=True)
 
     result = subprocess.run(
@@ -28,10 +28,10 @@ def commit_release(new_version: str) -> None:
         print("no documentation changes to commit")
         return
 
-    subprocess.run(["git", "commit", "-m", f"Release docs {new_version}"], check=True)
+    subprocess.run(["git", "commit", "-m", f"Create new version {new_version}"], check=True)
 
 
-def release_documentation(new_version: str, source_version: str | None = None, commit: bool = True) -> None:
+def create_new_version(new_version: str, source_version: str | None = None, commit: bool = True) -> None:
     versions = load_versions()
 
     original_versions = {
@@ -91,18 +91,18 @@ def release_documentation(new_version: str, source_version: str | None = None, c
         raise
 
     if commit:
-        commit_release(new_version)
+        commit_new_version(new_version)
 
-    print(f"released {new_version} from {source}")
+    print(f"created {new_version} from {source}")
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description="Release a new documentation version.",
+        description="Create a new documentation version.",
         epilog=(
             "Examples:\n"
-            "  python scripts/release_docs.py --new-version v0.2.2\n"
-            "  python scripts/release_docs.py --new-version v0.2.2 --from v0.2.1\n"
-            "  python scripts/release_docs.py --new-version v0.2.2 --no-commit"
+            "  python scripts/create_new_version.py --new-version v0.2.2\n"
+            "  python scripts/create_new_version.py --from v0.2.1 --new-version v0.2.2\n"
+            "  python scripts/create_new_version.py --new-version v0.2.2 --no-commit"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -112,12 +112,12 @@ def main(argv=None):
     parser.add_argument(
         "--no-commit",
         action="store_true",
-        help="Generate the release without creating the release commit.",
+        help="Generate the version files without creating the version commit.",
     )
 
     args = parser.parse_args(argv)
 
-    release_documentation(args.new_version, args.from_version, not args.no_commit)
+    create_new_version(args.new_version, args.from_version, not args.no_commit)
 
 
 if __name__ == "__main__":

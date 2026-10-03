@@ -33,34 +33,3 @@ $ python scripts/archive_docs.py --version v0.2.0
 ```console
 $ python scripts/archive_docs.py --version v0.2.0
 ```
-
-## Files Touched
-
-The script may update:
-
-- `documentation/versions.json`
-- `documentation/index.html`
-- `documentation/<version>/...`
-
-## What The Script Does Not Do
-
-The script does not:
-
-- delete the archived documentation
-- move the content to another location
-- promote another version automatically
-
-## Common Errors
-
-### Cannot Archive The Latest Version
-
-The target version is still the current latest version.
-
-### Unknown Version
-
-The target version is not registered in `documentation/versions.json`.
-
-## Notes
-
-> [!NOTE]
-> Archiving is a public status change. The versioned documentation remains available through its stable URL.

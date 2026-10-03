@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'Release docs ')
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'Create new version ')
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

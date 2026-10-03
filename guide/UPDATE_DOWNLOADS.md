@@ -66,17 +66,3 @@ Run the same update as a test first:
 ```console
 $ python scripts/update_downloads.py --from-version v0.2.1 --to-version v0.2.2 --test
 ```
-
-## Files It Changes
-
-- `assets/js/downloads.js`
-- `en/index.html`
-- `es/index.html`
-- `en/downloads/index.html`
-- `es/downloads/index.html`
-
-## Common Mistakes
-
-- passing a `--from-version` that does not match the current version in `assets/js/downloads.js`
-- assuming `--test` writes files
-- updating downloads before the matching GitHub Release assets exist

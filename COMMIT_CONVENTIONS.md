@@ -21,7 +21,7 @@ Valid locations:
 - `site` Any location that usually involves the public pages of the website, including the landing pages and general HTML structure.
 - `docs` Any location that usually involves the versioned documentation, editable documentation content, documentation assets, or documentation pages under `documentation/`.
 - `assets` Any location that usually involves website shared CSS, Javascript, images, icons, and brand resources under `assets/`.
-- `scripts` Any location that usually involves the Python tooling used to build, update, release, or archive documentation under `scripts/`.
+- `scripts` Any location that usually involves the Python tooling used to build, update, create, or archive documentation under `scripts/`.
 - `project` Any location that usually involves repository level files, guides, metadata, or general project maintenance.
 
 Example:
@@ -39,7 +39,7 @@ Valid locations:
 - `site` Any location that usually involves the public pages of the website, including the landing pages and general HTML structure.
 - `docs` Any location that usually involves the versioned documentation, editable documentation content, documentation assets, or documentation pages under `documentation/`.
 - `assets` Any location that usually involves website shared CSS, Javascript, images, icons, and brand resources under `assets/`.
-- `scripts` Any location that usually involves the Python tooling used to build, update, release, or archive documentation under `scripts/`.
+- `scripts` Any location that usually involves the Python tooling used to build, update, create, or archive documentation under `scripts/`.
 - `project` Any location that usually involves repository level files, guides, metadata, or general project maintenance.
 
 Any consecutive location written next to another one needs to be followed by a COMMA character `,`.

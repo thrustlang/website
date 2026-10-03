@@ -88,7 +88,7 @@ Each item in `versions` describes one public documentation version.
 | `label` | string | Human-readable label shown in selectors and cards. |
 | `status` | string | Public status. Expected values are `current` and `archived`. |
 
-`scripts/release_docs.py` inserts the new version at the front, marks it as `current`, and marks older versions as `archived`.
+`scripts/create_new_version.py` inserts the new version at the front, marks it as `current`, and marks older versions as `archived`.
 
 `scripts/archive_docs.py` changes a non-latest version to `archived`.
 
@@ -389,14 +389,14 @@ The scripts under `scripts/` edit or consume the source JSON.
 | --- | --- |
 | `scripts/create_docs.py` | Adds a new page entry to `pages.json` and rebuilds docs. |
 | `scripts/update_docs.py` | Updates an existing field in `pages.json` or `compiler-command-line-reference.json` and rebuilds docs. |
-| `scripts/release_docs.py` | Copies source JSON from one version to a new version, updates `versions.json`, rebuilds docs, and creates the release commit by default. |
+| `scripts/create_new_version.py` | Copies source JSON from one version to a new version, updates `versions.json`, rebuilds docs, and creates the version commit by default. |
 | `scripts/archive_docs.py` | Updates `versions.json` status for a non-latest version and rebuilds docs. |
 | `scripts/generate_std_social_cards.py` | Reads `pages.json` and writes PNG social cards for std pages. |
 
 ## Editing Rules
 
 - Edit `documentation/content/<version>/*.json` for documentation content changes.
-- Edit `documentation/versions.json` only for version state changes, preferably through release or archive scripts.
+- Edit `documentation/versions.json` only for version state changes, preferably through create-new-version or archive scripts.
 - Do not manually edit generated HTML unless you intend to lose those changes on the next rebuild.
 - Do not manually edit `documentation/<version>/search-index.json`; it is generated.
 - Keep arrays as arrays even when they contain one item.

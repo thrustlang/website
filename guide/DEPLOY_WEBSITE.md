@@ -38,13 +38,6 @@ PS> powershell -ExecutionPolicy Bypass -File scripts/deploy-website.ps1
 4. Replaces the branch contents with the built website.
 5. Commits and pushes only when files changed.
 
-## Environment Overrides
-
-| Variable | What It Means | Default |
-| --- | --- | --- |
-| `BASE_PATH` | Deployment base path | `/website` |
-| `PYTHON_BIN` | Python executable | `python3` on Unix shells, `python` on Windows |
-
 ## Files It Changes
 
 - temporary build directories

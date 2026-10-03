@@ -63,33 +63,6 @@ $ python scripts/update_docs.py --version v0.2.1 --section std --slug io --field
 $ python scripts/update_docs.py --version v0.2.1 --section compiler-command-line-reference --category compiler-flags --flag -emit --field description --value "Emit one selected compilation artifact."
 ```
 
-## Files Touched
-
-The script may update:
-
-- `documentation/content/<version>/pages.json`
-- `documentation/index.html`
-- `documentation/<version>/...`
-- `documentation/<version>/search-index.json`
-
-## Common Errors
-
-### Unknown Version
-
-The requested version is not registered in `documentation/versions.json`.
-
-### Unknown Page
-
-The `--section` and `--slug` combination does not exist in the current content manifest.
-
-### Unknown Field
-
-The page exists, but that page does not expose the field you tried to replace.
-
-### Invalid Value Type
-
-The new value does not match the existing field type.
-
 ## Notes
 
 > [!IMPORTANT]

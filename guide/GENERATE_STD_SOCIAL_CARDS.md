@@ -54,7 +54,3 @@ Generate one module:
 ```console
 $ python scripts/generate_std_social_cards.py --version v0.2.1 --slug mem
 ```
-
-## Files It Changes
-
-- `documentation/<version>/social/std/*.png`
