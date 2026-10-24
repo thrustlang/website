@@ -54,7 +54,7 @@ def planned_change(path: Path, before: str, after: str, count: int) -> None:
     print(f"  {before} -> {after}, {count} occurrence{'s' if count != 1 else ''}")
 
 
-def update_downloads(from_version: str, to_version: str, test: bool = False) -> None:
+def update_downloads(from_version: str, to_version: str) -> None:
     expected = normalize_version(from_version)
     target = normalize_version(to_version)
     expected_label = display_version(expected)
@@ -87,20 +87,11 @@ def update_downloads(from_version: str, to_version: str, test: bool = False) -> 
         print("No changes needed.")
         return
 
-    if test:
-        print("\nTest mode: no files will be changed.")
-        print("\nFiles that would change:")
-    else:
-        print("\nFiles changed:")
+    print("\nFiles changed:")
 
     for path, before, after, count, next_text in changes:
         planned_change(path, before, after, count)
-
-        if not test:
-            path.write_text(next_text)
-
-    if test:
-        print("\nNo files changed.")
+        path.write_text(next_text)
 
 
 def main(argv=None) -> None:
@@ -109,16 +100,15 @@ def main(argv=None) -> None:
         epilog=(
             "Examples:\n"
             "  python scripts/update_downloads.py --from-version 0.2.1 --to-version 0.2.2\n"
-            "  python scripts/update_downloads.py --from-version v0.2.1 --to-version v0.2.2 --test"
+            "  python scripts/update_downloads.py --from-version v0.2.1 --to-version v0.2.2"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--from-version", required=True, help="Current downloads version, with or without leading v.")
     parser.add_argument("--to-version", required=True, help="New downloads version, with or without leading v.")
-    parser.add_argument("--test", action="store_true", help="Show planned changes without writing files.")
 
     args = parser.parse_args(argv)
-    update_downloads(args.from_version, args.to_version, args.test)
+    update_downloads(args.from_version, args.to_version)
 
 
 if __name__ == "__main__":

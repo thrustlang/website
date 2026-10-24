@@ -2,65 +2,110 @@ $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectDir = (Get-Item (Join-Path $ScriptDir "..")).FullName
-$BasePath = if ($env:BASE_PATH) { $env:BASE_PATH } else { "/website" }
-$PythonBin = if ($env:PYTHON_BIN) { $env:PYTHON_BIN } else { "python" }
-$TempSite = Join-Path $env:TEMP "thrust-website-pages"
-$PagesWorktree = Join-Path $env:TEMP "thrust-website-gh-pages"
+
+$Repo = if ($env:REPO) { $env:REPO } else { "" }
+$Workflow = if ($env:WORKFLOW) { $env:WORKFLOW } else { "deploy-pages.yml" }
+$Ref = if ($env:REF) { $env:REF } else { "master" }
+$Wait = if ($env:WAIT) { $env:WAIT } else { "1" }
+$Platform = if ($env:PLATFORM) { $env:PLATFORM } else { "" }
+$Version = if ($env:VERSION) { $env:VERSION } else { "" }
 
 Set-Location $ProjectDir
 
-if ($env:REMOTE_NAME) {
-    $Remote = $env:REMOTE_NAME
-} elseif (git remote get-url origin 2>$null) {
-    $Remote = "origin"
-} else {
-    $Remote = (git remote | Select-Object -First 1)
+if ($env:BASE_PATH -or $env:PYTHON_BIN -or $env:REMOTE_NAME) {
+    Write-Warning "BASE_PATH, PYTHON_BIN and REMOTE_NAME are no longer used."
 }
 
-if (-not $Remote) {
-    throw "No git remote configured. Add one or set REMOTE_NAME."
+if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+    throw "The GitHub CLI (gh) is required."
 }
 
-Write-Host "Using project directory: $ProjectDir" -ForegroundColor Cyan
-Write-Host "Using remote: $Remote" -ForegroundColor Cyan
-
-$remoteBranch = git ls-remote --heads $Remote gh-pages
-if (-not $remoteBranch) {
-    Write-Host "Branch 'gh-pages' not found on remote '$Remote'. Creating it from a temporary repository..." -ForegroundColor Yellow
-    $TempEmpty = Join-Path $env:TEMP ("thrust-website-empty-gh-pages-" + [guid]::NewGuid())
-    New-Item -ItemType Directory -Path $TempEmpty | Out-Null
-    git -C $TempEmpty init
-    git -C $TempEmpty commit --allow-empty -m "Initial gh-pages commit"
-    $RemoteUrl = git remote get-url $Remote
-    git -C $TempEmpty push $RemoteUrl HEAD:gh-pages
-    Remove-Item -Recurse -Force $TempEmpty
+gh auth status 2>$null | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    throw "gh is not authenticated. Run 'gh auth login' first."
 }
 
-Write-Host "Building website for $BasePath..."
-if (Test-Path $TempSite) { Remove-Item -Recurse -Force $TempSite }
-& $PythonBin "scripts/normalize_website_path_for_gh_pages.py" --base-path $BasePath --output $TempSite
+if (-not $Repo) {
+    $Repo = gh repo view --json nameWithOwner --jq .nameWithOwner
 
-Write-Host "Deploying website to GitHub Pages..."
-if (Test-Path $PagesWorktree) { Remove-Item -Recurse -Force $PagesWorktree }
-git fetch $Remote gh-pages
-git worktree add --detach $PagesWorktree FETCH_HEAD
-
-Push-Location $PagesWorktree
-    Get-ChildItem -Exclude .git | Remove-Item -Recurse -Force
-    Copy-Item -Path "$TempSite\*" -Destination "." -Recurse -Force
-    Copy-Item -Path (Join-Path $TempSite ".nojekyll") -Destination ".nojekyll" -Force
-
-    git add -A
-    if (git diff-index --quiet HEAD --) {
-        Write-Host "No changes to website."
-    } else {
-        $date = Get-Date -Format "yyyy-MM-dd HH:mm"
-        git commit -m "Update website $date"
-        git push $Remote HEAD:gh-pages
+    if ($LASTEXITCODE -ne 0 -or -not $Repo) {
+        throw "Could not resolve the repository. Set REPO=owner/name."
     }
-Pop-Location
+}
 
-git worktree remove $PagesWorktree
-if (Test-Path $TempSite) { Remove-Item -Recurse -Force $TempSite }
+gh workflow view $Workflow --repo $Repo 2>$null | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    throw "Workflow '$Workflow' was not found in '$Repo'."
+}
 
-Write-Host "Done. Website updated successfully." -ForegroundColor Green
+$BuildType = gh api "repos/$Repo/pages" --jq .build_type 2>$null
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Warning "Could not verify the GitHub Pages source for '$Repo'."
+} elseif ($BuildType -ne "workflow") {
+    throw "GitHub Pages source is '$BuildType'; configure it to use GitHub Actions."
+}
+
+if ($Platform -or $Version) {
+    if (-not $Platform -or -not $Version) {
+        throw "PLATFORM and VERSION must be provided together."
+    }
+
+    if ($Platform -notin @("windows", "linux", "macos_intel", "macos_arm")) {
+        throw "Unknown PLATFORM '$Platform'."
+    }
+
+    $Version = $Version -replace "^v", ""
+}
+
+$Dirty = git status --porcelain
+if ($Dirty) {
+    Write-Warning "The working tree is not clean. The workflow deploys '$Ref', not local changes."
+}
+
+$BeforeId = gh run list --workflow $Workflow --repo $Repo --branch $Ref --event workflow_dispatch --limit 1 --jq ".[0].databaseId" 2>$null
+
+if ($LASTEXITCODE -ne 0) {
+    $BeforeId = ""
+}
+
+$Arguments = @("workflow", "run", $Workflow, "--repo", $Repo, "--ref", $Ref)
+
+if ($Platform) {
+    $Arguments += @("-f", "platform=$Platform", "-f", "version=$Version")
+}
+
+& gh @Arguments
+if ($LASTEXITCODE -ne 0) {
+    throw "Could not dispatch the deployment workflow."
+}
+
+$RunId = ""
+$RunUrl = ""
+
+for ($Attempt = 0; $Attempt -lt 30; $Attempt++) {
+    Start-Sleep -Seconds 2
+
+    $CandidateId = gh run list --workflow $Workflow --repo $Repo --branch $Ref --event workflow_dispatch --limit 1 --jq ".[0].databaseId" 2>$null
+    $CandidateUrl = gh run list --workflow $Workflow --repo $Repo --branch $Ref --event workflow_dispatch --limit 1 --jq ".[0].url" 2>$null
+
+    if ($LASTEXITCODE -eq 0 -and $CandidateId -and $CandidateId -ne $BeforeId) {
+        $RunId = $CandidateId
+        $RunUrl = $CandidateUrl
+        break
+    }
+}
+
+if (-not $RunId) {
+    Write-Warning "Deployment dispatched. Could not resolve the run URL; check the Actions tab."
+    return
+}
+
+Write-Host "Deployment run: $RunUrl" -ForegroundColor Cyan
+
+if ($Wait -in @("1", "true", "TRUE", "yes", "YES")) {
+    & gh run watch $RunId --repo $Repo --exit-status
+    exit $LASTEXITCODE
+}
+
+Write-Host "Not waiting for completion (WAIT=0)." -ForegroundColor Yellow

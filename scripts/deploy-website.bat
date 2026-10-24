@@ -3,81 +3,121 @@ setlocal enabledelayedexpansion
 
 set "SCRIPT_DIR=%~dp0"
 cd /d "%SCRIPT_DIR%.."
-set "PROJECT_DIR=%cd%"
 
-if not defined BASE_PATH set "BASE_PATH=/website"
-if not defined PYTHON_BIN set "PYTHON_BIN=python"
+if not defined WORKFLOW set "WORKFLOW=deploy-pages.yml"
+if not defined REF set "REF=master"
+if not defined WAIT set "WAIT=1"
 
-set "TEMP_SITE=%TEMP%\thrust-website-pages"
-set "PAGES_WORKTREE=%TEMP%\thrust-website-gh-pages"
+if defined BASE_PATH echo warning: BASE_PATH is no longer used. 1>&2
+if defined PYTHON_BIN echo warning: PYTHON_BIN is no longer used. 1>&2
+if defined REMOTE_NAME echo warning: REMOTE_NAME is no longer used. 1>&2
 
-if defined REMOTE_NAME (
-    set "REMOTE=%REMOTE_NAME%"
-) else (
-    git remote get-url origin >nul 2>&1
-    if !errorlevel! equ 0 (
-        set "REMOTE=origin"
-    ) else (
-        for /f "tokens=*" %%i in ('git remote') do if not defined REMOTE set "REMOTE=%%i"
-    )
-)
-
-if not defined REMOTE (
-    echo No git remote configured. Add one or set REMOTE_NAME. 1>&2
+where gh >nul 2>&1
+if errorlevel 1 (
+    echo error: the GitHub CLI ^(gh^) is required. 1>&2
     exit /b 1
 )
 
-echo Using project directory: %PROJECT_DIR%
-echo Using remote: %REMOTE%
-
-git ls-remote --exit-code --heads "%REMOTE%" gh-pages >nul 2>&1
-if %errorlevel% neq 0 (
-    echo Branch 'gh-pages' not found on remote '%REMOTE%'. Creating it from a temporary repository...
-    set "TEMP_EMPTY=%TEMP%\thrust-website-empty-gh-pages-%RANDOM%%RANDOM%"
-    mkdir "%TEMP_EMPTY%"
-    git -C "%TEMP_EMPTY%" init
-    git -C "%TEMP_EMPTY%" commit --allow-empty -m "Initial gh-pages commit"
-    for /f "tokens=*" %%i in ('git remote get-url "%REMOTE%"') do set "REMOTE_URL=%%i"
-    git -C "%TEMP_EMPTY%" push "%REMOTE_URL%" HEAD:gh-pages
-    if errorlevel 1 exit /b 1
-    rd /s /q "%TEMP_EMPTY%"
+gh auth status >nul 2>&1
+if errorlevel 1 (
+    echo error: gh is not authenticated. Run 'gh auth login' first. 1>&2
+    exit /b 1
 )
 
-echo Building website for %BASE_PATH%...
-if exist "%TEMP_SITE%" rd /s /q "%TEMP_SITE%"
-"%PYTHON_BIN%" scripts\normalize_website_path_for_gh_pages.py --base-path "%BASE_PATH%" --output "%TEMP_SITE%"
+if not defined REPO (
+    for /f "tokens=*" %%i in ('gh repo view --json nameWithOwner --jq .nameWithOwner 2^>nul') do set "REPO=%%i"
+)
+
+if not defined REPO (
+    echo error: could not resolve the repository. Set REPO=owner/name. 1>&2
+    exit /b 1
+)
+
+gh workflow view "%WORKFLOW%" --repo "%REPO%" >nul 2>&1
+if errorlevel 1 (
+    echo error: workflow '%WORKFLOW%' was not found in '%REPO%'. 1>&2
+    exit /b 1
+)
+
+set "BUILD_TYPE="
+for /f "tokens=*" %%i in ('gh api "repos/%REPO%/pages" --jq .build_type 2^>nul') do set "BUILD_TYPE=%%i"
+
+if not defined BUILD_TYPE (
+    echo warning: could not verify the GitHub Pages source for '%REPO%'. 1>&2
+) else if not "%BUILD_TYPE%"=="workflow" (
+    echo error: GitHub Pages source is '%BUILD_TYPE%'; configure it to use GitHub Actions. 1>&2
+    exit /b 1
+)
+
+if defined PLATFORM if not defined VERSION (
+    echo error: PLATFORM and VERSION must be provided together. 1>&2
+    exit /b 1
+)
+
+if not defined PLATFORM if defined VERSION (
+    echo error: PLATFORM and VERSION must be provided together. 1>&2
+    exit /b 1
+)
+
+if defined PLATFORM (
+    if /i not "%PLATFORM%"=="windows" if /i not "%PLATFORM%"=="linux" if /i not "%PLATFORM%"=="macos_intel" if /i not "%PLATFORM%"=="macos_arm" (
+        echo error: unknown PLATFORM '%PLATFORM%'. 1>&2
+        exit /b 1
+    )
+
+    if /i "!VERSION:~0,1!"=="v" set "VERSION=!VERSION:~1!"
+)
+
+set "DIRTY="
+for /f "delims=" %%i in ('git status --porcelain 2^>nul') do set "DIRTY=1"
+if defined DIRTY echo warning: the working tree is not clean. The workflow deploys '%REF%', not local changes. 1>&2
+
+set "GH_ARGS=workflow run %WORKFLOW% --repo %REPO% --ref %REF%"
+
+if defined PLATFORM set "GH_ARGS=%GH_ARGS% -f platform=%PLATFORM% -f version=%VERSION%"
+
+set "BEFORE_ID="
+for /f "tokens=*" %%i in ('gh run list --workflow "%WORKFLOW%" --repo "%REPO%" --branch "%REF%" --event workflow_dispatch --limit 1 --jq ".[0].databaseId" 2^>nul') do set "BEFORE_ID=%%i"
+
+gh %GH_ARGS%
 if errorlevel 1 exit /b 1
 
-echo Deploying website to GitHub Pages...
-if exist "%PAGES_WORKTREE%" rd /s /q "%PAGES_WORKTREE%"
-git fetch "%REMOTE%" gh-pages
-if errorlevel 1 exit /b 1
-git worktree add --detach "%PAGES_WORKTREE%" FETCH_HEAD
-if errorlevel 1 exit /b 1
+set "RUN_ID="
+set "RUN_URL="
 
-pushd "%PAGES_WORKTREE%"
-    for /f "delims=" %%i in ('dir /b') do (
-        if not "%%i"==".git" (
-            if exist "%%i\" (rd /s /q "%%i") else (del /q "%%i")
+for /l %%N in (1,1,30) do (
+    if not defined RUN_ID (
+        timeout /t 2 /nobreak >nul
+
+        set "CANDIDATE_ID="
+        set "CANDIDATE_URL="
+
+        for /f "tokens=*" %%i in ('gh run list --workflow "%WORKFLOW%" --repo "%REPO%" --branch "%REF%" --event workflow_dispatch --limit 1 --jq ".[0].databaseId" 2^>nul') do set "CANDIDATE_ID=%%i"
+        for /f "tokens=*" %%i in ('gh run list --workflow "%WORKFLOW%" --repo "%REPO%" --branch "%REF%" --event workflow_dispatch --limit 1 --jq ".[0].url" 2^>nul') do set "CANDIDATE_URL=%%i"
+
+        if defined CANDIDATE_ID if not "!CANDIDATE_ID!"=="!BEFORE_ID!" (
+            set "RUN_ID=!CANDIDATE_ID!"
+            set "RUN_URL=!CANDIDATE_URL!"
         )
     )
+)
 
-    xcopy /e /i /y "%TEMP_SITE%\*" "."
-    if errorlevel 1 exit /b 1
+if not defined RUN_ID (
+    echo Deployment dispatched. Could not resolve the run URL; check the Actions tab. 1>&2
+    exit /b 0
+)
 
-    git add -A
-    git diff-index --quiet HEAD --
-    if !errorlevel! equ 0 (
-        echo No changes to website.
-    ) else (
-        git commit -m "Update website %date% %time%"
-        if errorlevel 1 exit /b 1
-        git push "%REMOTE%" HEAD:gh-pages
-        if errorlevel 1 exit /b 1
-    )
-popd
+echo Deployment run: %RUN_URL%
 
-git worktree remove "%PAGES_WORKTREE%"
-if exist "%TEMP_SITE%" rd /s /q "%TEMP_SITE%"
+if /i "%WAIT%"=="1" (
+    gh run watch "%RUN_ID%" --repo "%REPO%" --exit-status
+    exit /b !errorlevel!
+)
 
-echo Done. Website updated successfully.
+if /i "%WAIT%"=="true" (
+    gh run watch "%RUN_ID%" --repo "%REPO%" --exit-status
+    exit /b !errorlevel!
+)
+
+echo Not waiting for completion (WAIT=0).
+exit /b 0

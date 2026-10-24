@@ -1,13 +1,14 @@
 # Update Downloads
 
+> Compiler downloads update automatically per platform after a `thrustc` release. This command updates the package manager (`torio`) version.
+
 ```console
 # Run from the website repository root in PowerShell.
 # Provide:
 # <current-version>  Version currently written in the website downloads.
-#                    Example values: 0.2.2, v0.2.2
+#                    Example values: 0.1.4, v0.1.4
 # <new-version>      Version to write into downloads.
-#                    Example values: 0.2.3, v0.2.3
-# Add --test to preview changes without writing files.
+#                    Example values: 0.1.5, v0.1.5
 
 py scripts\update_downloads.py `
   --from-version <current-version> `

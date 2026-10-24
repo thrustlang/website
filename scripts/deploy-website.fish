@@ -8,70 +8,135 @@ end
 set SCRIPT_DIR (realpath (dirname (status filename)))
 set PROJECT_DIR (realpath "$SCRIPT_DIR/..")
 
-if not set -q BASE_PATH
-    set BASE_PATH "/website"
+if not set -q REPO
+    set REPO ""
 end
 
-if not set -q PYTHON_BIN
-    set PYTHON_BIN "python3"
+if not set -q WORKFLOW
+    set WORKFLOW "deploy-pages.yml"
 end
 
-set TEMP_SITE "/tmp/thrust-website-pages"
-set PAGES_WORKTREE "/tmp/thrust-website-gh-pages"
+if not set -q REF
+    set REF "master"
+end
+
+if not set -q WAIT
+    set WAIT "1"
+end
+
+if not set -q PLATFORM
+    set PLATFORM ""
+end
+
+if not set -q VERSION
+    set VERSION ""
+end
 
 run cd $PROJECT_DIR
 
-if set -q REMOTE_NAME
-    set REMOTE $REMOTE_NAME
-else if git remote get-url origin >/dev/null 2>&1
-    set REMOTE origin
-else
-    set REMOTES (git remote)
-    set REMOTE $REMOTES[1]
+if set -q BASE_PATH; or set -q PYTHON_BIN; or set -q REMOTE_NAME
+    echo "warning: BASE_PATH, PYTHON_BIN and REMOTE_NAME are no longer used." >&2
 end
 
-if test -z "$REMOTE"
-    echo "No git remote configured. Add one or set REMOTE_NAME." >&2
+if not command -q gh
+    echo "error: the GitHub CLI (gh) is required." >&2
     exit 1
 end
 
-echo "Using project directory: $PROJECT_DIR"
-echo "Using remote: $REMOTE"
-
-if not git ls-remote --exit-code --heads $REMOTE gh-pages >/dev/null 2>&1
-    echo "Branch 'gh-pages' not found on remote '$REMOTE'. Creating it from a temporary repository..."
-    set TEMP_EMPTY (mktemp -d /tmp/thrust-website-empty-gh-pages.XXXXXX)
-    run git -C $TEMP_EMPTY init
-    run git -C $TEMP_EMPTY commit --allow-empty -m "Initial gh-pages commit"
-    set REMOTE_URL (git remote get-url $REMOTE)
-    run git -C $TEMP_EMPTY push $REMOTE_URL HEAD:gh-pages
-    run rm -rf $TEMP_EMPTY
+if not gh auth status >/dev/null 2>&1
+    echo "error: gh is not authenticated. Run 'gh auth login' first." >&2
+    exit 1
 end
 
-echo "Building website for $BASE_PATH..."
-run rm -rf $TEMP_SITE
-run $PYTHON_BIN scripts/normalize_website_path_for_gh_pages.py --base-path $BASE_PATH --output $TEMP_SITE
+if test -z "$REPO"
+    set REPO (gh repo view --json nameWithOwner --jq .nameWithOwner 2>/dev/null)
+end
 
-echo "Deploying website to GitHub Pages..."
-run rm -rf $PAGES_WORKTREE
-run git fetch $REMOTE gh-pages
-run git worktree add --detach $PAGES_WORKTREE FETCH_HEAD
+if test -z "$REPO"
+    echo "error: could not resolve the repository. Set REPO=owner/name." >&2
+    exit 1
+end
 
-run pushd $PAGES_WORKTREE
-    run find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf '{}' +
-    run cp -r $TEMP_SITE/* ./
-    run cp "$TEMP_SITE/.nojekyll" ./.nojekyll
+if not gh workflow view $WORKFLOW --repo $REPO >/dev/null 2>&1
+    echo "error: workflow '$WORKFLOW' was not found in '$REPO'." >&2
+    exit 1
+end
 
-    run git add -A
-    if git diff-index --quiet HEAD --
-        echo "No changes to website."
-    else
-        run git commit -m "Update website "(date '+%Y-%m-%d %H:%M')
-        run git push $REMOTE HEAD:gh-pages
+set -l BUILD_TYPE (gh api "repos/$REPO/pages" --jq .build_type 2>/dev/null)
+
+if test -z "$BUILD_TYPE"
+    echo "warning: could not verify the GitHub Pages source for '$REPO'." >&2
+else if test "$BUILD_TYPE" != "workflow"
+    echo "error: GitHub Pages source is '$BUILD_TYPE'; configure it to use GitHub Actions." >&2
+    exit 1
+end
+
+if test -n "$PLATFORM"; or test -n "$VERSION"
+    if test -z "$PLATFORM"; or test -z "$VERSION"
+        echo "error: PLATFORM and VERSION must be provided together." >&2
+        exit 1
     end
-run popd
 
-run git worktree remove $PAGES_WORKTREE
-run rm -rf $TEMP_SITE
+    switch $PLATFORM
+        case windows linux macos_intel macos_arm
+        case '*'
+            echo "error: unknown PLATFORM '$PLATFORM'." >&2
+            exit 1
+    end
 
-echo "Done. Website updated successfully."
+    set VERSION (string replace -r '^v' '' -- $VERSION)
+end
+
+set -l DIRTY (git status --porcelain)
+
+if test -n "$DIRTY"
+    echo "warning: the working tree is not clean. The workflow deploys '$REF', not local changes." >&2
+end
+
+set -l ARGS workflow run $WORKFLOW --repo $REPO --ref $REF
+
+if test -n "$PLATFORM"
+    set -a ARGS -f platform=$PLATFORM -f version=$VERSION
+end
+
+set -l BEFORE_ID (gh run list --workflow $WORKFLOW --repo $REPO --branch $REF --event workflow_dispatch --limit 1 --jq '.[0].databaseId' 2>/dev/null)
+
+run gh $ARGS
+
+set -l RUN_ID ""
+set -l RUN_URL ""
+
+set -l ATTEMPT 0
+
+while test $ATTEMPT -lt 30
+    set ATTEMPT (math $ATTEMPT + 1)
+    sleep 2
+
+    set -l RUN_INFO (gh run list --workflow $WORKFLOW --repo $REPO --branch $REF --event workflow_dispatch --limit 1 --json databaseId,url --jq '.[0] | "\(.databaseId) \(.url)"' 2>/dev/null)
+
+    if test -z "$RUN_INFO"
+        continue
+    end
+
+    set -l PARTS (string split -m 1 ' ' -- $RUN_INFO)
+    set RUN_ID $PARTS[1]
+    set RUN_URL $PARTS[2]
+
+    if test -n "$RUN_ID"; and test "$RUN_ID" != "$BEFORE_ID"
+        break
+    end
+end
+
+if test -z "$RUN_ID"
+    echo "Deployment dispatched. Could not resolve the run URL; check the Actions tab." >&2
+    exit 0
+end
+
+echo "Deployment run: $RUN_URL"
+
+switch $WAIT
+    case 1 true TRUE yes YES
+        run gh run watch $RUN_ID --repo $REPO --exit-status
+    case '*'
+        echo "Not waiting for completion (WAIT=0)."
+end

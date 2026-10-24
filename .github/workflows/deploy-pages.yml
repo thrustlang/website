@@ -7,10 +7,22 @@ on:
       - master
     paths:
       - documentation/versions.json
+  repository_dispatch:
+    types:
+      - compiler-release
   workflow_dispatch:
+    inputs:
+      platform:
+        description: "Compiler platform: windows, linux, macos_intel, or macos_arm"
+        required: false
+        type: string
+      version:
+        description: "Compiler version without the leading v (example: 0.2.5)"
+        required: false
+        type: string
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -20,7 +32,10 @@ concurrency:
 
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'Create new version ')
+    if: >-
+      github.event_name == 'repository_dispatch' ||
+      github.event_name == 'workflow_dispatch' ||
+      startsWith(github.event.head_commit.message, 'Create new version ')
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -28,11 +43,96 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve Deployment Request
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PAYLOAD_PLATFORM: ${{ github.event.client_payload.platform }}
+          PAYLOAD_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_PLATFORM: ${{ inputs.platform }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "repository_dispatch" ]; then
+            PLATFORM="$PAYLOAD_PLATFORM"
+            VERSION="$PAYLOAD_VERSION"
+          else
+            PLATFORM="$INPUT_PLATFORM"
+            VERSION="$INPUT_VERSION"
+          fi
+
+          if [ -n "$PLATFORM" ] && [ -z "$VERSION" ]; then
+            echo "::error::A platform was provided without a version."
+            exit 1
+          fi
+
+          if [ -z "$PLATFORM" ] && [ -n "$VERSION" ]; then
+            echo "::error::A version was provided without a platform."
+            exit 1
+          fi
+
+          case "$PLATFORM" in
+            ""|windows|linux|macos_intel|macos_arm) ;;
+            *)
+              echo "::error::Unknown platform '$PLATFORM'."
+              exit 1
+              ;;
+          esac
+
+          VERSION="${VERSION#v}"
+
+          echo "PLATFORM=$PLATFORM" >> "$GITHUB_ENV"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Update Compiler Download
+        if: env.PLATFORM != ''
+        run: |
+          set -euo pipefail
+
+          python scripts/update_compiler_download.py --platform "$PLATFORM" --version "$VERSION"
+
+          node --check assets/js/downloads.js
+
+      - name: Commit Compiler Download Update
+        if: env.PLATFORM != ''
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet -- assets/js/downloads.js en/index.html es/index.html en/downloads/index.html es/downloads/index.html; then
+            echo "No compiler download changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/js/downloads.js en/index.html es/index.html en/downloads/index.html es/downloads/index.html
+          git commit -m "feat(assets) Update ${PLATFORM} compiler download to v${VERSION}"
+
+          for attempt in 1 2 3; do
+            git fetch origin master
+            git rebase origin/master
+            if git push origin HEAD:master; then
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "::error::Could not push the compiler download update."
+          exit 1
 
       - name: Build website for GitHub Pages
         run: python scripts/normalize_website_path_for_gh_pages.py --base-path /website --output _site

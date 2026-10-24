@@ -4,15 +4,58 @@
 
 <img src="https://github.com/thrustlang/.github/blob/main/assets/standard-text-separator.png" alt="standard-separator" style="width: 1hv;"></img>
 
-This guide explains how to update the website download links from one compiler version to another with `scripts/update_downloads.py`.
+> [!NOTE]
+> Compiler download versions are updated automatically per platform when a `thrustc` release workflow finishes. The manual commands below are only for recovery or forced updates.
 
-## What It Does
+This guide explains how to update the download versions used by the public pages.
 
-`scripts/update_downloads.py` updates the downloads version used by the public pages.
+## Compiler Downloads
 
-The script changes the central downloads configuration in `assets/js/downloads.js` and also updates the visible fallback version labels in the English and Spanish pages.
+Compiler versions are stored per platform in `assets/js/downloads.js`. Each platform can point to a different compiler version, so a partial release does not break the other platforms.
 
-## Command Shape
+Use `scripts/update_compiler_download.py` for manual updates.
+
+### Command Shape
+
+```console
+$ python scripts/update_compiler_download.py --platform <platform> --version <version>
+```
+
+### Flags
+
+| Flag | Required | What It Means | Example |
+| --- | --- | --- | --- |
+| `--platform` | yes | Platform to update | `windows`, `linux`, `macos_intel`, `macos_arm` |
+| `--version` | yes | Compiler version, with or without leading `v` | `0.2.5` or `v0.2.5` |
+| `--root` | no | Website repository root | `.` |
+| `--force` | no | Allow downgrading the platform version | `--force` |
+
+### Platform Tags
+
+| Platform | Release tag |
+| --- | --- |
+| `windows` | `thrustc-x86_64-windows-msvc-v{version}` |
+| `linux` | `thrustc-x86_64-linux-ubuntu-v{version}` |
+| `macos_intel` | `thrustc-x86_64-macos-v{version}` |
+| `macos_arm` | `thrustc-aarch64-macos-v{version}` |
+
+### Examples
+
+Update the Linux compiler download:
+
+```console
+$ python scripts/update_compiler_download.py --platform linux --version 0.2.5
+```
+
+Allow a downgrade:
+
+```console
+$ python scripts/update_compiler_download.py --platform linux --version 0.2.4 --force
+```
+
+## Package Manager Downloads
+
+The package manager (`torio`) use `scripts/update_downloads.py`.
 
 ```console
 $ python scripts/update_downloads.py --from-version <current-version> --to-version <new-version>
@@ -20,49 +63,7 @@ $ python scripts/update_downloads.py --from-version <current-version> --to-versi
 
 Versions can be passed with or without a leading `v`.
 
-## Flags
-
 | Flag | Required | What It Means | Example |
 | --- | --- | --- | --- |
-| `--from-version` | yes | Current downloads version expected in the site | `0.2.1` or `v0.2.1` |
-| `--to-version` | yes | New downloads version to write | `0.2.2` or `v0.2.2` |
-| `--test` | no | Print the planned changes without writing files | `--test` |
-
-## Test Mode
-
-Use `--test` when you want to confirm exactly what would change before editing files.
-
-```console
-$ python scripts/update_downloads.py --from-version 0.2.1 --to-version 0.2.2 --test
-```
-
-Example output:
-
-```text
-Current downloads version: 0.2.1
-Target downloads version: 0.2.2
-
-Test mode: no files will be changed.
-
-Files that would change:
-- assets/js/downloads.js
-  version: "0.2.1" -> version: "0.2.2", 1 occurrence
-- en/index.html
-  v0.2.1 -> v0.2.2, 4 occurrences
-
-No files changed.
-```
-
-## Examples
-
-Update downloads from `0.2.1` to `0.2.2`:
-
-```console
-$ python scripts/update_downloads.py --from-version 0.2.1 --to-version 0.2.2
-```
-
-Run the same update as a test first:
-
-```console
-$ python scripts/update_downloads.py --from-version v0.2.1 --to-version v0.2.2 --test
-```
+| `--from-version` | yes | Current package manager version | `0.1.4` |
+| `--to-version` | yes | New package manager version | `0.1.5` |
