@@ -65,8 +65,5 @@ $ python scripts/update_docs.py --version v0.2.1 --section compiler-command-line
 
 ## Notes
 
-> [!IMPORTANT]
-> `examples` and other content-heavy fields should be updated carefully. Prefer `--input-file` for long code snippets.
-
 > [!NOTE]
 > The script rebuilds the generated output after the content change is saved.

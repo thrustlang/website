@@ -9,24 +9,11 @@
 > [!WARNING]
 > The latest version cannot be archived with this script.
 
-## What The Script Does
-
-The script:
-
-1. Checks that the requested version exists.
-2. Refuses to archive the latest version.
-3. Marks the version as archived in `documentation/versions.json`.
-4. Rebuilds the documentation hub and generated output.
-
 ## Command Syntax
 
 ```console
 $ python scripts/archive_docs.py --version v0.2.0
 ```
-
-## Parameters
-
-- `--version`: the published documentation version to archive
 
 ## Example
 

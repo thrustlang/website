@@ -10,8 +10,6 @@ Use it after changing documentation JSON or the documentation renderer so the ge
 
 ## What It Does
 
-The script calls `build_all()` from `scripts/docs_common.py`.
-
 It reads:
 
 - `documentation/versions.json`

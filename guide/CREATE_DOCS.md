@@ -6,9 +6,6 @@
 
 `scripts/create_docs.py` creates a new page scaffold inside an existing versioned documentation section and then rebuilds the generated documentation output.
 
-> [!IMPORTANT]
-> This script creates new page entries in `documentation/content/<version>/pages.json`. It does not create a new top-level documentation section.
-
 ## What The Script Does
 
 The script:
