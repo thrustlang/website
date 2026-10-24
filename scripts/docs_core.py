@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-import html
 import json
+import html
 import re
 import shutil
+
 from pathlib import Path
-
+from typing import Literal
+from typing import Any
 from generate_std_social_cards import generate_std_social_cards, slug_filename
-
 
 ROOT: Path = Path(__file__).resolve().parent
 REPO_ROOT: Path = ROOT.parent
@@ -16,53 +17,45 @@ CONTENT_ROOT: Path = DOCS_ROOT / "content"
 VERSION_STATE: Path = DOCS_ROOT / "versions.json"
 STD_ROOT: Path = REPO_ROOT.parent / "thrustc" / "std"
 
-
 def read_json(path: Path):
     return json.loads(path.read_text())
-
 
 def write_json(path: Path, payload) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
 
-
 def load_versions():
     return read_json(VERSION_STATE)
-
 
 def save_versions(data) -> None:
     write_json(VERSION_STATE, data)
 
-
 def load_pages(version: str):
-    path = CONTENT_ROOT / version / "pages.json"
+    path: Path = CONTENT_ROOT / version / "pages.json"
 
     if not path.exists():
         raise FileNotFoundError(f"missing content for {version}: {path}")
 
     return read_json(path)
 
-
 def save_pages(version: str, data) -> None:
     write_json(CONTENT_ROOT / version / "pages.json", data)
 
-
 def load_cli_reference(version: str):
-    path = CONTENT_ROOT / version / "compiler-command-line-reference.json"
+    path: Path = CONTENT_ROOT / version / "compiler-command-line-reference.json"
 
     if not path.exists():
         raise FileNotFoundError(f"missing compiler command line reference for {version}: {path}")
 
     return read_json(path)
 
-
 def save_cli_reference(version: str, data) -> None:
     write_json(CONTENT_ROOT / version / "compiler-command-line-reference.json", data)
 
 
 def copy_content(source_version: str, target_version: str) -> None:
-    source = CONTENT_ROOT / source_version
-    target = CONTENT_ROOT / target_version
+    source: Path = CONTENT_ROOT / source_version
+    target: Path = CONTENT_ROOT / target_version
 
     if not source.exists():
         raise FileNotFoundError(f"missing source content: {source}")
@@ -72,14 +65,12 @@ def copy_content(source_version: str, target_version: str) -> None:
 
     shutil.copytree(source, target)
 
-
 def get_version_entry(versions_data, version: str):
     for entry in versions_data.get("versions", []):
         if entry.get("id") == version:
             return entry
 
     raise KeyError(f"unknown version: {version}")
-
 
 def latest_version(versions_data) -> str:
     latest = versions_data.get("latest")
@@ -99,7 +90,7 @@ def normalize_tail(path: str) -> str:
     if not path:
         return ""
 
-    tail = path
+    tail: str = path
 
     if tail.startswith("/"):
         tail = tail[1:]
@@ -117,26 +108,23 @@ def normalize_tail(path: str) -> str:
 
     return tail
 
-
 def current_version_and_tail(pathname: str):
-    match = re.match(r"^/documentation/(v[^/]+)/?(.*)$", pathname)
+    match: re.Match[str] | None = re.match(r"^/documentation/(v[^/]+)/?(.*)$", pathname)
 
     if not match:
         return {"version": None, "tail": ""}
 
     return {"version": match.group(1), "tail": normalize_tail(match.group(2))}
 
-
 def doc_href(path: str) -> str:
     return path.rstrip("/") + "/index.html"
 
-
 def extract_signatures(path: Path):
-    lines = path.read_text().splitlines()
-    out = []
+    lines: list[str] = path.read_text().splitlines()
+    out: list[str] = []
 
     for line in lines:
-        text = line.strip()
+        text: str = line.strip()
 
         if not text or text.startswith("/*") or text.startswith("//"):
             continue
@@ -152,7 +140,7 @@ def extract_signatures(path: Path):
 
 def std_signatures_for_source(source_file: str, version: str):
     if source_file == "ffi/c/*.thrust":
-        signatures = []
+        signatures: list[Any] = []
 
         for rel in [
             "ffi/c/primitives.thrust",
@@ -177,17 +165,17 @@ def render_head(
     og_image: str | None = None,
     og_url: str | None = None,
 ):
-    safe_title = html.escape(title)
-    safe_desc = html.escape(desc)
-    safe_canonical = html.escape(canonical)
+    safe_title: str = html.escape(title)
+    safe_desc: str = html.escape(desc)
+    safe_canonical: str = html.escape(canonical)
     social = ""
 
     if og_image is not None:
-        safe_og_title = html.escape(og_title or title)
-        safe_og_description = html.escape(og_description or desc)
-        safe_og_image = html.escape(og_image)
-        safe_og_url = html.escape(og_url or canonical)
-        social = f"""
+        safe_og_title: str = html.escape(og_title or title)
+        safe_og_description: str = html.escape(og_description or desc)
+        safe_og_image: str = html.escape(og_image)
+        safe_og_url: str = html.escape(og_url or canonical)
+        social: str = f"""
   <meta property=\"og:type\" content=\"website\">
   <meta property=\"og:title\" content=\"{safe_og_title}\">
   <meta property=\"og:description\" content=\"{safe_og_description}\">
@@ -233,24 +221,20 @@ def render_head(
 
 FOOTER = """  <footer class=\"site-footer\">\n    <div class=\"container footer-row\">\n      <span class=\"muted\">Thrust Programming Language</span>\n      <div class=\"social\">\n        <a class=\"btn\" href=\"https://github.com/thrustlang\" target=\"_blank\" rel=\"noopener noreferrer\">\n          <svg class=\"icon icon-sm\" aria-hidden=\"true\"><use href=\"/assets/icons/brands.svg#icon-github\"></use></svg>\n          GitHub\n        </a>\n        <a class=\"btn\" href=\"https://discord.gg/MhVpCSxnhV\" target=\"_blank\" rel=\"noopener noreferrer\">\n          <svg class=\"icon icon-sm\" aria-hidden=\"true\"><use href=\"/assets/icons/brands.svg#icon-discord\"></use></svg>\n          Discord\n        </a>\n      </div>\n    </div>\n  </footer>\n  <script src=\"/assets/js/thrust-highlight.js\"></script>\n  <script src=\"/documentation/assets/docs-version-switcher.js\"></script>\n  <script src=\"/documentation/assets/docs-search.js\"></script>\n</body>\n</html>\n"""
 
-
 def docs_hero(title: str, summary: str, version: str, badge: str):
     return f"""    <section class=\"container hero\">\n      <h1>{html.escape(title)} ({html.escape(version)})</h1>\n      <p>{html.escape(summary)}</p>\n      <div class=\"docs-version-row\">\n        <label for=\"docs-version-{html.escape(version)}\">Version</label>\n        <select id=\"docs-version-{html.escape(version)}\" class=\"docs-version-select\" data-docs-version-select></select>\n        <span class=\"doc-badge\">{html.escape(badge)}</span>\n      </div>\n    </section>\n"""
-
 
 def render_paragraphs(paragraphs):
     return "\n".join(f"      <p>{html.escape(polish_prose(p))}</p>" for p in paragraphs)
 
-
 def render_items(items):
     return "\n".join(f"        <li>{html.escape(polish_prose(item))}</li>" for item in items)
 
-
 def render_code_blocks(snippets):
     if isinstance(snippets, str):
-        snippets = [snippets]
+        snippets: list[str] = [snippets]
 
-    blocks = []
+    blocks: list[Any] = []
 
     for snippet in snippets:
         blocks.append(
@@ -259,13 +243,12 @@ def render_code_blocks(snippets):
 
     return "\n".join(blocks)
 
-
 def render_cli_meta(label: str, value):
     if value is None or value == "" or value == []:
         return ""
 
     if isinstance(value, bool):
-        text = "yes" if value else "no"
+        text: Literal['no', 'yes'] = "yes" if value else "no"
     elif isinstance(value, list):
         text = ", ".join(str(item) for item in value)
     else:
@@ -278,14 +261,14 @@ def render_attribute_sections(data: dict):
     if "attribute_catalog" not in data:
         return ""
 
-    catalog = "\n".join(
+    catalog: str = "\n".join(
         f"        <li><code>{html.escape(item.split(' - ')[0])}</code> - {html.escape(polish_prose(' - '.join(item.split(' - ')[1:])))}</li>"
         if " - " in item
         else f"        <li>{html.escape(polish_prose(item))}</li>"
         for item in data["attribute_catalog"]
     )
 
-    applicability = "\n".join(
+    applicability: str = "\n".join(
         f"      <p>{html.escape(polish_prose(text))}</p>" for text in data.get("applicability_notes", [])
     )
 
@@ -297,12 +280,12 @@ def render_reference_sections(data: dict):
     if "reference_sections" not in data:
         return ""
 
-    blocks = []
+    blocks: list[Any] = []
 
     for section in data["reference_sections"]:
         intro = section.get("intro", "")
-        intro_html = f"      <p>{html.escape(polish_prose(intro))}</p>\n" if intro else ""
-        items = "\n".join(
+        intro_html: str = f"      <p>{html.escape(polish_prose(intro))}</p>\n" if intro else ""
+        items: str = "\n".join(
             f"        <li><code>{html.escape(item.split(' - ')[0])}</code> - {html.escape(polish_prose(' - '.join(item.split(' - ')[1:])))}</li>"
             if " - " in item
             else f"        <li>{html.escape(polish_prose(item))}</li>"
@@ -314,30 +297,27 @@ def render_reference_sections(data: dict):
 
     return "\n\n".join(blocks)
 
-
 def polish_prose(text: str) -> str:
-    polished = text
-    polished = re.sub(r"\s+,", ",", polished)
+    polished: str = text
+    polished: str = re.sub(r"\s+,", ",", polished)
     polished = re.sub(r"\s{2,}", " ", polished)
 
     return polished.strip()
 
-
 def render_std_page(version: str, badge: str, slug: str, data: dict):
     signatures = std_signatures_for_source(data["source"], version)
     signature_block = "\n".join(signatures[:220])
-    source_view = f"thrustc/std/{version}/{data['source']}"
-    canonical = f"/documentation/{version}/std/{slug}/"
-    social_image = f"/documentation/{version}/social/std/{slug_filename(slug)}"
+    source_view: str = f"thrustc/std/{version}/{data['source']}"
+    canonical: str = f"/documentation/{version}/std/{slug}/"
+    social_image: str = f"/documentation/{version}/social/std/{slug_filename(slug)}"
 
     return f"""{render_head(data['title'] + ' ' + version, data['summary'], canonical, og_title=f"{data['title']} | Thrust", og_description=data['summary'], og_image=social_image, og_url=canonical)}
   <main class=\"site-main\">\n{docs_hero(data['title'], data['summary'], version, badge)}\n    <section class=\"container section panel docs-content\">\n      <h2>Overview</h2>\n{render_paragraphs(data.get('overview', ''))}\n      <p class=\"muted\">Source: <code>{html.escape(source_view)}</code></p>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Public Signatures</h2>\n      <p class=\"muted\">Exported declarations for this module snapshot.</p>\n      <pre class=\"code-thrust\"><code class=\"language-thrust\">{html.escape(signature_block)}</code></pre>\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Behavior and Use</h2>\n{render_paragraphs(data.get('details', ''))}\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Examples</h2>\n{render_code_blocks(data.get('examples', []))}\n    </section>\n\n    <section class=\"container section panel docs-content\">\n      <h2>Notes</h2>\n      <ul>\n{render_items(data.get('notes', []))}\n      </ul>\n      <p><a class=\"btn\" href=\"{doc_href(f'/documentation/{version}/std/')}\">Back to std index</a></p>\n    </section>\n  </main>\n{FOOTER}"""
 
-
 def render_lang_page(version: str, badge: str, slug: str, data: dict):
     extra_sections = render_attribute_sections(data) + render_reference_sections(data)
     guidance = data.get("guidance", [])
-    guidance_block = (
+    guidance_block: str = (
         f"      <h3>Best Practices</h3>\n      <ul>\n{render_items(guidance)}\n      </ul>\n"
         if guidance
         else ""
@@ -348,7 +328,7 @@ def render_lang_page(version: str, badge: str, slug: str, data: dict):
 
 
 def render_std_index(version: str, badge: str, pages: dict):
-    cards = []
+    cards: list[Any] = []
 
     for slug, data in pages.items():
         cards.append(
@@ -358,9 +338,8 @@ def render_std_index(version: str, badge: str, pages: dict):
     return f"""{render_head(version + ' Standard Library', 'Standard library module index.', f'/documentation/{version}/std/')}
   <main class=\"site-main\">\n{docs_hero('Standard Library', 'Standard modules and public APIs for this version.', version, badge)}\n{render_docs_search()}\n    <section class=\"container section panel docs-content\">\n      <p>The standard library contains the core modules that most Thrust programs use for everyday work: input and output, memory management, math helpers, dynamic arrays, and C bindings. It is intentionally small and explicit, so each module keeps close to the behavior it exposes.</p>\n      <p>These pages describe what each module provides, how its functions are meant to be used, and which parts map directly to C library behavior. Use this section as the starting point when you need reusable building blocks before writing lower-level bindings yourself.</p>\n    </section>\n    <section class=\"container section panel\">\n      <div class=\"features-grid docs-features-grid\">\n{chr(10).join(cards)}\n      </div>\n      <p><a class=\"btn\" href=\"/documentation/index.html\">Back to documentation hub</a></p>\n    </section>\n  </main>\n{FOOTER}"""
 
-
 def render_lang_index(version: str, badge: str, pages: dict):
-    cards = []
+    cards: list[Any] = []
 
     for slug, data in pages.items():
         cards.append(
@@ -370,22 +349,21 @@ def render_lang_index(version: str, badge: str, pages: dict):
     return f"""{render_head(version + ' Language Reference', 'Language reference index.', f'/documentation/{version}/language-reference/')}
   <main class=\"site-main\">\n{docs_hero('Language Reference', 'Stable syntax topics with behavior notes and practical guidance.', version, badge)}\n{render_docs_search()}\n    <section class=\"container section panel docs-content\">\n      <p>The language reference maps syntax materials into topic pages with plain explanations. Each topic includes a short overview, representative signatures, notes about behavior, and practical guidance.</p>\n      <p>Pages can be read in order or used independently. They prioritize stable constructs and clear behavior over shorthand descriptions.</p>\n    </section>\n    <section class=\"container section panel\">\n      <div class=\"features-grid docs-features-grid\">\n{chr(10).join(cards)}\n      </div>\n      <p><a class=\"btn\" href=\"/documentation/index.html\">Back to documentation hub</a></p>\n    </section>\n  </main>\n{FOOTER}"""
 
-
 def render_cli_flag_section(flag: dict):
     details = flag.get("details", [])
     notes = flag.get("notes", [])
     examples = flag.get("examples", [])
-    details_block = (
+    details_block: Literal['      <p class="muted">No additional details for this flag.</p>'] | Any = (
         render_paragraphs(details)
         if details
         else "      <p class=\"muted\">No additional details for this flag.</p>"
     )
-    notes_block = (
+    notes_block: str = (
         f"      <ul>\n{render_items(notes)}\n      </ul>"
         if notes
         else "      <p class=\"muted\">No extra notes for this flag.</p>"
     )
-    examples_block = (
+    examples_block: Literal['      <p class="muted">No examples for this flag yet.</p>'] | Any = (
         render_code_blocks(examples)
         if examples
         else "      <p class=\"muted\">No examples for this flag yet.</p>"
@@ -396,14 +374,14 @@ def render_cli_flag_section(flag: dict):
 
 def render_cli_category_page(version: str, badge: str, cli_reference: dict, category: dict):
     slug = category["slug"]
-    blocks = [render_cli_flag_section(flag) for flag in category.get("flags", [])]
+    blocks: list[Any] = [render_cli_flag_section(flag) for flag in category.get("flags", [])]
 
     return f"""{render_head(category['title'] + ' ' + version, category['summary'], f'/documentation/{version}/compiler-command-line-reference/{slug}/')}
   <main class=\"site-main\">\n{docs_hero(category['title'], category['summary'], version, badge)}\n    <section class=\"container section panel docs-content\">\n      <h2>Overview</h2>\n      <p>{html.escape(polish_prose(category['intro']))}</p>\n      <p class=\"muted\">Reference source: <code>{html.escape(cli_reference['source'])}</code></p>\n      <p><a class=\"btn\" href=\"{doc_href(f'/documentation/{version}/compiler-command-line-reference/')}\">Back to command line reference</a></p>\n    </section>\n\n{chr(10).join(blocks)}\n  </main>\n{FOOTER}"""
 
 
 def render_cli_index(version: str, badge: str, cli_reference: dict):
-    cards = []
+    cards: list[Any] = []
 
     for category in cli_reference.get("categories", []):
         slug = category["slug"]
@@ -446,10 +424,10 @@ def render_version_redirect(version: str):
 
 
 def page_search_text(data: dict, extra: str = ""):
-    parts = [data.get("title", ""), data.get("summary", "")]
+    parts: list[Any] = [data.get("title", ""), data.get("summary", "")]
 
     for key in ["overview", "details", "semantics", "guidance", "notes", "attribute_catalog", "applicability_notes", "usage"]:
-        value = data.get(key)
+        value: Any | None = data.get(key)
 
         if isinstance(value, list):
             parts.extend(value)
@@ -477,9 +455,8 @@ def page_search_text(data: dict, extra: str = ""):
 
     return "\n".join(parts)
 
-
 def cli_category_search_text(cli_reference: dict, category: dict):
-    parts = [
+    parts: list[Any] = [
         cli_reference.get("title", ""),
         cli_reference.get("summary", ""),
         category.get("title", ""),
@@ -502,9 +479,8 @@ def cli_category_search_text(cli_reference: dict, category: dict):
 
     return "\n".join(part for part in parts if part)
 
-
 def write_search_index(version: str, pages: dict, cli_reference: dict):
-    entries = []
+    entries: list[Any] = []
 
     for slug, data in pages.get("std", {}).items():
         signatures = "\n".join(std_signatures_for_source(data["source"], version)[:220])
@@ -561,23 +537,22 @@ def write_search_index(version: str, pages: dict, cli_reference: dict):
         {"version": version, "entries": entries},
     )
 
-
 def render_docs_hub(versions_data):
     versions = versions_data.get("versions", [])
 
     if not versions:
         raise ValueError("versions.json has no versions")
 
-    latest = latest_version(versions_data)
-    archived = [entry for entry in versions if entry.get("status") == "archived"]
-    archived_cards = []
+    latest: str = latest_version(versions_data)
+    archived: list[Any] = [entry for entry in versions if entry.get("status") == "archived"]
+    archived_cards: list[Any] = []
 
     for entry in archived:
         archived_cards.append(
             f"      <a class=\"btn\" href=\"/documentation/{html.escape(entry['id'])}/index.html\">Open {html.escape(entry['id'])}</a>"
         )
 
-    archived_html = (
+    archived_html: str = (
         f"      <div class=\"archived-links\">\n{chr(10).join(archived_cards)}\n      </div>"
         if archived_cards
         else '      <p class="muted">No archived versions yet.</p>'
@@ -622,9 +597,9 @@ def build_version(version: str, versions_data=None) -> None:
 
     pages = load_pages(version)
     cli_reference = load_cli_reference(version)
-    badge = "Latest" if version == latest_version(versions_data) else "Archived"
+    badge: Literal['Archived', 'Latest'] = "Latest" if version == latest_version(versions_data) else "Archived"
 
-    base = DOCS_ROOT / version
+    base: Path = DOCS_ROOT / version
     (base / "std").mkdir(parents=True, exist_ok=True)
     (base / "language-reference").mkdir(parents=True, exist_ok=True)
     (base / "compiler-command-line-reference").mkdir(parents=True, exist_ok=True)
@@ -656,7 +631,6 @@ def build_version(version: str, versions_data=None) -> None:
         page.parent.mkdir(parents=True, exist_ok=True)
         page.write_text(render_cli_category_page(version, badge, cli_reference, category))
 
-
 def build_all() -> None:
     versions_data = load_versions()
 
@@ -664,7 +638,6 @@ def build_all() -> None:
         build_version(entry["id"], versions_data)
 
     write_docs_hub(versions_data)
-
 
 def write_docs_hub(versions_data=None) -> None:
     if versions_data is None:
