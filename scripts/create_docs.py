@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 
-from docs_common import (
+from docs_core import (
     STD_ROOT,
     build_all,
     load_pages,

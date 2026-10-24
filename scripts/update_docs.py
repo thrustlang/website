@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from docs_common import (
+from docs_core import (
     build_all,
     load_cli_reference,
     load_pages,

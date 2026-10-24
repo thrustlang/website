@@ -1,6 +1,6 @@
 from __future__ import annotations
 import argparse
-from docs_common import build_all, latest_version, load_versions, save_versions
+from docs_core import build_all, latest_version, load_versions, save_versions
 
 def archive_documentation(version: str) -> None:
     versions = load_versions()

@@ -32,7 +32,7 @@ Use it when:
 - You edited `documentation/content/<version>/compiler-command-line-reference.json`.
 - You changed examples, summaries, overview text, notes, CLI descriptions, or language reference text.
 - You changed `documentation/versions.json`.
-- You changed the documentation generator in `scripts/docs_common.py`.
+- You changed the documentation generator in `scripts/docs_core.py`.
 - You want generated HTML and search data to match the editable JSON before committing.
 
 Do not use it to create a new page or a new documentation version.

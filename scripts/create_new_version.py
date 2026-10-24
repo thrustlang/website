@@ -4,7 +4,7 @@ import argparse
 import shutil
 import subprocess
 
-from docs_common import (
+from docs_core import (
     CONTENT_ROOT,
     DOCS_ROOT,
     STD_ROOT,
