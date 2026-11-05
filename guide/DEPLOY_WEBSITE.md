@@ -7,11 +7,9 @@
 > [!NOTE]
 > `thrustc` automatically updates the compiler download versions and deploys the website at the end of every platform release.
 
-This guide explains how to deploy the website manually with the platform-specific `scripts/deploy-website.*` scripts.
-
 ## What They Do
 
-The deploy scripts trigger the `Deploy Website` GitHub Actions workflow. The workflow builds the site with `scripts/normalize_website_path_for_gh_pages.py` and publishes it through GitHub Pages.
+The platform-specific `scripts/deploy-website.*` scripts deploy the website manually by triggering the `Deploy Website` GitHub Actions workflow. The workflow builds the site with `scripts/normalize_website_path_for_gh_pages.py` and publishes it through GitHub Pages.
 
 ## Requirements
 
@@ -79,11 +77,11 @@ Update the Linux compiler download before deploying:
 $ PLATFORM=linux VERSION=0.2.5 bash scripts/deploy-website.sh
 ```
 
-## Important
+## Deployment Notes
 
 The workflow deploys the target ref, not the local working tree. Commit and push local changes before using these scripts.
 
-The `BASE_PATH`, `PYTHON_BIN`, and `REMOTE_NAME` values are no longer used by the deploy scripts.
+The deploy scripts no longer use `BASE_PATH`, `PYTHON_BIN`, or `REMOTE_NAME`.
 
 ## Files It Changes
 

@@ -7,8 +7,6 @@
 > [!NOTE]
 > Compiler download versions are updated automatically per platform when a `thrustc` release workflow finishes. The manual commands below are only for recovery or forced updates.
 
-This guide explains how to update the download versions used by the public pages.
-
 ## Compiler Downloads
 
 Compiler versions are stored per platform in `assets/js/downloads.js`. Each platform can point to a different compiler version, so a partial release does not break the other platforms.
@@ -55,7 +53,7 @@ $ python scripts/update_compiler_download.py --platform linux --version 0.2.4 --
 
 ## Package Manager Downloads
 
-The package manager (`torio`) use `scripts/update_downloads.py`.
+The package manager (`torio`) uses `scripts/update_downloads.py`.
 
 ```console
 $ python scripts/update_downloads.py --from-version <current-version> --to-version <new-version>

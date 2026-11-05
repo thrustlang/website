@@ -11,8 +11,6 @@
 
 ## What The Script Does
 
-The script:
-
 1. Validates the requested version.
 2. Validates the section and page slug.
 3. Validates that the requested field already exists.

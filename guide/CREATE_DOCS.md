@@ -8,8 +8,6 @@
 
 ## What The Script Does
 
-The script:
-
 1. Validates the requested version.
 2. Validates the target section.
 3. Refuses to overwrite an existing page slug.
@@ -84,4 +82,4 @@ The `--source` path for a `std` page does not exist in `thrustc/std/<version>/`.
 > Slugs may contain `/`. This is how nested output paths such as `collections/vector` are represented.
 
 > [!NOTE]
-> The generated scaffold is only a starting point. After creation, use `scripts/update_docs.py` to refine individual fields.
+> After creation, use `scripts/update_docs.py` to refine individual fields.

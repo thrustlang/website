@@ -4,11 +4,9 @@
 
 <img src="https://github.com/thrustlang/.github/blob/main/assets/standard-text-separator.png" alt="standard-separator" style="width: 1hv;"></img>
 
-This guide explains how to generate PNG Open Graph cards for standard library pages with `scripts/generate_std_social_cards.py`.
-
 ## What It Does
 
-The script reads standard library page metadata from `documentation/content/<version>/pages.json` and generates social preview images under `documentation/<version>/social/std/`.
+`scripts/generate_std_social_cards.py` reads standard library page metadata from `documentation/content/<version>/pages.json` and generates PNG Open Graph cards under `documentation/<version>/social/std/`.
 
 ## Dependency
 

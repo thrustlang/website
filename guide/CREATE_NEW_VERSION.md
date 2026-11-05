@@ -11,8 +11,6 @@
 
 ## What The Script Does
 
-The script:
-
 1. Checks that the new version does not already exist.
 2. Resolves the source version.
 3. Verifies that the matching `std` sources exist.
@@ -65,8 +63,6 @@ The script may update:
 - the commit message starts with `Create new version `
 
 Use `--no-commit` only when you plan to commit manually with the same message shape or deploy manually.
-
-This trigger is not based on a file that must be deleted later. A later normal commit does not deploy just because version files already exist. Accidental deployment requires both a change to `documentation/versions.json` and a commit message that starts with `Create new version `.
 
 ## Failure Behavior
 

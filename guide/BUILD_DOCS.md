@@ -24,9 +24,7 @@ It regenerates:
 - `documentation/<version>/search-index.json`
 - `documentation/<version>/social/std/*.png`
 
-## When It Is Useful
-
-Use it when:
+## When To Rebuild
 
 - You edited `documentation/content/<version>/pages.json`.
 - You edited `documentation/content/<version>/compiler-command-line-reference.json`.

@@ -4,8 +4,6 @@
 
 <img src="https://github.com/thrustlang/.github/blob/main/assets/standard-text-separator.png" alt="standard-separator" style="width: 1hv;"></img>
 
-This guide explains how to normalize website paths for GitHub Pages subpath deployment with `scripts/normalize_website_path_for_gh_pages.py`.
-
 ## What It Does
 
 `scripts/normalize_website_path_for_gh_pages.py` copies the website to an output directory and rewrites internal root-relative paths so the site can be served below a path such as `/website`.
